@@ -177,7 +177,6 @@
           rounded
           color="indigo-14"
           @click="calcular"
-          :disabled="!isFormValid"
         ></q-btn>
       </div>
     </form>
@@ -209,9 +208,9 @@ export default {
     isFormValid() {
       return (
         this.encomenda.leituraInicial &&
-        this.encomenda.vistoInicial &&
-        this.encomenda.leituraFinal &&
-        this.encomenda.vistoFinal
+        // this.encomenda.vistoInicial &&
+        this.encomenda.leituraFinal
+        //this.encomenda.vistoFinal
       );
     },
     usuarioLogado() {
