@@ -14,35 +14,40 @@ export const useStore = defineStore('formularioStore', {
   },
 });
 
+interface Usuario {
+  usuario: string;
+  senha: string;
+}
+
 export const usuarioStore = defineStore('usuario', {
   state: () => ({
     nomeUsuario: '',
     usuario: '',
     senha: '',
-    usuarioLogado: '', // Altere null para string vazia
+    usuarioLogado: localStorage.getItem('usuarioLogado') || '', // Carregar o usuário logado do localStorage
 
     listaDeUsuario: [
       {
         usuario: 'renan',
-        senha: '123456'
+        senha: '123456',
       },
       {
         usuario: 'bruno',
-        senha: '123456'
+        senha: '123456',
       },
       {
         usuario: 'augusto',
-        senha: '123456'
+        senha: '123456',
       },
       {
         usuario: 'junior',
-        senha: '123456'
+        senha: '123456',
       },
       {
         usuario: 'khalil',
-        senha: '123456'
-      }
-    ]
+        senha: '123456',
+      },
+    ] as Usuario[],
   }),
 
   actions: {
@@ -56,7 +61,8 @@ export const usuarioStore = defineStore('usuario', {
 
       if (usuarioValido) {
         this.nomeUsuario = usuario;
-        this.usuarioLogado = usuario; // Adicione esta linha
+        this.usuarioLogado = usuario;
+        localStorage.setItem('usuarioLogado', usuario); // Salvar o usuário logado no localStorage
         this.limparCamposFormulario();
         return true; // Login bem-sucedido
       } else {
@@ -65,8 +71,13 @@ export const usuarioStore = defineStore('usuario', {
     },
     limparCamposFormulario() {
       // Limpar os campos do formulário
-      (this as { [key: string]: any })['usuario'] = '';
-      (this as { [key: string]: any })['senha'] = '';
-    }
+      this.usuario = '';
+      this.senha = '';
+    },
+    fazerLogout() {
+      // Limpar o usuário logado
+      this.usuarioLogado = '';
+      localStorage.removeItem('usuarioLogado'); // Remover o usuário logado do localStorage
+    },
   },
 });

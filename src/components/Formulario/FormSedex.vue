@@ -197,7 +197,7 @@ const cadastrar = async () => {
       timeout: Math.random() * 1000 + 1000,
     });
     store.resetFormularioAtual();
-    $router.push('/usuario/Cards Encomendas');
+    $router.push('/usuario/Cards-Encomendas');
   } else {
     $q.notify({
       color: 'red-5',
@@ -210,6 +210,6 @@ const cadastrar = async () => {
   }
 };
 const voltar = () => {
-  $router.push('/usuario/Lista de Encomendas');
+  $router.push('/usuario/Lista-de-Encomendas');
 };
 </script>

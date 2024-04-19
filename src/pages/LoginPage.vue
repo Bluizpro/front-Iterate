@@ -10,10 +10,10 @@
       >
         <div class="row items-center justify-evenly">
           <img
-            src="../assets/logoIterate-frame-login.jpg"
+            src="../assets/logo6.jpeg"
             alt=""
             class="col-md-4 col-sm-4 col-xs-4"
-            style="border-radius: 4rem;"
+            style="border-radius: 4rem"
           />
         </div>
         <div
@@ -81,7 +81,7 @@
 
 <script setup lang="ts">
 import { useQuasar } from 'quasar';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { onBeforeUnmount } from 'vue';
 import { usuarioStore } from '../stores/example-store';
@@ -144,6 +144,14 @@ const onSubmit = async () => {
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value;
 };
+
+// Recuperar o usuário logado do localStorage quando o componente é montado
+onMounted(() => {
+  const usuarioLogado = localStorage.getItem('usuarioLogado');
+  if (usuarioLogado) {
+    store.usuarioLogado = usuarioLogado;
+  }
+});
 </script>
 
 <style scoped>

@@ -15,13 +15,13 @@
 import { useRouter } from 'vue-router';
 const $router = useRouter();
 const irParaForm = (): void => {
-  $router.push('/usuario/Cadastro de Encomendas');
+  $router.push('/usuario/Cadastro-de-Encomendas');
 };
 
 const irParaCard = (): void => {
-  $router.push('/usuario/Cards Encomendas');
+  $router.push('/usuario/Cards-Encomendas');
 };
 const irParaBaixa = (): void => {
-  $router.push('/usuario/Dar baixa');
+  $router.push('/usuario/Dar-baixa');
 };
 </script>

@@ -126,7 +126,6 @@ const condominoStore = useCondominosStore();
 const $router = useRouter();
 
 onMounted(() => {
-  // Preencher automaticamente a data e hora atuais
   const agora = new Date();
   const optionsData: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -164,7 +163,7 @@ const encomenda = ref({
 });
 
 const voltar = () => {
-  $router.push('/usuario/Lista de Encomendas');
+  $router.push('/usuario/Lista-de-Encomendas');
 };
 
 const gerarNovaEncomenda = (): Delivery => {
@@ -203,7 +202,6 @@ const cadastrar = async () => {
 
   const novaEncomenda = gerarNovaEncomenda();
 
-  // Adicionar a encomenda ao condômino correspondente usando a função do Pinia
   const adicionadaSucesso = await condominoStore.adicionarEncomendaACondomino(
     encomenda.value.conjunto,
     novaEncomenda
@@ -219,7 +217,7 @@ const cadastrar = async () => {
       timeout: Math.random() * 1000 + 1000,
     });
     store.resetFormularioAtual();
-    $router.push('/usuario/Cards Encomendas');
+    $router.push('/usuario/Cards-Encomendas');
   } else {
     $q.notify({
       color: 'red-5',

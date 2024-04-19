@@ -1,9 +1,6 @@
-
-
 export interface listData {
   imagem: string[];
   tipo: string[];
-
 }
 
 export interface EncomendaSedex {
@@ -41,6 +38,18 @@ export interface EncomendaExterno {
   local: string;
 }
 
+export interface RetiradaChave {
+  data: Date;
+  hora: Date;
+  conjunto: string;
+  usuario: string;
+}
+export interface DevolucaoChave {
+  data: Date;
+  hora: Date;
+  conjuto: string;
+  usuario: string;
+  usuarioDevolucao: string;
+}
+
 export type Delivery = EncomendaSedex | EncomendaInterno | EncomendaExterno;
-
-

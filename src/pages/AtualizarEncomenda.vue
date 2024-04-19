@@ -1,41 +1,64 @@
 <template>
   <q-page v-if="encomenda" padding>
+    <h1 class="q-heading text-h5 text-weight-medium text-center">
+      Atualizar encomenda
+    </h1>
     <q-card>
       <q-card-section>
-        <q-input v-model="encomendaEditada.destinatario" label="Destinatario" />
+        <q-form>
+          <q-input v-model.lazy="form.destinatario" label="Destinatário" lazy />
 
-        <q-input
-          v-if="encomenda.tipo === 'interno'"
-          v-model="encomendaEditada.remetente"
-          label="Remetente"
-        />
+          <q-input
+            v-if="encomenda.tipo === 'interno'"
+            v-model="form.remetente"
+            label="Remetente"
+            lazy
+          />
 
-        <q-input
-          v-if="encomenda.tipo === 'sedex'"
-          v-model="encomendaEditada.notaFiscal"
-          label="Nota Fiscal"
-        />
-        <q-input
-          v-if="encomenda.tipo === 'externo'"
-          v-model="encomendaEditada.recebedor"
-          label="Recebedor"
-        />
-        <q-input
-          v-if="encomenda.tipo === 'externo'"
-          v-model="encomendaEditada.local"
-          label="Local"
-        />
-        <q-input v-model="encomendaEditada.conteudo" label="Conteúdo" />
-        <q-input
-          v-if="encomenda.tipo === 'interno'"
-          v-model="encomendaEditada.empresa"
-          label="Empresa"
-        />
+          <q-input
+            v-if="encomenda.tipo === 'sedex'"
+            v-model="form.notaFiscal"
+            label="Nota Fiscal"
+            lazy
+          />
+          <q-input
+            v-if="encomenda.tipo === 'externo'"
+            v-model="form.recebedor"
+            label="Recebedor"
+            lazy
+          />
+          <q-input
+            v-if="encomenda.tipo === 'externo'"
+            v-model="form.local"
+            label="Local"
+            lazy
+          />
+          <q-input v-model="form.conteudo" label="Conteúdo" lazy />
+          <q-input
+            v-if="encomenda.tipo === 'interno'"
+            v-model="form.empresa"
+            label="Empresa"
+            lazy
+          />
+        </q-form>
         <!-- Adicione mais campos conforme necessário -->
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn label="Salvar" color="primary" @click="salvarEncomenda" />
+        <q-btn
+          class="float-right"
+          rounded
+          label="Cancelar"
+          color="white"
+          text-color="indigo-14"
+          :to="{ name: 'listaDeEncomendas' }"
+        />
+        <q-btn
+          label="Salvar"
+          color="indigo-14"
+          @click="salvarEncomenda"
+          rounded
+        />
       </q-card-actions>
     </q-card>
   </q-page>
@@ -48,18 +71,38 @@
 import { useRouter } from 'vue-router';
 import { useCondominosStore } from '../stores/condominos-store';
 import { useQuasar } from 'quasar';
+import { onBeforeUnmount } from 'vue';
+
 import {
   Delivery,
   EncomendaSedex,
   EncomendaInterno,
   EncomendaExterno,
 } from '../components/Imodels';
+import { ref } from 'vue';
+
+let timer: NodeJS.Timeout | null = null;
+onBeforeUnmount(() => {
+  if (timer !== null) {
+    clearTimeout(timer);
+    $q.loading.hide();
+  }
+});
+
+const showLoading = () => {
+  $q.loading.show();
+};
+const hideLoading = () => {
+  $q.loading.hide();
+};
 
 const $router = useRouter();
 const $q = useQuasar();
 
 const encomendaId = Number($router.currentRoute.value.params.id);
 const useCondominos = useCondominosStore();
+
+//capturando encomenda pelo id
 const encomenda = useCondominos.condominos
   .flatMap((condomino) => condomino.encomendas)
   .find((encomenda) => encomenda.id === encomendaId);
@@ -69,22 +112,58 @@ let encomendaEditada: Delivery = { ...encomenda } as
   | EncomendaInterno
   | EncomendaExterno;
 
-const salvarEncomenda = () => {
+const form = ref<Partial<Delivery>>({
+  destinatario: encomendaEditada.destinatario,
+  remetente: encomendaEditada.remetente,
+  notaFiscal: encomendaEditada.notaFiscal,
+  empresa: encomendaEditada.empresa,
+  local: encomendaEditada.local,
+  recebedor: encomendaEditada.recebedor,
+  conteudo: encomendaEditada.conteudo,
+});
+
+const salvarEncomenda = async () => {
+  showLoading();
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   // Se encomenda for indefinida, retorna
   if (!encomenda) {
     return;
   }
 
-  // Atualizar a encomenda no store
-  useCondominos.atualizarEncomenda(encomenda.id, encomendaEditada);
+  const newEncomendaEditada: Partial<Delivery> = {
+    ...encomendaEditada,
+    ...form.value,
+  };
 
-  // Exibir notificação
-  $q.notify({
-    type: 'positive',
-    message: 'Encomenda atualizada com sucesso',
-  });
+  // Verificar se todas as propriedades essenciais estão presentes
+  if (
+    'id' in newEncomendaEditada &&
+    'data' in newEncomendaEditada &&
+    'hora' in newEncomendaEditada &&
+    'conjunto' in newEncomendaEditada &&
+    'destinatario' in newEncomendaEditada &&
+    'conteudo' in newEncomendaEditada &&
+    'tipo' in newEncomendaEditada &&
+    'notaFiscal' in newEncomendaEditada
+  ) {
+    encomendaEditada = newEncomendaEditada as Delivery;
 
-  // Redirecionar para a página de lista de encomendas
-  $router.push('/usuario/Lista de Encomendas');
+    // Atualizar a encomenda no store
+    useCondominos.atualizarEncomenda(encomenda.id, encomendaEditada);
+    hideLoading();
+    // Exibir notificação
+    $q.notify({
+      type: 'positive',
+      message: 'Encomenda atualizada com sucesso',
+    });
+
+    // Redirecionar para a página de lista de encomendas
+    $router.push('/usuario/Lista-de-Encomendas');
+  } else {
+    $q.notify({
+      type: 'negative',
+      message: 'Por favor, preencha todos os campos obrigatórios',
+    });
+  }
 };
 </script>

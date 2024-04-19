@@ -48,7 +48,7 @@ const mostrarListaDeEncomendas = (encomenda: string): void => {
     encomenda == 'externo' ||
     encomenda == 'sedex'
   ) {
-    $router.push('/usuario/Lista de Encomendas');
+    $router.push('/usuario/Lista-de-Encomendas');
   } else if (encomenda == 'visitante' || encomenda == 'condômino') {
     console.log('voce esta na pagina de cadastro de Pessoas');
   } else {

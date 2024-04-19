@@ -13,7 +13,7 @@
 
         <q-toolbar-title>
           <q-avatar>
-            <img src="../assets/logoIterate-frame.png" />
+            <img src="../assets/logo6.jpeg" />
           </q-avatar>
           Iterate
         </q-toolbar-title>
@@ -63,7 +63,6 @@ import AvatarUser from 'src/components/AvatarUser.vue';
 import MenuTree from 'src/components/MenuTree.vue';
 import { onBeforeUnmount } from 'vue';
 import { useQuasar } from 'quasar';
-import { Console } from 'console';
 
 const $q = useQuasar();
 const router = useRouter();
@@ -87,12 +86,17 @@ const linksList = ref([
   {
     title: 'Anotações',
     icon: 'note',
-    link: 'anotação',
+    link: 'anotacao',
   },
   {
     title: 'Relatorio',
     icon: 'description',
     link: 'relatorio',
+  },
+  {
+    title: 'Craviculario',
+    icon: 'key',
+    link: 'craviculario',
   },
   {
     title: 'Saida',

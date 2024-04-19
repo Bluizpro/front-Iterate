@@ -1,16 +1,10 @@
 <template>
-  <div class="fullscreen bg-blue text-white text-center q-pa-md flex flex-center">
+  <div
+    class="fullscreen text-white text-center q-pa-md flex flex-center bg-robot"
+  >
     <div>
-      <div style="font-size: 30vh">
-        404
-      </div>
-
-      <div class="text-h2" style="opacity:.4">
-        Oops. Nothing here...
-      </div>
-
       <q-btn
-        class="q-mt-xl"
+        class="q-mt-xxl"
         color="white"
         text-color="blue"
         unelevated
@@ -22,6 +16,15 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<style scoped lang="scss">
+.bg-robot {
+  background: url('../assets/robo-erro.png') no-repeat center center fixed,
+    rgb(123, 123, 236);
+  -webkit-background-size: 50%; /* Ajuste este valor */
+  -moz-background-size: 50%; /* Ajuste este valor */
+  -o-background-size: 50%; /* Ajuste este valor */
+  background-size: 50%; /* Ajuste este valor */
+}
+</style>
 
-</script>
+<script setup lang="ts"></script>

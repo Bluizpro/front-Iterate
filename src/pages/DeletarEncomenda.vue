@@ -1,5 +1,8 @@
 <template>
   <q-page v-if="encomenda" padding>
+    <h1 class="q-heading text-h5 text-weight-medium text-center">
+      Deletar encomenda
+    </h1>
     <q-card>
       <q-card-section class="row items-center">
         <q-avatar
@@ -9,7 +12,9 @@
         />
         <div>
           <div class="text-h6">{{ encomenda?.destinatario }}</div>
-          <div class="text-subtitle1">Encomenda: {{ encomenda?.conteudo }}</div>
+          <div class="text-subtitle1">conteúdo: {{ encomenda?.conteudo }}</div>
+          <div class="text-subtitle1">encomenda: {{ encomenda?.tipo }}</div>
+          <div class="text-subtitle1">Conjunto: {{ encomenda?.conjunto }}</div>
         </div>
       </q-card-section>
 
@@ -52,35 +57,56 @@
 import { useRouter } from 'vue-router';
 import { useCondominosStore } from '../stores/condominos-store';
 import { useQuasar } from 'quasar';
-import { ref } from 'vue';
+import { ref, onBeforeUnmount } from 'vue';
 
 const $router = useRouter();
 const $q = useQuasar();
 
 const encomendaId = Number($router.currentRoute.value.params.id);
 const useCondominos = useCondominosStore();
+
+let timer: NodeJS.Timeout | null = null;
+
+onBeforeUnmount(() => {
+  if (timer !== null) {
+    clearTimeout(timer);
+    $q.loading.hide();
+  }
+});
+
+const showLoading = () => {
+  $q.loading.show();
+};
+const hideLoading = () => {
+  $q.loading.hide();
+};
+
+//capturando a encomenda
 const encomenda = useCondominos.condominos
   .flatMap((condomino) => condomino.encomendas)
   .find((encomenda) => encomenda.id === encomendaId);
 
 let justificativa = ref('');
 
-const deletarEncomenda = () => {
+const deletarEncomenda = async () => {
+  showLoading();
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   if (encomenda) {
     useCondominos.deletarEncomenda(encomenda.id);
     justificativa.value = '';
+    hideLoading();
     $q.notify({
       type: 'positive',
       message: 'Encomenda deletada com sucesso',
     });
-
-    $router.push('/usuario/Lista de Encomendas');
+    $router.push('/usuario/Lista-de-Encomendas');
   } else {
+    hideLoading();
     $q.notify({
       type: 'negative',
       message: 'Encomenda não encontrada',
     });
-    $router.push('/usuario/Lista de Encomendas');
+    $router.push('/usuario/Lista-de-Encomendas');
   }
 };
 </script>

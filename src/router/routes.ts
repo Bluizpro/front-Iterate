@@ -1,16 +1,13 @@
-
-
 const routes = [
   {
     path: '/usuario',
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
-        path: '/usuario',
+        path: '',
         name: 'home',
-        component: () => import('pages/IndexPage.vue'),
+        component: () => import('pages/AnotacoesPage.vue'),
       },
-
       {
         path: 'cadastro',
         name: 'cadastro',
@@ -27,7 +24,7 @@ const routes = [
         component: () => import('pages/CadastroPessoasPage.vue'),
       },
       {
-        path: 'Cadastro de Encomendas',
+        path: 'Cadastro-de-Encomendas',
         name: 'CadastroDeEncomendas',
         component: () => import('pages/CadastroEncomendasPage.vue'),
       },
@@ -37,47 +34,75 @@ const routes = [
         component: () => import('pages/CadastroLeituraDeAgua.vue'),
       },
       {
-        path: 'Lista de Andares',
+        path: 'Lista-de-Andares',
         name: 'listaDeAndares',
         component: () => import('pages/ListaDeAndares.vue'),
       },
       {
-        path: 'Lista de Encomendas',
+        path: 'Lista-de-Encomendas',
         name: 'listaDeEncomendas',
         component: () => import('pages/ListaDeEncomendasPage.vue'),
       },
       {
-        path: 'Cards Encomendas',
+        path: 'Cards-Encomendas',
         name: 'cardsEncomendas',
         component: () => import('pages/CardsButaoPage.vue'),
       },
       {
-        path: 'Dar baixa',
+        path: 'Dar-baixa',
         name: 'baixa',
         component: () => import('pages/BaixaPage.vue'),
       },
+
       {
-        path: '/deletar-encomenda/:id',
+        path: 'Relatorio',
+        name: 'relatorio',
+        component: () => import('pages/RelatorioPage.vue'),
+      },
+      {
+        path: 'Anotacao',
+        name: 'anotacao',
+        component: () => import('pages/AnotacoesPage.vue'),
+      },
+      {
+        path: 'Craviculario',
+        name: 'craviculario',
+        component: () => import('pages/CravicularioPage.vue'),
+      },
+      {
+        path: 'deletar-encomenda/:id?',
+        name: 'deletarEncomenda',
         component: () => import('pages/DeletarEncomenda.vue'),
       },
       {
-        path: '/editar-encomenda/:id',
+        path: 'editar-encomenda/:id?',
+        name: 'editarEncomenda',
         component: () => import('pages/AtualizarEncomenda.vue'),
       },
-
-
-
-    ]
-
+      {
+        path: 'retirar-chaves/:key',
+        name: 'RetiradaChaves',
+        component: () =>
+          import('src/components/Formulario/FormRetiraChave.vue'),
+      },
+      {
+        path: 'lista-chave/:selectedKeys?',
+        name: 'listaChave',
+        component: () => import('pages/ListaChaveRetiradaPage.vue'),
+      },
+      {
+        path: '/baixa-chave/:conjunto',
+        name: 'BaixaChave',
+        component: () => import('src/components/Formulario/FormBaixaChave.vue'),
+      },
+    ],
   },
   {
     path: '/',
     component: () => import('layouts/LoginLayout.vue'),
-    children: [{ path: '', component: () => import('pages/LoginPage.vue') }]
-
+    children: [{ path: '', component: () => import('pages/LoginPage.vue') }],
   },
-
-  // Always leave this as last one,
+  // Always leave this as the last one,
   // but you can also remove it
   {
     path: '/:catchAll(.*)*',
