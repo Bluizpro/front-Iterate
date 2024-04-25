@@ -1,93 +1,70 @@
 <template>
   <q-page>
-    <h1 style="font-size: 1.5em; text-align: center">Anotações</h1>
-    <div id="app">
-      <div class="note-container">
-        <div class="note-grid">
-          <div v-for="(note, index) in notes" :key="index" class="note-card">
-            <p v-html="note.text"></p>
-            <q-btn
-              label="Excluir"
-              rounded
-              color="negative"
-              @click="() => deleteNote(index)"
-            />
-          </div>
-        </div>
-        <div class="new-note">
-          <div class="input-area">
-            <q-editor v-model="newNote" style="height: 10rem; width: 68%" />
-            <q-btn
-              label="Salvar"
-              rounded
-              color="indigo-14"
-              @click="addNote"
-              class="save-button"
-            />
-          </div>
-        </div>
-      </div>
+    <h1 style="font-size: 1.5em; text-align: center">Anotacões</h1>
+
+    <div class="note-container">
+      <AnotacaoComponent
+        v-for="(anotacao, index) in forms"
+        :key="index"
+        :anotacao="anotacao"
+        @submit="onSubmit(index)"
+        @reset="onReset(index)"
+      />
     </div>
   </q-page>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
+import AnotacaoComponent from '../components/AnotacaoComponent.vue'; // Importe o componente AnotacaoComponent
 
-const newNote = ref('');
-const notes = reactive([]);
+const forms = ref([
+  {
+    data: new Date().toLocaleDateString(),
+    hora: new Date().toLocaleTimeString(),
+    usuario: localStorage.getItem('usuarioLogado') || '',
+    paciente: '',
+    status: '',
+    info: '',
+  },
+]); // Inicialize com um formulário vazio
 
-const addNote = () => {
-  if (newNote.value !== '') {
-    notes.push({ text: newNote.value });
-    newNote.value = '';
-    localStorage.setItem('notes', JSON.stringify(notes));
+const onSubmit = (index) => {
+  if (
+    forms.value[index].usuario === '' ||
+    forms.value[index].paciente === '' ||
+    forms.value[index].status === '' ||
+    forms.value[index].info === ''
+  ) {
+    $q.notify({
+      color: 'red-5',
+      textColor: 'white',
+      icon: 'warning',
+      message: 'Por favor, preencha todos os campos',
+    });
+  } else {
+    // Quando salvar, adicione um novo formulário ao array
+    forms.value.push({
+      data: new Date().toLocaleDateString(),
+      hora: new Date().toLocaleTimeString(),
+      usuario: localStorage.getItem('usuarioLogado') || '',
+      paciente: '',
+      status: '',
+      info: '',
+    });
+
+    $q.notify({
+      color: 'green-4',
+      textColor: 'white',
+      icon: 'cloud_done',
+      message: 'Salvo Com Sucesso',
+    });
   }
 };
 
-const deleteNote = (index) => {
-  notes.splice(index, 1);
-  localStorage.setItem('notes', JSON.stringify(notes));
+const onReset = (index) => {
+  forms.value[index].paciente = '';
+  forms.value[index].status = '';
+  forms.value[index].info = '';
 };
-
-onMounted(() => {
-  if (localStorage.getItem('notes')) {
-    notes.push(...JSON.parse(localStorage.getItem('notes')));
-  }
-});
-
-onUnmounted(() => {
-  localStorage.setItem('notes', JSON.stringify(notes));
-});
 </script>
-
-<style scoped lang="scss">
-.note-container {
-  border: 3px solid #ccc;
-  padding: 2rem;
-  width: 80%;
-  margin: auto;
-}
-.note-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-.note-card {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-top: 1rem;
-}
-.new-note {
-  margin-top: 50px;
-  .input-area {
-    display: flex;
-    justify-content: space-between;
-    .save-button {
-      width: 5rem;
-      height: 3rem;
-      margin-top: 9rem;
-    }
-  }
-}
-</style>

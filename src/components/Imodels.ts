@@ -2,8 +2,11 @@ export interface listData {
   imagem: string[];
   tipo: string[];
 }
+interface Selecionavel {
+  selecionado?: boolean;
+}
 
-export interface EncomendaSedex {
+export interface EncomendaSedex extends Selecionavel {
   id: number;
   data: string;
   hora: string;
@@ -14,7 +17,7 @@ export interface EncomendaSedex {
   notaFiscal: string;
 }
 
-export interface EncomendaInterno {
+export interface EncomendaInterno extends Selecionavel {
   id: number;
   data: string;
   hora: string;
@@ -26,7 +29,7 @@ export interface EncomendaInterno {
   empresa: string;
 }
 
-export interface EncomendaExterno {
+export interface EncomendaExterno extends Selecionavel {
   id: number;
   data: string;
   hora: string;

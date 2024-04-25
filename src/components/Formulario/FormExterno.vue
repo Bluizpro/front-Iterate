@@ -119,6 +119,7 @@ import { useCondominosStore } from '../../stores/condominos-store';
 import { Delivery } from '../Imodels';
 import { useQuasar } from 'quasar';
 import { onMounted } from 'vue';
+import axios from 'axios';
 
 const store = useStore();
 const $q = useQuasar();
@@ -203,13 +204,31 @@ const cadastrar = async () => {
 
   const novaEncomenda = gerarNovaEncomenda();
 
-  // Adicionar a encomenda ao condômino correspondente usando a função do Pinia
   const adicionadaSucesso = await condominoStore.adicionarEncomendaACondomino(
     encomenda.value.conjunto,
     novaEncomenda
   );
   hideLoading();
   if (adicionadaSucesso) {
+    // Obter o condomínio correspondente ao conjunto
+    const condomino = condominoStore.condominos.find(
+      (condomino) => condomino.conjunto === encomenda.value.conjunto
+    );
+
+    if (condomino && condomino.telefone) {
+      // Enviar a mensagem de WhatsApp
+      axios
+        .post('http://localhost:3000/send-whatsapp/encomenda', {
+          message: `Olá ${encomenda.value.destinatario}, sua encomenda foi entregue à portaria.`,
+          telefone: condomino.telefone,
+        })
+        .catch((error) => {
+          console.error('Erro ao enviar a mensagem de WhatsApp:', error);
+        });
+    } else {
+      console.error('Condomínio não encontrado ou sem número de telefone.');
+    }
+
     $q.notify({
       color: 'green-4',
       textColor: 'white',

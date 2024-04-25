@@ -16,12 +16,12 @@
         class="q-mt-xl"
       >
         <q-card-section>
+          <q-checkbox v-model="encomenda.selecionado" label="Selecionar" />
           <p>Data: {{ encomenda.data }}</p>
           <p>Hora: {{ encomenda.hora }}</p>
           <p>Destinatario: {{ encomenda.destinatario }}</p>
           <p>Conteudo: {{ encomenda.conteudo }}</p>
           <p>Encomenda: {{ encomenda.tipo }}</p>
-          <!-- Adicionar mais informações conforme necessário -->
         </q-card-section>
       </q-card>
     </div>
@@ -63,15 +63,18 @@ import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useCondominosStore } from '../stores/condominos-store';
 import { Delivery } from '../components/Imodels';
 import { useQuasar } from 'quasar';
+import { useStore } from '../stores/example-store';
 
 import GeraAssinatura from 'src/components/GeraAssinatura.vue';
 
 const useCondominos = useCondominosStore();
 const $q = useQuasar();
+const store = useStore();
 
 const conjuntoSelecionado = ref<string>(''); // Conjunto selecionado inicialmente
 const encomendasFiltradas = ref<Delivery[]>([]);
 const exibirModalAssinatura = ref(false);
+const encomendasBaixadas = ref<Delivery[]>([]);
 
 let timer: NodeJS.Timeout | null = null;
 onBeforeUnmount(() => {
@@ -112,8 +115,12 @@ const filtrarEncomendas = async () => {
     .filter(
       (encomenda) =>
         encomenda.conjunto === conjuntoSelecionado.value &&
-        (encomenda.tipo === 'interno' || encomenda.tipo === 'sedex')
+        encomenda.tipo === store.formularioAtual
     );
+  // Redefinir a propriedade 'selecionado' para false para cada encomenda
+  encomendasFiltradasTemp.forEach((encomenda) => {
+    encomenda.selecionado = false;
+  });
 
   encomendasFiltradas.value = [...encomendasFiltradasTemp];
 
@@ -124,21 +131,52 @@ const darBaixa = async () => {
   showLoading();
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  encomendasFiltradas.value.forEach((encomenda) => {
+  // Filtrar apenas as encomendas selecionadas
+  const encomendasSelecionadas = encomendasFiltradas.value.filter(
+    (encomenda) => encomenda.selecionado
+  );
+
+  encomendasSelecionadas.forEach((encomenda) => {
     const condomino = useCondominos.condominos.find((condomino) =>
       condomino.encomendas.includes(encomenda)
     );
     if (condomino) {
       const index = condomino.encomendas.indexOf(encomenda);
+      encomendasBaixadas.value.push(encomenda);
       condomino.encomendas.splice(index, 1);
     }
   });
 
-  encomendasFiltradas.value = [];
+  // Criar uma nova lista com as encomendas que não foram selecionadas
+  const encomendasRestantes = encomendasFiltradas.value.filter(
+    (encomenda) => !encomenda.selecionado
+  );
+
+  // Atualizar encomendasFiltradas com as encomendas restantes
+  encomendasFiltradas.value = encomendasRestantes;
+  // Recuperar encomendas baixadas existentes do localStorage
+  const encomendasBaixadasSalvas = JSON.parse(
+    localStorage.getItem('encomendasBaixadas') || '[]'
+  );
+
+  // Adicionar novas encomendas baixadas às existentes
+  const todasEncomendasBaixadas = [
+    ...encomendasBaixadasSalvas,
+    ...encomendasBaixadas.value,
+  ];
+
+  // Salvar no localStorage
+  localStorage.setItem(
+    'encomendasBaixadas',
+    JSON.stringify(todasEncomendasBaixadas)
+  );
+
   hideLoading();
   $q.notify({
     type: 'positive',
     message: 'baixa realizada com sucesso',
   });
+
+  // Imprimir todas as encomendas baixadas no console
 };
 </script>

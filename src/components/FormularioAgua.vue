@@ -258,61 +258,68 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  data() {
-    let tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return {
-      leituraAgua: {
-        data: new Date().toLocaleDateString(),
-        hora: new Date().toLocaleTimeString(),
-        leituraInicial: '',
-        vistoInicial: '',
-        dataMeioPeriodo: new Date().toLocaleDateString(),
-        horaMeio: '23:00',
-        leituraMeioPeriodo: '',
-        dataFinal: tomorrow.toLocaleDateString(),
-        horaFinal: '06:00',
-        leituraFinal: '',
-        vistoFinal: '',
-        consumo: '',
-      },
-    };
-  },
-  computed: {
-    isFormValid() {
-      return (
-        this.leituraAgua.leituraInicial &&
-        this.leituraAgua.leituraMeioPeriodo &&
-        this.leituraAgua.leituraFinal
-      );
-    },
-  },
-  methods: {
-    calcular() {
-      let leituraInicial = parseInt(this.leituraAgua.leituraInicial.slice(3));
-      let leituraMeioPeriodo = parseInt(
-        this.leituraAgua.leituraMeioPeriodo.slice(3)
-      );
-      let leituraFinal = parseInt(this.leituraAgua.leituraFinal.slice(3));
+<script setup>
+import { ref, computed } from 'vue';
+import { useQuasar } from 'quasar';
+import axios from 'axios'; // Importe o axios
+const $q = useQuasar();
 
-      let consumoMeioPeriodo = leituraMeioPeriodo - leituraInicial;
-      let consumoFinal = leituraFinal - leituraInicial;
+let tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
 
-      if (consumoFinal > 6000 && Number.isInteger(consumoMeioPeriodo)) {
-        this.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'warning',
-          message: 'O consumo no meio do período ultrapassou 6000m³',
-        });
-      }
+let leituraAgua = ref({
+  data: new Date().toLocaleDateString(),
+  hora: new Date().toLocaleTimeString(),
+  leituraInicial: '',
+  vistoInicial: '',
+  dataMeioPeriodo: new Date().toLocaleDateString(),
+  horaMeio: '23:00',
+  leituraMeioPeriodo: '',
+  dataFinal: tomorrow.toLocaleDateString(),
+  horaFinal: '06:00',
+  leituraFinal: '',
+  vistoFinal: '',
+  consumo: '',
+});
 
-      this.leituraAgua.consumo = `${consumoFinal.toFixed(0)} m³!`;
-    },
-  },
-};
+let isFormValid = computed(() => {
+  return (
+    leituraAgua.value.leituraInicial &&
+    leituraAgua.value.leituraMeioPeriodo &&
+    leituraAgua.value.leituraFinal
+  );
+});
+
+async function calcular() {
+  let leituraInicial = parseInt(leituraAgua.value.leituraInicial.slice(3));
+  let leituraMeioPeriodo = parseInt(
+    leituraAgua.value.leituraMeioPeriodo.slice(3)
+  );
+  let leituraFinal = parseInt(leituraAgua.value.leituraFinal.slice(3));
+
+  let consumoMeioPeriodo = leituraMeioPeriodo - leituraInicial;
+  let consumoFinal = leituraFinal - leituraInicial;
+
+  if (consumoFinal > 6000 && Number.isInteger(consumoMeioPeriodo)) {
+    $q.notify({
+      color: 'red-5',
+      textColor: 'white',
+      icon: 'warning',
+      message: 'O consumo  ultrapassou 6000m³',
+    });
+
+    try {
+      await axios.post('http://localhost:3000/send-whatsapp', {
+        message: 'O consumo  ultrapassou 6000m³',
+      });
+      console.log('Mensagem enviada com sucesso!');
+    } catch (error) {
+      console.error('Erro ao enviar a mensagem:', error);
+    }
+  }
+
+  leituraAgua.value.consumo = `${consumoFinal.toFixed(0)} m³!`;
+}
 </script>
 <style scoped lang="scss">
 .my-card {

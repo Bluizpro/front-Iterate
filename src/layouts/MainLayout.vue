@@ -40,17 +40,6 @@
     <q-page-container>
       <router-view />
     </q-page-container>
-
-    <!--<q-footer class="bg-grey-8 text-white">
-      <q-toolbar>
-        <q-toolbar-title>
-          <q-avatar>
-            <img src="../assets/logoIterate.png" />
-          </q-avatar>
-          <div>Iterate</div>
-        </q-toolbar-title>
-      </q-toolbar>
-    </q-footer>-->
   </q-layout>
 </template>
 
@@ -74,33 +63,43 @@ const linksList = ref([
     link: 'listaDeAndares',
   },
   {
-    title: 'Pesquisar',
-    icon: 'search',
-    link: 'pesquisa',
+    title: 'Lista de Visitante',
+    icon: 'format_list_bulleted',
+    link: 'listaDeVisitante',
   },
   {
-    title: 'Leitura de Agua',
-    icon: 'waves',
+    title: 'QTC',
+    icon: '💬',
+    link: 'qtc',
+  },
+  {
+    title: 'Ocorrencia',
+    icon: '⚠️',
+    link: 'ocorrencia',
+  },
+  {
+    title: 'Leitura de Água',
+    icon: '🌊',
     link: 'agua',
   },
   {
-    title: 'Anotações',
-    icon: 'note',
+    title: 'Anotacões',
+    icon: '📝',
     link: 'anotacao',
   },
   {
     title: 'Relatorio',
-    icon: 'description',
+    icon: '📄',
     link: 'relatorio',
   },
   {
     title: 'Craviculario',
-    icon: 'key',
+    icon: '🔑',
     link: 'craviculario',
   },
   {
     title: 'Saida',
-    icon: 'logout',
+    icon: '🚪',
     link: 'logout',
   },
 ]);

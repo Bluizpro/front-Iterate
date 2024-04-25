@@ -119,6 +119,7 @@ import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { Delivery } from '../Imodels';
 import { onMounted } from 'vue';
+import axios from 'axios';
 
 const store = useStore();
 const $q = useQuasar();
@@ -208,12 +209,30 @@ const cadastrar = async () => {
   );
   hideLoading();
   if (adicionadaSucesso) {
+    // Obter o condomínio correspondente ao conjunto
+    const condomino = condominoStore.condominos.find(
+      (condomino) => condomino.conjunto === encomenda.value.conjunto
+    );
+
+    if (condomino && condomino.telefone) {
+      // Enviar a mensagem de WhatsApp
+      axios
+        .post('http://localhost:3000/send-whatsapp/encomenda', {
+          message: `Olá ${encomenda.value.destinatario}, sua encomenda foi entregue à portaria.`,
+          telefone: condomino.telefone,
+        })
+        .catch((error) => {
+          console.error('Erro ao enviar a mensagem de WhatsApp:', error);
+        });
+    } else {
+      console.error('Condomínio não encontrado ou sem número de telefone.');
+    }
+
     $q.notify({
       color: 'green-4',
       textColor: 'white',
       icon: 'cloud_done',
       message: 'cadastrado com sucesso',
-
       timeout: Math.random() * 1000 + 1000,
     });
     store.resetFormularioAtual();

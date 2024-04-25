@@ -1,5 +1,5 @@
 <template>
-  <q-expansion-item icon="person_add" label="Cadastrar">
+  <q-expansion-item icon="👤+" label="Cadastrar">
     <EssentialLink
       class="q-ml-lg"
       v-for="(person, idx) in peopleLinks"
@@ -17,12 +17,12 @@ const store = useStore();
 const peopleLinks = [
   {
     title: 'Pessoas',
-    icon: 'person',
+    icon: '👤',
     link: 'Pessoas',
   },
   {
     title: 'Encomendas',
-    icon: 'add_box',
+    icon: '📦',
     link: 'cardsEncomendas',
   },
 ];

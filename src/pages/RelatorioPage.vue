@@ -43,14 +43,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import jsPDF from 'jspdf';
 
 const gerarPDF = (tipo) => {
   let pdf = new jsPDF();
 
   if (tipo === 'chavesDevolvidas') {
-    // Recupera as chaves devolvidas do armazenamento local
     const chavesDevolvidasFromStorage =
       localStorage.getItem('chavesDevolvidas');
     let chavesDevolvidas = [];
@@ -59,39 +57,73 @@ const gerarPDF = (tipo) => {
       chavesDevolvidas = JSON.parse(chavesDevolvidasFromStorage);
     }
 
-    // Adicione o conteúdo do relatório aqui
-    chavesDevolvidas.forEach((chave, index) => {
-      // Verifica se a posição base ultrapassa o limite da página
-      let basePosition = 10 + (index % 4) * 70; // Ajusta a posição base para cada chave
-      if (index % 4 === 0 && index !== 0) {
-        pdf.addPage(); // Adiciona uma nova página
-      }
+    if (chavesDevolvidas.length === 0) {
+      pdf.text('Nenhuma chave devolvida', 10, 10);
+    } else {
+      chavesDevolvidas.forEach((chave, index) => {
+        let basePosition = 10 + (index % 4) * 70;
+        if (index % 4 === 0 && index !== 0) {
+          pdf.addPage();
+        }
 
-      // Adiciona as informações da chave ao PDF
-      pdf.setFontSize(8); // Diminui o tamanho da fonte
-      pdf.text(`Chave ${index + 1}:`, 10, basePosition);
-      pdf.text(`Conjunto: ${chave.conjunto}`, 10, basePosition + 10);
-      pdf.text(`Data: ${chave.data}`, 10, basePosition + 20);
-      pdf.text(`Hora: ${chave.hora}`, 10, basePosition + 30);
-      pdf.text(`Usuário: ${chave.usuario}`, 10, basePosition + 40);
-      pdf.text(
-        `Usuário Devolução: ${chave.usuarioDevolucao}`,
-        10,
-        basePosition + 50
-      );
-      pdf.text(`Assinatura: ${chave.assinatura}`, 10, basePosition + 60); // Adiciona a assinatura
+        pdf.setFontSize(8);
+        pdf.text(`Chave ${index + 1}:`, 10, basePosition);
+        pdf.text(`Conjunto: ${chave.conjunto}`, 10, basePosition + 10);
+        pdf.text(`Data: ${chave.data}`, 10, basePosition + 20);
+        pdf.text(`Hora: ${chave.hora}`, 10, basePosition + 30);
+        pdf.text(`Usuário: ${chave.usuario}`, 10, basePosition + 40);
+        pdf.text(
+          `Usuário Devolução: ${chave.usuarioDevolucao}`,
+          10,
+          basePosition + 50
+        );
+        pdf.text(`Assinatura: ${chave.assinatura}`, 10, basePosition + 60);
 
-      // Desenha uma linha para dividir as seções
-      if ((index + 1) % 4 !== 0 && index < chavesDevolvidas.length - 1) {
-        pdf.line(10, basePosition + 65, 200, basePosition + 65); // (x1, y1, x2, y2)
-      }
-    });
-
+        if ((index + 1) % 4 !== 0 && index < chavesDevolvidas.length - 1) {
+          pdf.line(10, basePosition + 65, 200, basePosition + 65);
+        }
+      });
+    }
     pdf.save('Relatorio_Chaves_Devolvidas.pdf');
-  } else if (tipo === 'encomendas') {
-    pdf.setFontSize(16); // Aumenta o tamanho da fonte
-    pdf.text('Encomendas', 10, 10); // Adiciona um título ao PDF
+  }
+  if (tipo === 'encomendas') {
+    const encomendasBaixadasFromStorage =
+      localStorage.getItem('encomendasBaixadas');
+    let encomendasBaixadas = [];
 
+    if (encomendasBaixadasFromStorage) {
+      encomendasBaixadas = JSON.parse(encomendasBaixadasFromStorage);
+    }
+
+    if (encomendasBaixadas.length === 0) {
+      pdf.text('Nenhuma encomenda retirada', 10, 10);
+    } else {
+      pdf.setFontSize(16);
+      pdf.text('Encomendas', 10, 10);
+
+      encomendasBaixadas.forEach((encomenda, index) => {
+        let basePosition = 20 + (index % 4) * 70;
+        if (index % 4 === 0 && index !== 0) {
+          pdf.addPage();
+        }
+
+        pdf.setFontSize(8);
+        pdf.text(`Encomenda ${index + 1}:`, 10, basePosition);
+        pdf.text(`Data: ${encomenda.data}`, 10, basePosition + 10);
+        pdf.text(`Hora: ${encomenda.hora}`, 10, basePosition + 20);
+        pdf.text(
+          `Destinatario: ${encomenda.destinatario}`,
+          10,
+          basePosition + 30
+        );
+        pdf.text(`Conteudo: ${encomenda.conteudo}`, 10, basePosition + 40);
+        pdf.text(`Tipo: ${encomenda.tipo}`, 10, basePosition + 50);
+
+        if ((index + 1) % 4 !== 0 && index < encomendasBaixadas.length - 1) {
+          pdf.line(10, basePosition + 55, 200, basePosition + 55);
+        }
+      });
+    }
     pdf.save('Relatorio_Encomendas.pdf');
   }
 };
@@ -100,17 +132,17 @@ const gerarPDF = (tipo) => {
 <style scoped>
 .card-container {
   display: flex;
-  justify-content: space-around; /* Ajusta o espaçamento entre os cards */
-  margin-top: 20px; /* Adiciona uma margem no topo para descer os cards */
+  justify-content: space-around;
+  margin-top: 20px;
 }
 
 .card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 45%; /* Ajuste este valor para alterar a largura dos cards */
-  background-color: #e9e8e8; /* Adiciona um fundo cinza */
-  border-radius: 15px; /* Adiciona uma borda arredondada */
+  width: 30%;
+  background-color: #f5f4f4;
+  border-radius: 15px;
 }
 
 .card-body {
@@ -127,6 +159,5 @@ const gerarPDF = (tipo) => {
   border-radius: 6px;
   margin-top: 5px;
   margin-bottom: 20px;
-  background-color: #e3e3e9;
 }
 </style>

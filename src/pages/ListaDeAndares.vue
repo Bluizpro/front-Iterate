@@ -88,7 +88,7 @@ const columns = [
     name: 'conjunto',
     label: 'Número do Conj.',
     align: 'center',
-    field: (row) => row.name,
+    field: 'conjunto', // Acessa a propriedade 'conjunto' do objeto da linha
     format: (val) => `${val}`,
     sortable: true,
   },
@@ -97,7 +97,7 @@ const columns = [
     align: 'left',
     label: 'Especialidade',
     required: true,
-    field: (row) => row.name,
+    field: 'especialidade', // Acessa a propriedade 'especialidade' do objeto da linha
     format: (val) => `${val}`,
     sortable: true,
   },
@@ -106,21 +106,30 @@ const columns = [
     label: 'Locatário',
     align: 'left',
     required: true,
-    field: (row) => row.name,
+    field: 'locatario', // Acessa a propriedade 'locatario' do objeto da linha
     format: (val) => `${val}`,
     sortable: true,
   },
-  { name: 'interfone', label: 'Interfonar', field: 'interfone', align: 'left' },
+  {
+    name: 'interfone',
+    label: 'Interfonar',
+    field: 'interfone', // Acessa a propriedade 'interfone' do objeto da linha
+    align: 'left',
+  },
   {
     name: 'proprietario',
     label: 'Proprietário',
     align: 'left',
     required: true,
-    field: (row) => row.name,
+    field: 'proprietario', // Acessa a propriedade 'proprietario' do objeto da linha
     format: (val) => `${val}`,
     sortable: true,
   },
-
-  { name: 'telefone', label: 'Telefone', field: 'telefone', align: 'left' },
+  {
+    name: 'telefone',
+    label: 'Telefone',
+    field: 'telefone', // Acessa a propriedade 'telefone' do objeto da linha
+    align: 'left',
+  },
 ];
 </script>

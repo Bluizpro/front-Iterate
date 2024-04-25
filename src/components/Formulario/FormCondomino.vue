@@ -9,6 +9,7 @@
         class="q-gutter-md col-md-10 col-sm-10 col-xs-12"
       >
         <q-input
+          class="col-md-6 col-sm-6 col-xs-12"
           required
           name="conjunto"
           outlined
@@ -42,7 +43,7 @@
 
         <div class="row justify-between">
           <q-input
-            class="col-md-8 col-sm-8 col-xs-12"
+            class="col-md-6 col-sm-6 col-xs-12"
             required
             name="CPF/RG"
             outlined
@@ -66,12 +67,12 @@
             clear-icon="close"
             v-model="form.telefone"
             label="Telefone"
-            mask="(##) ### - ######"
-            unmasked-value
+            mask="+55(##)#####-####"
             :rules="[
-              (val:string) => (val && val.length > 0) || 'Telefone Obrigatório',
-              (val: string) => (val && val.replace(/\D/g, '').length === 11) || 'Telefone inválido'
-            ]"
+    (val:string) => (val && val.length > 0) || 'Telefone Obrigatório',
+    (val: string) => (val && val.replace(/\D/g, '').length === 13) || 'Telefone inválido'
+
+  ]"
           >
             <template v-slot:prepend>
               <q-icon name="phone" />
@@ -79,15 +80,17 @@
           </q-input>
         </div>
 
-        <!-- <q-input
+        <q-input
+          class="col-md-6 col-sm-6 col-xs-12"
           required
-          name="login"
+          name="proprietario"
           outlined
           clearable
           clear-icon="close"
-          v-model="form.login"
-          label="login"
-          :rules="[(val:string) => (val && val.length > 0) || 'Campo Obrigatório']"
+          v-model="form.proprietario"
+          color="indigo-13"
+          label="Proprietário"
+          :rules="[(val:string) => (val && val.length > 0) || 'Digite o nome do proprietário']"
         >
           <template v-slot:prepend>
             <q-icon name="person" />
@@ -96,28 +99,36 @@
 
         <q-input
           required
-          name="senha"
-          :type="isPwd ? 'password' : 'text'"
+          name="especialidade"
           outlined
           clearable
           clear-icon="close"
-          v-model="form.senha"
-          label="Senha"
-          :rules="[
-            (val:string) => (val && val.length > 0) || 'Campo Obrigatório',
-            (val:string) => val.length > 4 || 'Mínimo de 5 caracteres',
-          ]"
+          v-model="form.especialidade"
+          color="indigo-13"
+          label="Especialidade"
+          :rules="[(val:string) => (val && val.length > 0) || 'Digite a especialidade']"
         >
-          <template v-slot:append>
-            <q-icon
-              :name="isPwd ? 'visibility_off' : 'visibility'"
-              class="cursor-pointer"
-              @click="mostrar"
-            />
+          <template v-slot:prepend>
+            <q-icon name="school" />
           </template>
-        </q-input> -->
+        </q-input>
 
-        <!-- botoes -->
+        <q-select
+          required
+          name="interfone"
+          outlined
+          clearable
+          clear-icon="close"
+          v-model="form.interfone"
+          color="indigo-13"
+          label="Interfone"
+          :options="['sim', 'não']"
+          :rules="[(val:string) => (val && val.length > 0) || 'Selecione uma opção']"
+        >
+          <template v-slot:prepend>
+            <q-icon name="phone_in_talk" />
+          </template>
+        </q-select>
 
         <div class="row q-gutter-md">
           <q-btn
@@ -147,6 +158,7 @@ import { useStore } from '../../stores/example-store';
 import { useQuasar } from 'quasar';
 import { useCondominosStore } from '../../stores/condominos-store';
 import { useRouter } from 'vue-router';
+import { Condomino } from '../../stores/condominos-store';
 
 const store = useStore();
 const $q = useQuasar();
@@ -173,8 +185,9 @@ const form = ref({
   nome: '',
   cpfrg: '',
   telefone: '',
-  login: '',
-  senha: '',
+  interfone: '',
+  especialidade: '',
+  proprietario: '',
 });
 
 const isPwd = ref(true);
@@ -192,15 +205,23 @@ const titulo = computed(() => {
 });
 
 const cadastrar = async () => {
-  // Adicionar locatário
-  const locatario = form.value.nome;
-  const conjunto = form.value.conjunto;
+  // Cria um novo Condomino com os dados do formulário
+  const novoConjunto: Condomino = {
+    conjunto: form.value.conjunto,
+    especialidade: form.value.especialidade,
+    locatario: form.value.nome, // 'nome' agora é um array de nomes
+    proprietario: form.value.proprietario,
+    interfone: form.value.interfone,
+    telefone: form.value.telefone,
+    encomendas: [], // Valor padrão
+    visitantes: [], // Valor padrão
+  };
+
   showLoading();
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  const adicionadaSucesso = await condominosStore.adicionarLocatarioACondomino(
-    conjunto,
-    locatario
+  const adicionadaSucesso = await condominosStore.adicionarConjunto(
+    novoConjunto
   );
   hideLoading();
   if (adicionadaSucesso) {
@@ -226,3 +247,13 @@ const cadastrar = async () => {
   }
 };
 </script>
+<style scoped lang="scss">
+.q-select {
+  width: 200px;
+
+  input,
+  select {
+    font-size: 14px;
+  }
+}
+</style>

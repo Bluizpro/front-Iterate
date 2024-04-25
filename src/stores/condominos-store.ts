@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { Delivery } from 'src/components/Imodels';
+import { watch } from 'vue';
 
-interface Condomino {
+export interface Condomino {
   conjunto: string;
   especialidade: string;
   locatario: string[];
@@ -18,64 +19,37 @@ interface CondominosState {
 
 export const useCondominosStore = defineStore('condominosStore', {
   state: (): CondominosState => ({
-    condominos: [
-      {
-        conjunto: '23',
-        especialidade: 'direito',
-        locatario: ['renan almeida', 'Bruno silva'],
-        interfone: 'sim',
-        proprietario: 'raimundo',
-        telefone: '91999815499',
-        encomendas: [
-          {
-            id: 1,
-            data: '23/02/2023',
-            hora: '08:00',
-            conjunto: '23',
-            destinatario: 'renan',
-            remetente: 'pedro',
-            conteudo: '3 caixas',
-            empresa: 'avon',
-            tipo: 'interno',
-          },
-        ],
-        visitantes: [],
-      },
-      {
-        conjunto: '24',
-        especialidade: 'Psicologia',
-        locatario: ['Augusto cezar', ' Fabio Junior'],
-        interfone: 'não',
-        proprietario: 'Augusto',
-        telefone: '91999896678',
-        encomendas: [
-          {
-            id: 3,
-            data: '24/02/2023',
-            hora: '09:00',
-            conjunto: '24',
-            destinatario: 'augusto',
-            conteudo: '1 caixa',
-            notaFiscal: '785452',
-            tipo: 'sedex',
-          },
-          {
-            id: 4,
-            data: '25/01/2023',
-            hora: '10:55',
-            conjunto: '24',
-            destinatario: 'Bruno',
-            conteudo: '1 chocolate',
-            tipo: 'externo',
-            recebedor: 'Paulo',
-            local: 'belem',
-          },
-        ],
-        visitantes: [],
-      },
-    ],
+    condominos: [],
   }),
   actions: {
+    init() {
+      const savedState = localStorage.getItem('condominosStore');
+      if (savedState) {
+        this.condominos = JSON.parse(savedState);
+      }
+
+      watch(
+        () => this.condominos,
+        (newState) => {
+          localStorage.setItem('condominosStore', JSON.stringify(newState));
+        },
+        { deep: true }
+      );
+    },
+    adicionarConjunto(novoConjunto: Condomino) {
+      // Verifica se o conjunto já existe
+      const conjuntoExistente = this.condominos.find(
+        (condomino) => condomino.conjunto === novoConjunto.conjunto
+      );
+
+      if (!conjuntoExistente) {
+        this.condominos.push(novoConjunto);
+        return true;
+      } else {
+        console.error('Este conjunto já existe.');
+        return false;
+      }
+    },
     adicionarEncomendaACondomino(numeroConjunto: string, encomenda: Delivery) {
       const condomino = this.condominos.find(
         (condomino) => condomino.conjunto === numeroConjunto
@@ -88,7 +62,6 @@ export const useCondominosStore = defineStore('condominosStore', {
         return false;
       }
     },
-
     adicionarLocatarioACondomino(numeroConjunto: string, locatario: string) {
       const condomino = this.condominos.find(
         (condomino) => condomino.conjunto === numeroConjunto
@@ -109,25 +82,6 @@ export const useCondominosStore = defineStore('condominosStore', {
       }
     },
 
-    adicionarVisitanteACondomino(numeroConjunto: string, visitante: string) {
-      const condomino = this.condominos.find(
-        (condomino) => condomino.conjunto === numeroConjunto
-      );
-
-      if (condomino) {
-        // Verifica se o visitante já existe
-        if (!condomino.visitantes.includes(visitante)) {
-          condomino.visitantes.push(visitante);
-          return true;
-        } else {
-          console.error('Este visitante já existe para o condomínio.');
-          return false;
-        }
-      } else {
-        console.error('Condomínio não encontrado.');
-        return false;
-      }
-    },
     deletarEncomenda(id: number) {
       this.condominos.forEach((condomino) => {
         const index = condomino.encomendas.findIndex(
@@ -138,7 +92,6 @@ export const useCondominosStore = defineStore('condominosStore', {
         }
       });
     },
-
     atualizarEncomenda(id: number, encomendaEditada: Delivery) {
       this.condominos.forEach((condomino) => {
         const encomendaIndex = condomino.encomendas.findIndex(
@@ -183,3 +136,8 @@ export const useCondominosStore = defineStore('condominosStore', {
     },
   },
 });
+
+// ...
+
+const condominosStore = useCondominosStore();
+condominosStore.init();

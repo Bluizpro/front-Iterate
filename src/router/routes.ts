@@ -14,9 +14,9 @@ const routes = [
         component: () => import('pages/CadastroPage.vue'),
       },
       {
-        path: 'pesquisa',
-        name: 'pesquisa',
-        component: () => import('pages/PesquisaPage.vue'),
+        path: 'Ocorrencia',
+        name: 'ocorrencia',
+        component: () => import('pages/OcorrenciaPage.vue'),
       },
       {
         path: 'Pessoas',
@@ -35,6 +35,11 @@ const routes = [
       },
       {
         path: 'Lista-de-Andares',
+        name: 'listaDeVisitante',
+        component: () => import('pages/ListaVisitantePage.vue'),
+      },
+      {
+        path: 'Lista-de-visitante',
         name: 'listaDeAndares',
         component: () => import('pages/ListaDeAndares.vue'),
       },
@@ -65,18 +70,21 @@ const routes = [
         component: () => import('pages/AnotacoesPage.vue'),
       },
       {
+        path: 'Qtc',
+        name: 'qtc',
+        component: () => import('pages/QtcPage.vue'),
+      },
+      {
         path: 'Craviculario',
         name: 'craviculario',
         component: () => import('pages/CravicularioPage.vue'),
       },
       {
-        path: 'deletar-encomenda/:id?',
-        name: 'deletarEncomenda',
+        path: '/deletar-encomenda/:id?',
         component: () => import('pages/DeletarEncomenda.vue'),
       },
       {
-        path: 'editar-encomenda/:id?',
-        name: 'editarEncomenda',
+        path: '/editar-encomenda/:id?',
         component: () => import('pages/AtualizarEncomenda.vue'),
       },
       {

@@ -111,16 +111,15 @@
     </div>
   </q-page>
 </template>
-
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue';
 import { useStore } from '../../stores/example-store';
 import { useQuasar } from 'quasar';
-import { useCondominosStore } from '../../stores/condominos-store';
+import { useVisitantesStore } from '../../stores/visitanteStorage'; // Importe o visitantesStore
 
 const store = useStore();
 const $q = useQuasar();
-const condominosStore = useCondominosStore();
+const visitantesStore = useVisitantesStore(); // Use o visitantesStore
 
 const form = ref({
   conjunto: '',
@@ -157,34 +156,24 @@ const hideLoading = () => {
 };
 
 const cadastrar = async () => {
-  const visitante = form.value.nome;
-  const conjunto = form.value.conjunto;
+  const visitante = {
+    conjunto: form.value.conjunto,
+    nome: form.value.nome,
+    cpf: form.value.cpfrg,
+    empresa: form.value.empresa,
+    autorizacao: form.value.autorizacao,
+  };
   showLoading();
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  const adicionadaSucesso = await condominosStore.adicionarVisitanteACondomino(
-    conjunto,
-    visitante
-  );
+  visitantesStore.adicionarVisitante(visitante); // Adicione o visitante ao visitantesStore
   hideLoading();
-  if (adicionadaSucesso) {
-    $q.notify({
-      color: 'green-4',
-      textColor: 'white',
-      icon: 'cloud_done',
-      message: 'cadastrado com sucesso',
-
-      timeout: Math.random() * 1000 + 1000,
-    });
-    store.resetFormularioAtual();
-  } else {
-    $q.notify({
-      color: 'red-5',
-      textColor: 'white',
-      icon: 'warning',
-      message: 'Erro ao cadastra visitante',
-      position: 'center',
-      timeout: Math.random() * 1000 + 1000,
-    });
-  }
+  $q.notify({
+    color: 'green-4',
+    textColor: 'white',
+    icon: 'cloud_done',
+    message: 'cadastrado com sucesso',
+    timeout: Math.random() * 1000 + 1000,
+  });
+  store.resetFormularioAtual();
 };
 </script>
