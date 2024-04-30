@@ -1,8 +1,9 @@
 <template>
-  <div>
+  <q-page>
     <h1 style="font-size: 1.5em; text-align: center">Controle de Chaves</h1>
+
     <KeyComponent />
-  </div>
+  </q-page>
 </template>
 
 <script setup>

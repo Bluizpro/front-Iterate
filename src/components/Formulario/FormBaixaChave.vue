@@ -107,14 +107,19 @@ const router = useRouter();
 const route = useRoute();
 const chave = ref({
   conjunto: '',
-  data: new Date().toLocaleDateString(),
-  hora: new Date().toLocaleTimeString(),
+  data: '',
+  hora: '',
   usuario: '',
   usuarioDevolucao: '',
   assinatura: '',
 });
 const exibirModalAssinatura = ref(false);
 const chavesRetiradas = ref([]);
+
+const atualizarDataHora = () => {
+  chave.value.data = new Date().toLocaleDateString();
+  chave.value.hora = new Date().toLocaleTimeString();
+};
 
 const voltar = () => {
   router.push('/usuario/lista-chave');
@@ -125,6 +130,7 @@ const gerarAssinatura = () => {
 };
 
 const devolverChave = () => {
+  atualizarDataHora();
   exibirModalAssinatura.value = true;
 };
 
@@ -136,15 +142,12 @@ const salvarAssinatura = (assinatura) => {
     (chave) => String(chave.conjunto) === String(route.params.conjunto)
   );
   if (index !== -1) {
-    // Move a chave retirada para o novo local de armazenamento
     const chaveDevolvida = chavesRetiradas.value.splice(index, 1)[0];
-    chaveDevolvida.assinatura = assinatura; // Adicione a assinatura à chave devolvida
+    chaveDevolvida.assinatura = assinatura;
     let chavesDevolvidas =
       JSON.parse(localStorage.getItem('chavesDevolvidas')) || [];
     chavesDevolvidas.push(chaveDevolvida);
     localStorage.setItem('chavesDevolvidas', JSON.stringify(chavesDevolvidas));
-
-    // Atualiza o armazenamento local das chaves retiradas
     localStorage.setItem(
       'chavesRetiradas',
       JSON.stringify(chavesRetiradas.value)
@@ -170,5 +173,7 @@ onMounted(() => {
       chave.value = chaveRetirada;
     }
   }
+
+  atualizarDataHora();
 });
 </script>

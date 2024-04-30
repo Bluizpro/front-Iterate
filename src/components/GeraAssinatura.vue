@@ -5,19 +5,26 @@
     persistent
     no-click-outside
   >
-    <div class="q-dialog__inner">
+    <div class="q-dialog__inner" style="width: 1200px; height: 600px">
+      <!-- Ajuste o tamanho aqui -->
       <div class="q-dialog__content row items-center">
         <div class="assinatura-container">
           <VueSignaturePad ref="signaturePad" />
         </div>
       </div>
       <div class="q-dialog__actions">
-        <q-btn label="Cancelar" color="negative" v-close-popup />
+        <q-btn
+          label="Cancelar"
+          color="negative"
+          v-close-popup
+          class="dialog-button"
+        />
         <q-btn
           label="Salvar"
           color="primary"
           v-close-popup
           v-on:click="salvarAssinatura"
+          class="dialog-button"
         />
       </div>
     </div>
@@ -52,12 +59,16 @@ const salvarAssinatura = async () => {
 
 <style scoped lang="scss">
 .assinatura-container {
-  width: 800px; /* Defina a largura desejada para aumentar a caixa para os lados */
-  height: 600px;
-  /* Defina a altura desejada */
+  width: 100%; /* Ajuste a largura para 100% */
+  height: 100%; /* Ajuste a altura para 100% */
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px dashed #ccc;
+}
+
+.dialog-button {
+  margin: 0 2px; /* Adicione margem aos botões */
+  border-radius: 2rem;
 }
 </style>

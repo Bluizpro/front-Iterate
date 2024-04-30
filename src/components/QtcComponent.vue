@@ -2,7 +2,7 @@
   <q-page>
     <div
       class="note-container"
-      v-for="(anotacao, index) in paginatedForms"
+      v-for="(qtcInfor, index) in paginatedForms"
       :key="index"
     >
       <q-form
@@ -14,7 +14,7 @@
           readonly
           name="Data"
           outlined
-          v-model="anotacao.data"
+          v-model="qtcInfor.data"
           color="indigo-13"
           label="Data"
           class="col-2 data"
@@ -28,7 +28,7 @@
           readonly
           name="Hora"
           outlined
-          v-model="anotacao.hora"
+          v-model="qtcInfor.hora"
           color="indigo-13"
           label="Hora"
           class="col-2 hora"
@@ -38,10 +38,16 @@
           </template>
         </q-input>
         <q-input
+          outlined
+          v-model="qtcInfor.conjunto"
+          label="Conjunto"
+          class="col"
+        />
+        <q-input
           disable
           name="Usuario"
           outlined
-          v-model="anotacao.usuario"
+          v-model="qtcInfor.usuario"
           color="indigo-13"
           label="Nome do usuário"
           class="col-1 usuario"
@@ -50,29 +56,29 @@
             <q-icon name="person" />
           </template>
         </q-input>
-
         <q-input
           outlined
-          v-model="anotacao.paciente"
+          v-model="qtcInfor.paciente"
           label="Paciente"
           color="indigo-13"
           class="col-2 paciente"
         />
-        <q-select
+        <q-input
           outlined
-          v-model="anotacao.info"
-          :options="infoOptions"
+          v-model="qtcInfor.informacoes"
           label="Informações"
-          :class="colorClass(anotacao.info)"
           class="col"
-        />
-        <q-select
-          outlined
-          v-model="anotacao.status"
-          :options="statusOptions"
-          label="Status "
-          class="col"
-        />
+        >
+          <template v-slot:append>
+            <q-icon name="info">
+              <q-tooltip>
+                <div class="custom-tooltip">
+                  {{ qtcInfor.informacoes }}
+                </div>
+              </q-tooltip>
+            </q-icon>
+          </template>
+        </q-input>
 
         <q-btn
           icon="save"
@@ -106,14 +112,14 @@ const $q = useQuasar();
 const formsPerPage = 5;
 const currentPage = ref(1);
 const forms = ref(
-  JSON.parse(localStorage.getItem('anotacoes')) || [
+  JSON.parse(localStorage.getItem('qtcInfors')) || [
     {
       data: new Date().toLocaleDateString(),
       hora: new Date().toLocaleTimeString(),
       usuario: localStorage.getItem('usuarioLogado') || '',
       paciente: '',
-      status: '',
-      info: '',
+      informacoes: '',
+      conjunto: '',
     },
   ]
 );
@@ -121,7 +127,7 @@ const forms = ref(
 watch(
   forms,
   () => {
-    localStorage.setItem('anotacoes', JSON.stringify(forms.value));
+    localStorage.setItem('qtcInfors', JSON.stringify(forms.value));
   },
   { deep: true }
 );
@@ -138,8 +144,8 @@ const onSubmit = (index) => {
   if (
     forms.value[index].usuario === '' ||
     forms.value[index].paciente === '' ||
-    forms.value[index].status === '' ||
-    forms.value[index].info === ''
+    forms.value[index].informacoes === '' ||
+    forms.value[index].conjunto === ''
   ) {
     $q.notify({
       color: 'red-5',
@@ -153,8 +159,8 @@ const onSubmit = (index) => {
       hora: new Date().toLocaleTimeString(),
       usuario: localStorage.getItem('usuarioLogado') || '',
       paciente: '',
-      status: '',
-      info: '',
+      informacoes: '',
+      conjunto: '',
     });
 
     $q.notify({
@@ -167,38 +173,16 @@ const onSubmit = (index) => {
 };
 
 const onReset = (index) => {
-  const savedForms = JSON.parse(localStorage.getItem('savedForms')) || [];
+  const savedForms = JSON.parse(localStorage.getItem('savedInfors')) || [];
   savedForms.push(forms.value[index]);
-  localStorage.setItem('savedForms', JSON.stringify(savedForms));
+  localStorage.setItem('savedInfors', JSON.stringify(savedForms));
 
   if (forms.value.length > 1) {
     forms.value.splice(index, 1);
   } else {
     forms.value[index].paciente = '';
-    forms.value[index].status = '';
-    forms.value[index].info = '';
-  }
-};
-
-const statusOptions = ['J/S', 'N/S'];
-const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
-
-const colorClass = (info) => {
-  switch (info) {
-    case 'AG/2T':
-      return 'yellow-background'; // Amarelo
-    case 'AG':
-      return 'red-background'; // Vermelho
-    case 'AG/CM':
-      return 'green-background'; // Verde
-    case 'PS':
-      return 'background'; // Branco
-    case 'AG/CF':
-      return 'orange-background'; // Laranja
-    case 'PS/+1T':
-      return 'blue-background'; // Azul-royal
-    default:
-      return ''; // Caso padrão (sem cor específica)
+    forms.value[index].informacoes = '';
+    forms.value[index].conjunto = '';
   }
 };
 </script>
@@ -230,29 +214,10 @@ const colorClass = (info) => {
   padding: 5px;
   border-radius: 4px;
 }
-.yellow-background {
-  background-color: rgb(250, 250, 144);
-}
-
-.red-background {
-  background-color: #f07171;
-}
-.green-background {
-  background-color: rgb(152, 228, 152);
-}
-
-.background {
-  background-color: rgb(255, 255, 255);
-}
-
-.orange-background {
-  background-color: rgb(253, 202, 107);
-}
-
-.blue-background {
-  background-color: rgb(147, 147, 247);
-}
 .paginação {
   margin-top: 2rem;
+}
+.custom-tooltip {
+  font-size: 1.5em; /* Ajuste este valor para o tamanho desejado */
 }
 </style>

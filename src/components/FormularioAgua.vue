@@ -305,12 +305,16 @@ async function calcular() {
       color: 'red-5',
       textColor: 'white',
       icon: 'warning',
-      message: 'O consumo  ultrapassou 6000m³',
+      message: `O consumo ultrapassou 6000m³. Consumo atual: ${consumoFinal.toFixed(
+        0
+      )} m³!`,
     });
 
     try {
       await axios.post('http://localhost:3000/send-whatsapp', {
-        message: 'O consumo  ultrapassou 6000m³',
+        message: `O consumo ultrapassou 6000m³. Consumo atual: ${consumoFinal.toFixed(
+          0
+        )} m³!`,
       });
       console.log('Mensagem enviada com sucesso!');
     } catch (error) {
