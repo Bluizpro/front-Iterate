@@ -33,4 +33,4 @@ Para usar o sistema, basta acessar a interface web. É possível filtrar as enco
 
 ## Contato
 
-Se você tiver alguma dúvida ou sugestão, sinta-se à vontade para entrar em contato com a equipe de desenvolvimento por e-mail em renan.almeida.dev@hotmail.com
+Se você tiver alguma dúvida ou sugestão, sinta-se à vontade para entrar em contato com a equipe de desenvolvimento por e-mail em renan.almeida.dev@hotmail.com e brunoluizperez@gmail.com

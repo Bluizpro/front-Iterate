@@ -22,15 +22,15 @@ import QtcComponent from '../components/QtcComponent.vue'; // Importe o componen
 const qtcInfors = ref(
   JSON.parse(localStorage.getItem('qtcInfors')) || [
     {
-      data: new Date().toLocaleDateString(),
-      hora: new Date().toLocaleTimeString(),
+      data: '',
+      hora: '', // Retorna a hora no formato "hh:mm:ss"
       usuario: localStorage.getItem('usuarioLogado') || '',
       paciente: '',
       status: '',
       info: '',
     },
   ]
-); // Inicialize com um formulário vazio
+);
 
 const onSubmit = (index) => {
   if (

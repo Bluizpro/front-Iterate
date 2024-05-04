@@ -1,6 +1,7 @@
 interface AnotacaoStorage {
   data: string;
   hora: string;
+  conjunto: number;
   usuario: string;
   paciente: string;
   status: string;

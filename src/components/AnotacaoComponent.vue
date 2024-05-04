@@ -17,11 +17,8 @@
           v-model="anotacao.data"
           color="indigo-13"
           label="Data"
-          class="col-2 data"
+          class="col-2"
         >
-          <template v-slot:prepend>
-            <q-icon name="date_range" />
-          </template>
         </q-input>
         <q-input
           disable
@@ -31,11 +28,8 @@
           v-model="anotacao.hora"
           color="indigo-13"
           label="Hora"
-          class="col-2 hora"
+          class="col-2"
         >
-          <template v-slot:prepend>
-            <q-icon name="access_time" />
-          </template>
         </q-input>
         <q-input
           disable
@@ -46,34 +40,37 @@
           label="Nome do usuário"
           class="col-1 usuario"
         >
-          <template v-slot:prepend>
-            <q-icon name="person" />
-          </template>
         </q-input>
-
+        <q-input
+          outlined
+          v-model="anotacao.conjunto"
+          label="Conjunto"
+          class="col-1"
+        />
         <q-input
           outlined
           v-model="anotacao.paciente"
           label="Paciente"
           color="indigo-13"
-          class="col-2 paciente"
+          class="col-2"
         />
+
         <q-select
           outlined
           v-model="anotacao.info"
           :options="infoOptions"
           label="Informações"
           :class="colorClass(anotacao.info)"
-          class="col"
+          class="col-1"
         />
-        <q-select
+        <!-- <q-select
           outlined
           v-model="anotacao.status"
           :options="statusOptions"
           label="Status "
           class="col"
         />
-
+-->
         <q-btn
           icon="save"
           color="primary"
@@ -99,7 +96,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, onUpdated } from 'vue';
 import { useQuasar } from 'quasar';
 
 const $q = useQuasar();
@@ -108,12 +105,14 @@ const currentPage = ref(1);
 const forms = ref(
   JSON.parse(localStorage.getItem('anotacoes')) || [
     {
-      data: new Date().toLocaleDateString(),
-      hora: new Date().toLocaleTimeString(),
+      data: new Date().toLocaleDateString(), // Retorna a data no formato "dd/mm/yyyy"
+      hora: new Date().toLocaleTimeString(), // Retorna a hora no formato "hh:mm:ss"
       usuario: localStorage.getItem('usuarioLogado') || '',
+      conjunto: '',
       paciente: '',
-      status: '',
+      //status: '',
       info: '',
+      salvo: false, // Adicione esta linha
     },
   ]
 );
@@ -126,6 +125,18 @@ watch(
   { deep: true }
 );
 
+watch(
+  forms,
+  (newForms, oldForms) => {
+    if (newForms.length > oldForms.length) {
+      const lastIndex = newForms.length - 1;
+      newForms[lastIndex].data = new Date().toLocaleDateString();
+      newForms[lastIndex].hora = new Date().toLocaleTimeString();
+    }
+  },
+  { deep: true }
+);
+
 const maxPages = computed(() => Math.ceil(forms.value.length / formsPerPage));
 
 const paginatedForms = computed(() => {
@@ -134,11 +145,26 @@ const paginatedForms = computed(() => {
   return forms.value.slice(start, end);
 });
 
+onMounted(updateDateTime);
+onUpdated(updateDateTime);
+
+function updateDateTime() {
+  const start = (currentPage.value - 1) * formsPerPage;
+  const end = Math.min(start + formsPerPage, forms.value.length);
+  for (let i = start; i < end; i++) {
+    if (!forms.value[i].salvo) {
+      forms.value[i].data = new Date().toLocaleDateString();
+      forms.value[i].hora = new Date().toLocaleTimeString();
+    }
+  }
+}
+
 const onSubmit = (index) => {
   if (
     forms.value[index].usuario === '' ||
     forms.value[index].paciente === '' ||
-    forms.value[index].status === '' ||
+    //forms.value[index].status === '' ||
+    forms.value[index].conjunto === '' ||
     forms.value[index].info === ''
   ) {
     $q.notify({
@@ -148,13 +174,16 @@ const onSubmit = (index) => {
       message: 'Por favor, preencha todos os campos',
     });
   } else {
+    forms.value[index].salvo = true; // Adicione esta linha
     forms.value.push({
       data: new Date().toLocaleDateString(),
       hora: new Date().toLocaleTimeString(),
       usuario: localStorage.getItem('usuarioLogado') || '',
+      conjunto: '',
       paciente: '',
-      status: '',
+      //  status: '',
       info: '',
+      salvo: false, // Adicione esta linha
     });
 
     $q.notify({
@@ -167,20 +196,18 @@ const onSubmit = (index) => {
 };
 
 const onReset = (index) => {
-  const savedForms = JSON.parse(localStorage.getItem('savedForms')) || [];
-  savedForms.push(forms.value[index]);
-  localStorage.setItem('savedForms', JSON.stringify(savedForms));
-
   if (forms.value.length > 1) {
     forms.value.splice(index, 1);
   } else {
     forms.value[index].paciente = '';
-    forms.value[index].status = '';
+    forms.value[index].conjunto = '';
+    // forms.value[index].status = '';
     forms.value[index].info = '';
+    forms.value[index].salvo = false; // Adicione esta linha
   }
 };
 
-const statusOptions = ['J/S', 'N/S'];
+//const statusOptions = ['J/S', 'N/S'];
 const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
 
 const colorClass = (info) => {
@@ -211,13 +238,14 @@ const colorClass = (info) => {
 }
 
 .q-form .q-field {
-  margin-right: 1px !important;
+  border: 1px solid #ccc;
+  border-radius: 10px; // Ajuste este valor para alterar a curvatura da borda
 }
 
 .note-container {
   border: 3px solid #ccc;
-  padding: 2rem;
-  width: 95%;
+  padding: 1rem;
+  width: 90%;
   height: 100px;
   align-items: flex-start;
   margin: auto;
@@ -225,10 +253,10 @@ const colorClass = (info) => {
 }
 .button-save,
 .button-done {
-  margin-left: 3px !important;
+  margin-left: 5px !important;
   border: 1px solid #ccc;
   padding: 5px;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 .yellow-background {
   background-color: rgb(250, 250, 144);

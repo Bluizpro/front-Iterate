@@ -17,11 +17,8 @@
           v-model="qtcInfor.data"
           color="indigo-13"
           label="Data"
-          class="col-2 data"
+          class="col-1"
         >
-          <template v-slot:prepend>
-            <q-icon name="date_range" />
-          </template>
         </q-input>
         <q-input
           disable
@@ -31,17 +28,14 @@
           v-model="qtcInfor.hora"
           color="indigo-13"
           label="Hora"
-          class="col-2 hora"
+          class="col-1"
         >
-          <template v-slot:prepend>
-            <q-icon name="access_time" />
-          </template>
         </q-input>
         <q-input
           outlined
           v-model="qtcInfor.conjunto"
           label="Conjunto"
-          class="col"
+          class="col-1"
         />
         <q-input
           disable
@@ -52,16 +46,13 @@
           label="Nome do usuário"
           class="col-1 usuario"
         >
-          <template v-slot:prepend>
-            <q-icon name="person" />
-          </template>
         </q-input>
         <q-input
           outlined
-          v-model="qtcInfor.paciente"
-          label="Paciente"
+          v-model="qtcInfor.prestador"
+          label=" Prestador"
           color="indigo-13"
-          class="col-2 paciente"
+          class="col-2 prestador"
         />
         <q-input
           outlined
@@ -105,7 +96,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, onUpdated } from 'vue';
 import { useQuasar } from 'quasar';
 
 const $q = useQuasar();
@@ -114,12 +105,13 @@ const currentPage = ref(1);
 const forms = ref(
   JSON.parse(localStorage.getItem('qtcInfors')) || [
     {
-      data: new Date().toLocaleDateString(),
-      hora: new Date().toLocaleTimeString(),
+      data: new Date().toLocaleDateString(), // Retorna a data no formato "dd/mm/yyyy"
+      hora: new Date().toLocaleTimeString(), // Retorna a hora no formato "hh:mm:ss"
       usuario: localStorage.getItem('usuarioLogado') || '',
-      paciente: '',
+      prestador: '',
       informacoes: '',
       conjunto: '',
+      salvo: false, // Adicione esta linha
     },
   ]
 );
@@ -132,6 +124,18 @@ watch(
   { deep: true }
 );
 
+watch(
+  forms,
+  (newForms, oldForms) => {
+    if (newForms.length > oldForms.length) {
+      const lastIndex = newForms.length - 1;
+      newForms[lastIndex].data = new Date().toLocaleDateString();
+      newForms[lastIndex].hora = new Date().toLocaleTimeString();
+    }
+  },
+  { deep: true }
+);
+
 const maxPages = computed(() => Math.ceil(forms.value.length / formsPerPage));
 
 const paginatedForms = computed(() => {
@@ -140,10 +144,24 @@ const paginatedForms = computed(() => {
   return forms.value.slice(start, end);
 });
 
+onMounted(updateDateTime);
+onUpdated(updateDateTime);
+
+function updateDateTime() {
+  const start = (currentPage.value - 1) * formsPerPage;
+  const end = Math.min(start + formsPerPage, forms.value.length);
+  for (let i = start; i < end; i++) {
+    if (!forms.value[i].salvo) {
+      forms.value[i].data = new Date().toLocaleDateString();
+      forms.value[i].hora = new Date().toLocaleTimeString();
+    }
+  }
+}
+
 const onSubmit = (index) => {
   if (
     forms.value[index].usuario === '' ||
-    forms.value[index].paciente === '' ||
+    forms.value[index].prestador === '' ||
     forms.value[index].informacoes === '' ||
     forms.value[index].conjunto === ''
   ) {
@@ -154,13 +172,15 @@ const onSubmit = (index) => {
       message: 'Por favor, preencha todos os campos',
     });
   } else {
+    forms.value[index].salvo = true; // Adicione esta linha
     forms.value.push({
       data: new Date().toLocaleDateString(),
       hora: new Date().toLocaleTimeString(),
       usuario: localStorage.getItem('usuarioLogado') || '',
-      paciente: '',
+      prestador: '',
       informacoes: '',
       conjunto: '',
+      salvo: false, // Adicione esta linha
     });
 
     $q.notify({
@@ -173,16 +193,13 @@ const onSubmit = (index) => {
 };
 
 const onReset = (index) => {
-  const savedForms = JSON.parse(localStorage.getItem('savedInfors')) || [];
-  savedForms.push(forms.value[index]);
-  localStorage.setItem('savedInfors', JSON.stringify(savedForms));
-
   if (forms.value.length > 1) {
     forms.value.splice(index, 1);
   } else {
-    forms.value[index].paciente = '';
+    forms.value[index].prestador = '';
     forms.value[index].informacoes = '';
     forms.value[index].conjunto = '';
+    forms.value[index].salvo = false; // Adicione esta linha
   }
 };
 </script>

@@ -65,6 +65,11 @@ const linksList = ref([
   {
     title: 'Lista de Visitante',
     icon: 'format_list_bulleted',
+    link: 'listaDeCorrespondencia',
+  },
+  {
+    title: 'Lista de Correspondencia',
+    icon: 'format_list_bulleted',
     link: 'listaDeVisitante',
   },
   {

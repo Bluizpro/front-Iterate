@@ -1,9 +1,9 @@
 interface QtcStorage {
-  data: Date;
+  data: string;
   hora: string;
   conjunto: number;
   usuario: string;
-  paciente: string;
+  prestador: string;
   informacoes: string;
 }
 

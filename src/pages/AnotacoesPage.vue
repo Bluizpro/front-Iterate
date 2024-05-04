@@ -34,6 +34,7 @@ const onSubmit = (index) => {
   if (
     forms.value[index].usuario === '' ||
     forms.value[index].paciente === '' ||
+    forms.value[index].conjunto === '' ||
     forms.value[index].status === '' ||
     forms.value[index].info === ''
   ) {
@@ -66,6 +67,8 @@ const onSubmit = (index) => {
 const onReset = (index) => {
   forms.value[index].paciente = '';
   forms.value[index].status = '';
+  forms.value[index].conjunto === '';
+
   forms.value[index].info = '';
 };
 </script>
