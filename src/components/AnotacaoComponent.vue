@@ -38,7 +38,7 @@
           v-model="anotacao.usuario"
           color="indigo-13"
           label="Nome do usuário"
-          class="col-1 usuario"
+          class="col-1"
         >
         </q-input>
         <q-input
@@ -69,8 +69,8 @@
           :options="statusOptions"
           label="Status "
           class="col"
-        />
--->
+        /> -->
+
         <q-btn
           icon="save"
           color="primary"
@@ -110,7 +110,7 @@ const forms = ref(
       usuario: localStorage.getItem('usuarioLogado') || '',
       conjunto: '',
       paciente: '',
-      //status: '',
+      //  status: '',
       info: '',
       salvo: false, // Adicione esta linha
     },
@@ -163,7 +163,7 @@ const onSubmit = (index) => {
   if (
     forms.value[index].usuario === '' ||
     forms.value[index].paciente === '' ||
-    //forms.value[index].status === '' ||
+    // forms.value[index].status === '' ||
     forms.value[index].conjunto === '' ||
     forms.value[index].info === ''
   ) {
@@ -181,7 +181,7 @@ const onSubmit = (index) => {
       usuario: localStorage.getItem('usuarioLogado') || '',
       conjunto: '',
       paciente: '',
-      //  status: '',
+      //status: '',
       info: '',
       salvo: false, // Adicione esta linha
     });
@@ -244,8 +244,8 @@ const colorClass = (info) => {
 
 .note-container {
   border: 3px solid #ccc;
-  padding: 1rem;
-  width: 90%;
+  padding: 2rem;
+  width: 95%;
   height: 100px;
   align-items: flex-start;
   margin: auto;

@@ -209,7 +209,7 @@ const cadastrar = async () => {
   const novoConjunto: Condomino = {
     conjunto: form.value.conjunto,
     especialidade: form.value.especialidade,
-    locatario: form.value.nome, // 'nome' agora é um array de nomes
+    locatario: [form.value.nome], // 'nome' agora é um array de nomes
     proprietario: form.value.proprietario,
     interfone: form.value.interfone,
     telefone: form.value.telefone,

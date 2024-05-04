@@ -25,7 +25,7 @@ const forms = ref([
     hora: new Date().toLocaleTimeString(),
     usuario: localStorage.getItem('usuarioLogado') || '',
     paciente: '',
-    status: '',
+    // status: '',
     info: '',
   },
 ]); // Inicialize com um formulário vazio
@@ -51,7 +51,7 @@ const onSubmit = (index) => {
       hora: new Date().toLocaleTimeString(),
       usuario: localStorage.getItem('usuarioLogado') || '',
       paciente: '',
-      status: '',
+      // status: '',
       info: '',
     });
 
@@ -66,7 +66,7 @@ const onSubmit = (index) => {
 
 const onReset = (index) => {
   forms.value[index].paciente = '';
-  forms.value[index].status = '';
+  // forms.value[index].status = '';
   forms.value[index].conjunto === '';
 
   forms.value[index].info = '';

@@ -65,12 +65,12 @@ const linksList = ref([
   {
     title: 'Lista de Visitante',
     icon: 'format_list_bulleted',
-    link: 'listaDeCorrespondencia',
+    link: 'listaDeVisitante',
   },
   {
     title: 'Lista de Correspondencia',
     icon: 'format_list_bulleted',
-    link: 'listaDeVisitante',
+    link: 'listaDeAndares',
   },
   {
     title: 'QTC',

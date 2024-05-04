@@ -22,16 +22,16 @@
       v-if="store.formularioAtual === 'pessoas'"
       @fecharFormulario="fecharFormulario"
     />
-    <FormularioProdutos
+    <!-- <FormularioProdutos
       v-if="store.formularioAtual === 'encomenda'"
       @fecharFormulario="fecharFormulario"
-    />
+    />-->
   </q-page>
 </template>
 
 <script setup lang="ts">
 import FormularioPessoas from '../components/FormularioPessoas.vue';
-import FormularioProdutos from '../components/FormularioProdutos.vue';
+//import FormularioProdutos from 'src/components/FormularioProdutos.vue';
 import { useStore } from '../stores/example-store';
 
 const store = useStore();

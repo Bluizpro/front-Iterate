@@ -141,7 +141,7 @@ const gerarPDF = (tipo) => {
   flex-direction: column;
   align-items: center;
   width: 30%;
-  background-color: #ffffff;
+  background-color: #f5f4f4;
   border-radius: 15px;
 }
 

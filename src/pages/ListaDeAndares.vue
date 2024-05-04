@@ -27,16 +27,27 @@
             </q-td>
 
             <q-td key="locatario" :props="props">
-              {{ props.row.locatario.join(', ') }}
+              {{
+                Array.isArray(props.row.locatario)
+                  ? props.row.locatario.join(', ')
+                  : props.row.locatario
+              }}
               <q-popup-edit
                 v-model="props.row.locatario"
                 title="Alterar?"
                 buttons
                 v-slot="scope"
               >
-                <q-input type="text" v-model="scope.value" dense autofocus />
+                <q-input
+                  type="text"
+                  v-model="scope.value"
+                  dense
+                  autofocus
+                  @keyup.enter="scope.value = scope.value.split(',')"
+                />
               </q-popup-edit>
             </q-td>
+
             <q-td key="interfone" :props="props">
               {{ props.row.interfone }}
               <q-popup-edit
