@@ -155,13 +155,26 @@ const hideLoading = () => {
   $q.loading.hide();
 };
 
+function formatarDataHora(data: Date) {
+  const dia = data.getDate().toString().padStart(2, '0');
+  const mes = (data.getMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 porque os meses começam do 0
+  const ano = data.getFullYear();
+  const horas = data.getHours().toString().padStart(2, '0');
+  const minutos = data.getMinutes().toString().padStart(2, '0');
+
+  return `${dia}/${mes}/${ano} ${horas}:${minutos}`;
+}
+
 const cadastrar = async () => {
+  const agora = new Date();
+
   const visitante = {
     conjunto: form.value.conjunto,
     nome: form.value.nome,
     cpf: form.value.cpfrg,
     empresa: form.value.empresa,
     autorizacao: form.value.autorizacao,
+    dataCadastro: formatarDataHora(agora), // Adicione esta linha
   };
   showLoading();
   await new Promise((resolve) => setTimeout(resolve, 1000));

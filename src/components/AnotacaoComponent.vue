@@ -17,7 +17,7 @@
           v-model="anotacao.data"
           color="indigo-13"
           label="Data"
-          class="col-2"
+          class="col-1"
         >
         </q-input>
         <q-input
@@ -28,7 +28,7 @@
           v-model="anotacao.hora"
           color="indigo-13"
           label="Hora"
-          class="col-2"
+          class="col-1"
         >
         </q-input>
         <q-input

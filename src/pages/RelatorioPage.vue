@@ -73,14 +73,24 @@ const gerarPDF = (tipo) => {
         pdf.text(`Hora: ${chave.hora}`, 10, basePosition + 30);
         pdf.text(`Usuário: ${chave.usuario}`, 10, basePosition + 40);
         pdf.text(
-          `Usuário Devolução: ${chave.usuarioDevolucao}`,
+          `Data Devolução: ${chave.dataDevolucao}`,
           10,
           basePosition + 50
-        );
-        pdf.text(`Assinatura: ${chave.assinatura}`, 10, basePosition + 60);
+        ); // ajustado
+        pdf.text(
+          `Hora Devolução: ${chave.horaDevolucao}`,
+          10,
+          basePosition + 60
+        ); // ajustado
+        pdf.text(
+          `Usuário Devolução: ${chave.usuarioDevolucao}`,
+          10,
+          basePosition + 70
+        ); // ajustado
+        pdf.text(`Assinatura: ${chave.assinatura}`, 10, basePosition + 80); // ajustado
 
         if ((index + 1) % 4 !== 0 && index < chavesDevolvidas.length - 1) {
-          pdf.line(10, basePosition + 65, 200, basePosition + 65);
+          pdf.line(10, basePosition + 85, 200, basePosition + 85); // ajustado
         }
       });
     }
@@ -107,20 +117,24 @@ const gerarPDF = (tipo) => {
           pdf.addPage();
         }
 
+        let dataBaixa = new Date(encomenda.dataBaixa);
+        let dataFormatada = dataBaixa.toLocaleString('pt-BR');
+
         pdf.setFontSize(8);
         pdf.text(`Encomenda ${index + 1}:`, 10, basePosition);
         pdf.text(`Data: ${encomenda.data}`, 10, basePosition + 10);
         pdf.text(`Hora: ${encomenda.hora}`, 10, basePosition + 20);
+        pdf.text(`DataBaixa: ${dataFormatada}`, 10, basePosition + 30);
         pdf.text(
           `Destinatario: ${encomenda.destinatario}`,
           10,
-          basePosition + 30
+          basePosition + 40
         );
-        pdf.text(`Conteudo: ${encomenda.conteudo}`, 10, basePosition + 40);
-        pdf.text(`Tipo: ${encomenda.tipo}`, 10, basePosition + 50);
+        pdf.text(`Conteudo: ${encomenda.conteudo}`, 10, basePosition + 50);
+        pdf.text(`Tipo: ${encomenda.tipo}`, 10, basePosition + 60);
 
         if ((index + 1) % 4 !== 0 && index < encomendasBaixadas.length - 1) {
-          pdf.line(10, basePosition + 55, 200, basePosition + 55);
+          pdf.line(10, basePosition + 65, 200, basePosition + 65);
         }
       });
     }
@@ -141,7 +155,7 @@ const gerarPDF = (tipo) => {
   flex-direction: column;
   align-items: center;
   width: 30%;
-  background-color: #f5f4f4;
+  background-color: #fffcfc;
   border-radius: 15px;
 }
 

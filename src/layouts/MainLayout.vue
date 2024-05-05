@@ -70,7 +70,7 @@ const linksList = ref([
   {
     title: 'Lista de Correspondencia',
     icon: 'format_list_bulleted',
-    link: 'listaDeAndares',
+    link: 'listaCorrespondencia',
   },
   {
     title: 'QTC',

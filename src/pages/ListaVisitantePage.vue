@@ -13,7 +13,11 @@
       >
         <template v-slot:body="props">
           <q-tr :props="props">
+            <q-td key="dataCadastro" :props="props">{{
+              props.row.dataCadastro
+            }}</q-td>
             <q-td key="conjunto" :props="props">{{ props.row.conjunto }}</q-td>
+
             <q-td key="nome" :props="props">{{ props.row.nome }}</q-td>
             <q-td key="cpf" :props="props">{{ props.row.cpf }}</q-td>
             <q-td key="autorizacao" :props="props">{{
@@ -30,6 +34,14 @@
 <script setup>
 import { useVisitantesStore } from '../stores/visitanteStorage';
 const columns = [
+  {
+    name: 'dataCadastro',
+    label: 'Data de Cadastro',
+    align: 'center',
+    field: 'dataCadastro', // Acessa a propriedade 'dataCadastro' do objeto da linha
+    format: (val) => `${val}`,
+    sortable: true,
+  },
   {
     name: 'conjunto',
     label: 'numero do Conjunto',

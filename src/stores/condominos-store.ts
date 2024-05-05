@@ -16,6 +16,11 @@ export interface Condomino {
 interface CondominosState {
   condominos: Condomino[];
 }
+export interface EncomendaConsulta {
+  conjunto: string;
+  destinatario: string;
+  conteudo: string;
+}
 
 export const useCondominosStore = defineStore('condominosStore', {
   state: (): CondominosState => ({

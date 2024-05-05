@@ -110,6 +110,8 @@ const chave = ref({
   data: '',
   hora: '',
   usuario: '',
+  dataDevolucao: '', // novo campo para data de devolução
+  horaDevolucao: '', // novo campo para hora de devolução
   usuarioDevolucao: '',
   assinatura: '',
 });
@@ -130,7 +132,8 @@ const gerarAssinatura = () => {
 };
 
 const devolverChave = () => {
-  atualizarDataHora();
+  chave.value.dataDevolucao = new Date().toLocaleDateString(); // atualiza a data de devolução
+  chave.value.horaDevolucao = new Date().toLocaleTimeString(); // atualiza a hora de devolução
   exibirModalAssinatura.value = true;
 };
 

@@ -49,6 +49,11 @@ const routes = [
         component: () => import('pages/ListaDeEncomendasPage.vue'),
       },
       {
+        path: 'Listacorrespondencia',
+        name: 'listaCorrespondencia',
+        component: () => import('pages/listaCorrenpondenciaPage.vue'),
+      },
+      {
         path: 'Cards-Encomendas',
         name: 'cardsEncomendas',
         component: () => import('pages/CardsButaoPage.vue'),

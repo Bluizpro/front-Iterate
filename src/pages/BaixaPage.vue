@@ -142,6 +142,7 @@ const darBaixa = async () => {
     );
     if (condomino) {
       const index = condomino.encomendas.indexOf(encomenda);
+      encomenda.dataBaixa = new Date(); // Adicionando a data e hora da baixa
       encomendasBaixadas.value.push(encomenda);
       condomino.encomendas.splice(index, 1);
     }

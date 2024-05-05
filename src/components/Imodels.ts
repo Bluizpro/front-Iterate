@@ -4,6 +4,7 @@ export interface listData {
 }
 interface Selecionavel {
   selecionado?: boolean;
+  dataBaixa?: Date; // Adicione esta linha
 }
 
 export interface EncomendaSedex extends Selecionavel {
