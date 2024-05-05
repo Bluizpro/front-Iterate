@@ -61,7 +61,7 @@ const gerarPDF = (tipo) => {
       pdf.text('Nenhuma chave devolvida', 10, 10);
     } else {
       chavesDevolvidas.forEach((chave, index) => {
-        let basePosition = 10 + (index % 4) * 70;
+        let basePosition = 10 + (index % 4) * 90; // aumentado de 70 para 90
         if (index % 4 === 0 && index !== 0) {
           pdf.addPage();
         }
@@ -76,21 +76,21 @@ const gerarPDF = (tipo) => {
           `Data Devolução: ${chave.dataDevolucao}`,
           10,
           basePosition + 50
-        ); // ajustado
+        );
         pdf.text(
           `Hora Devolução: ${chave.horaDevolucao}`,
           10,
           basePosition + 60
-        ); // ajustado
+        );
         pdf.text(
           `Usuário Devolução: ${chave.usuarioDevolucao}`,
           10,
           basePosition + 70
-        ); // ajustado
-        pdf.text(`Assinatura: ${chave.assinatura}`, 10, basePosition + 80); // ajustado
+        );
+        pdf.text(`Assinatura: ${chave.assinatura}`, 10, basePosition + 80);
 
         if ((index + 1) % 4 !== 0 && index < chavesDevolvidas.length - 1) {
-          pdf.line(10, basePosition + 85, 200, basePosition + 85); // ajustado
+          pdf.line(10, basePosition + 85, 200, basePosition + 85);
         }
       });
     }
