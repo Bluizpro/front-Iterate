@@ -104,7 +104,6 @@
           clearable
           clear-icon="close"
           v-model="form.especialidade"
-          color="indigo-13"
           label="Especialidade"
           :rules="[(val:string) => (val && val.length > 0) || 'Digite a especialidade']"
         >
@@ -190,9 +189,6 @@ const form = ref({
   proprietario: '',
 });
 
-const isPwd = ref(true);
-const mostrar = () => (isPwd.value = !isPwd.value);
-
 const voltar = () => {
   store.resetFormularioAtual();
 };
@@ -247,6 +243,7 @@ const cadastrar = async () => {
   }
 };
 </script>
+
 <style scoped lang="scss">
 .q-select {
   width: 200px;

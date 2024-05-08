@@ -10,7 +10,7 @@ import { ref } from 'vue';
 import { listData } from '../components/Imodels';
 
 const tipoDeEntrega = ref<listData>({
-  imagem: ['/imagem/interno.png', '/imagem/externo.png', '/imagem/sedex.png'],
+  imagem: ['/imagem/interno1.png', '/imagem/externo.png', '/imagem/sedex1.png'],
 
   tipo: ['interno', 'externo', 'sedex'],
 });

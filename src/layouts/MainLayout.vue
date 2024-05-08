@@ -15,7 +15,7 @@
           <q-avatar>
             <img src="../assets/logo6.jpeg" />
           </q-avatar>
-          Iterate Tecnologia
+          Iterate
         </q-toolbar-title>
         <!-- Painel -->
         <PainelInterSedex />

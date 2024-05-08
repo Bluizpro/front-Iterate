@@ -17,7 +17,7 @@ import FormCondomino from 'src/components/Formulario/FormCondomino.vue';
 const store = useStore();
 
 const pessoas = ref<listData>({
-  imagem: ['/imagem/visitante.png', '/imagem/condomino.png'],
+  imagem: ['/imagem/visitantes.png', '/imagem/condominio.png'],
 
   tipo: ['visitante', 'condômino'],
 });

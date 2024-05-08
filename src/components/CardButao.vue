@@ -6,7 +6,9 @@
       v-for="(imagem, idx) in listaDeDados.imagem"
       :key="idx"
     >
-      <q-img :src="imagem" />
+      <div class="image-container">
+        <q-img :src="imagem" class="fixed-size-image centered-image" />
+      </div>
 
       <q-separator />
 
@@ -56,3 +58,15 @@ const mostrarListaDeEncomendas = (encomenda: string): void => {
   }
 };
 </script>
+<style scoped>
+.fixed-size-image {
+  width: 300px;
+  height: 200px;
+}
+
+.centered-image {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
