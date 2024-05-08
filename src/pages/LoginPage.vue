@@ -16,15 +16,7 @@
             style="border-radius: 4rem"
           />
         </div>
-        <div
-          style="
-            text-align: center;
-            font-family: 'Arial', sans-serif;
-            font-size: 16px;
-          "
-        >
-          Iterate
-        </div>
+        <span class="centered-text"> ITERATE TECNOLOGIA </span>
         <q-input
           required
           filled
@@ -161,5 +153,13 @@ onMounted(() => {
 
 .dark-mode {
   background-color: #2e2929;
+}
+.centered-text {
+  display: block;
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  color: #5c6bc0;
 }
 </style>

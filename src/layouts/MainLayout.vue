@@ -10,12 +10,11 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
-
         <q-toolbar-title>
           <q-avatar>
             <img src="../assets/logo6.jpeg" />
           </q-avatar>
-          Iterate
+          <span class="title-text">ITERATE TECNOLOGIA AVANÇADA</span>
         </q-toolbar-title>
         <!-- Painel -->
         <PainelInterSedex />
@@ -147,3 +146,11 @@ const handleLinkClick = async (link: { link: string }) => {
   }
 };
 </script>
+<style scoped>
+.title-text {
+  font-size: 14px;
+  font-weight: bold;
+  color: #c0c0c4;
+  margin-left: 5px;
+}
+</style>
