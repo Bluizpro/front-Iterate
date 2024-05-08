@@ -1,19 +1,19 @@
 <template>
   <div class="q-mr-xl">
     <q-chip dense color="indigo-14" text-color="white">
-      Interno:
+      <span class="centered-text">Interno:</span>
       <q-badge color="indigo-14" text-color="white" class="text-subtitle2">{{
         quantidadeEncomendasInterno
       }}</q-badge>
     </q-chip>
     <q-chip dense color="indigo-14" text-color="white">
-      Externo:
+      <span class="centered-text">Externo:</span>
       <q-badge color="indigo-14" text-color="white" class="text-subtitle2">{{
         quantidadeEncomendasExterno
       }}</q-badge>
     </q-chip>
     <q-chip dense color="indigo-14" text-color="white">
-      Sedex:
+      <span class="centered-text">Sedex:</span>
       <q-badge color="indigo-14" text-color="white" class="text-subtitle2">{{
         quantidadeEncomendasSedex
       }}</q-badge>
@@ -38,3 +38,13 @@ const quantidadeEncomendasExterno = computed(
   () => store.getQuantidadeEncomendasExterno
 );
 </script>
+<style scoped>
+.centered-text {
+  display: block;
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  color: #fafbfd;
+}
+</style>
