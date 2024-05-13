@@ -44,7 +44,11 @@ export const usuarioStore = defineStore('usuario', {
         senha: '123456',
       },
       {
-        usuario: 'khalil',
+        usuario: 'marcos',
+        senha: '123456',
+      },
+      {
+        usuario: 'miriam',
         senha: '123456',
       },
     ] as Usuario[],
