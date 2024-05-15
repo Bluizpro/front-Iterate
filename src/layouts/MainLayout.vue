@@ -57,6 +57,11 @@ const router = useRouter();
 
 const linksList = ref([
   {
+    title: 'Anotacões',
+    icon: '📝',
+    link: 'anotacao',
+  },
+  {
     title: 'Lista de Andares',
     icon: 'format_list_bulleted',
     link: 'listaDeAndares',
@@ -86,11 +91,7 @@ const linksList = ref([
     icon: '🌊',
     link: 'agua',
   },
-  {
-    title: 'Anotacões',
-    icon: '📝',
-    link: 'anotacao',
-  },
+
   {
     title: 'Relatorio',
     icon: '📄',
