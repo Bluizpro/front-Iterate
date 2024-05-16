@@ -82,7 +82,7 @@ const linksList = ref([
     link: 'qtc',
   },
   {
-    title: 'Ocorrencia',
+    title: 'Ocorrência',
     icon: '⚠️',
     link: 'ocorrencia',
   },
@@ -93,17 +93,17 @@ const linksList = ref([
   },
 
   {
-    title: 'Relatorio',
+    title: 'Relatório',
     icon: '📄',
     link: 'relatorio',
   },
   {
-    title: 'Craviculario',
+    title: 'Craviculário',
     icon: '🔑',
     link: 'craviculario',
   },
   {
-    title: 'Saida',
+    title: 'Saída',
     icon: '🚪',
     link: 'logout',
   },
