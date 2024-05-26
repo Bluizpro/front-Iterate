@@ -14,14 +14,16 @@
         </div>
       </div>
       <q-table
+        v-if="filteredEncomendas.length > 0"
         flat
         bordered
         title="Lista de Correspondências"
         :rows="filteredEncomendas"
-        :columns="computedColumns"
+        :column="computedColumns"
         row-key="id"
         binary-state-sort
       />
+      <div v-else>{{ noEncomendasMessage }}</div>
     </div>
   </q-page>
 </template>
@@ -31,14 +33,15 @@ import { computed, ref } from 'vue';
 import {
   useCondominosStore,
   EncomendaConsulta,
-} from '../stores/condominos-store';
-import { Delivery } from '../components/Imodels';
+} from '../stores/condominosStore';
+import { useFuncionariosStore } from '../stores/funcionarioStore';
 
 const useCondominos = useCondominosStore();
 const search = ref('');
+const useFuncionario = useFuncionariosStore();
 
 function getEncomendasInternasESedex(): EncomendaConsulta[] {
-  return useCondominos.condominos.reduce(
+  let encomendasCondominos = useCondominos.condominos.reduce(
     (acc: EncomendaConsulta[], condomino) => {
       acc.push(
         ...condomino.encomendas
@@ -57,9 +60,34 @@ function getEncomendasInternasESedex(): EncomendaConsulta[] {
     },
     []
   );
+
+  let encomendasFuncionarios = useFuncionario.funcionarios.reduce(
+    (acc: EncomendaConsulta[], funcionario) => {
+      acc.push(
+        ...funcionario.encomendas
+          .filter(
+            (encomenda) =>
+              encomenda.tipo === 'interno' || encomenda.tipo === 'sedex'
+          )
+          .map((encomenda) => ({
+            conjunto: encomenda.conjunto,
+            destinatario: encomenda.destinatario,
+            conteudo: encomenda.conteudo,
+            tipo: encomenda.tipo,
+          }))
+      );
+      return acc;
+    },
+    []
+  );
+
+  return [...encomendasCondominos, ...encomendasFuncionarios];
 }
 
 const encomendasConsulta = computed(getEncomendasInternasESedex);
+const noEncomendasMessage = computed(() => {
+  return filteredEncomendas.value.length === 0 ? 'Não há encomendas.' : '';
+});
 
 const filteredEncomendas = computed(() => {
   const searchValue = search.value.toLowerCase().trim();
@@ -112,7 +140,8 @@ const computedColumns = computed(() => {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-top: 3rem;
+  margin-top: 2rem;
+  margin-bottom: 10px;
 }
 
 .search-label {
@@ -124,6 +153,7 @@ const computedColumns = computed(() => {
   position: relative;
   width: 8rem;
   color: #000;
+  margin-top: 2rem;
 }
 
 #search {
@@ -141,3 +171,4 @@ const computedColumns = computed(() => {
   font-size: 23px;
 }
 </style>
+../stores/condominosStore src/stores/funcionarioStore

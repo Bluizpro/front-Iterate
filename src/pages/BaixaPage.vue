@@ -20,6 +20,7 @@
           <p>Data: {{ encomenda.data }}</p>
           <p>Hora: {{ encomenda.hora }}</p>
           <p>Destinatario: {{ encomenda.destinatario }}</p>
+          <p>conjunto: {{ encomenda.conjunto }}</p>
           <p>Conteudo: {{ encomenda.conteudo }}</p>
           <p>Encomenda: {{ encomenda.tipo }}</p>
         </q-card-section>
@@ -60,17 +61,17 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onBeforeUnmount } from 'vue';
-import { useCondominosStore } from '../stores/condominos-store';
+import { useCondominosStore } from '../stores/condominosStore';
 import { Delivery } from '../components/Imodels';
 import { useQuasar } from 'quasar';
 import { useStore } from '../stores/example-store';
-
+import { useFuncionariosStore } from '../stores/funcionarioStore';
 import GeraAssinatura from 'src/components/GeraAssinatura.vue';
-
+import { useEncomendasStore } from 'src/stores/encomendaStore';
 const useCondominos = useCondominosStore();
 const $q = useQuasar();
 const store = useStore();
-
+const useFuncionarios = useFuncionariosStore();
 const conjuntoSelecionado = ref<string>(''); // Conjunto selecionado inicialmente
 const encomendasFiltradas = ref<Delivery[]>([]);
 const exibirModalAssinatura = ref(false);
@@ -83,90 +84,91 @@ onBeforeUnmount(() => {
     $q.loading.hide();
   }
 });
-
 const showLoading = () => {
   $q.loading.show();
 };
 const hideLoading = () => {
   $q.loading.hide();
 };
-
 const NumeroDosConjuntos = computed(() => {
-  const conjuntos = useCondominos.condominos.reduce((conjuntos, condomino) => {
-    condomino.encomendas.forEach((encomenda) => {
+  const conjuntos = [
+    ...useCondominos.condominos,
+    ...useFuncionarios.funcionarios,
+  ].reduce((conjuntos, pessoa) => {
+    pessoa.encomendas.forEach((encomenda) => {
       conjuntos.add(encomenda.conjunto);
     });
     return conjuntos;
   }, new Set<string>());
   return Array.from(conjuntos);
 });
-
 watch(conjuntoSelecionado, () => {
   encomendasFiltradas.value = [];
   filtrarEncomendas();
 });
-
 const filtrarEncomendas = async () => {
   showLoading();
   await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  const encomendasFiltradasTemp = useCondominos.condominos
-    .flatMap((condomino) => condomino.encomendas)
-    .filter(
-      (encomenda) =>
-        encomenda.conjunto === conjuntoSelecionado.value &&
-        encomenda.tipo === store.formularioAtual
-    );
-  // Redefinir a propriedade 'selecionado' para false para cada encomenda
+  const encomendasFiltradasTemp = [
+    ...useCondominos.condominos.flatMap((condomino) => condomino.encomendas),
+    ...useFuncionarios.funcionarios.flatMap(
+      (funcionario) => funcionario.encomendas
+    ), // Adicionar as encomendas dos funcionários
+  ].filter(
+    (encomenda) =>
+      encomenda.conjunto === conjuntoSelecionado.value &&
+      encomenda.tipo === store.formularioAtual
+  ); // Redefinir a propriedade 'selecionado' para false para cada encomenda
   encomendasFiltradasTemp.forEach((encomenda) => {
     encomenda.selecionado = false;
   });
-
   encomendasFiltradas.value = [...encomendasFiltradasTemp];
-
   hideLoading();
 };
-
 const darBaixa = async () => {
   showLoading();
   await new Promise((resolve) => setTimeout(resolve, 1000));
-
   // Filtrar apenas as encomendas selecionadas
   const encomendasSelecionadas = encomendasFiltradas.value.filter(
     (encomenda) => encomenda.selecionado
   );
-
   encomendasSelecionadas.forEach((encomenda) => {
-    const condomino = useCondominos.condominos.find((condomino) =>
-      condomino.encomendas.includes(encomenda)
-    );
+    var index = 1;
+    const condomino = useCondominos.condominos.find((condomino) => {
+      index = condomino.encomendas.indexOf(encomenda);
+      return index !== -1;
+    });
+    const funcionario = useFuncionarios.funcionarios.find((funcionario) => {
+      index = funcionario.encomendas.indexOf(encomenda);
+      return index !== -1;
+    });
     if (condomino) {
-      const index = condomino.encomendas.indexOf(encomenda);
-      encomenda.dataBaixa = new Date(); // Adicionando a data e hora da baixa
+      encomenda.dataBaixa = new Date(); // Adicionar a data e hora da baixa
       encomendasBaixadas.value.push(encomenda);
       condomino.encomendas.splice(index, 1);
+      condomino.encomendas = [...condomino.encomendas]; // Criar uma nova cópia do array
+      useEncomendasStore().removerEncomenda(encomenda.id); // Atualizar a contagem de encomendas
+    } else if (funcionario) {
+      encomenda.dataBaixa = new Date(); // Adicionar a data e hora da baixa
+      encomendasBaixadas.value.push(encomenda);
+      funcionario.encomendas.splice(index, 1);
+      funcionario.encomendas = [...funcionario.encomendas]; // Criar uma nova cópia do array
+      useEncomendasStore().removerEncomenda(encomenda.id); // Atualizar a contagem de encomendas
     }
   });
-
   // Criar uma nova lista com as encomendas que não foram selecionadas
   const encomendasRestantes = encomendasFiltradas.value.filter(
     (encomenda) => !encomenda.selecionado
-  );
-
-  // Atualizar encomendasFiltradas com as encomendas restantes
+  ); // Atualizar encomendasFiltradas com as encomendas restantes
   encomendasFiltradas.value = encomendasRestantes;
   // Recuperar encomendas baixadas existentes do localStorage
   const encomendasBaixadasSalvas = JSON.parse(
     localStorage.getItem('encomendasBaixadas') || '[]'
-  );
-
-  // Adicionar novas encomendas baixadas às existentes
+  ); // Adicionar novas encomendas baixadas às existentes
   const todasEncomendasBaixadas = [
     ...encomendasBaixadasSalvas,
     ...encomendasBaixadas.value,
   ];
-
-  // Salvar no localStorage
   localStorage.setItem(
     'encomendasBaixadas',
     JSON.stringify(todasEncomendasBaixadas)
@@ -177,7 +179,6 @@ const darBaixa = async () => {
     type: 'positive',
     message: 'baixa realizada com sucesso',
   });
-
-  // Imprimir todas as encomendas baixadas no console
 };
 </script>
+../stores/condominosStore ../stores/funcionarioStore

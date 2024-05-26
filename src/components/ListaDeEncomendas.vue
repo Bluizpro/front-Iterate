@@ -22,13 +22,13 @@
               :props="props"
             >
               <template v-if="column.name === 'actions'">
-                <q-btn
+                <!--  <q-btn
                   @click="editarItem(props.row)"
                   color="positive"
                   dense
                   size="sm"
                   ><q-icon name="update"
-                /></q-btn>
+                /></q-btn> -->
                 <q-btn
                   @click="deletarItem(props.row)"
                   class="q-ml-sm"
@@ -52,16 +52,19 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useCondominosStore } from '../stores/condominos-store';
+import { useCondominosStore } from '../stores/condominosStore';
 import { Delivery } from '../components/Imodels';
 import { useStore } from '../stores/example-store';
 import { useQuasar } from 'quasar';
+import { useFuncionariosStore } from 'src/stores/funcionarioStore';
+import { useEncomendasStore } from 'src/stores/encomendaStore';
 
 const router = useRouter();
 const $q = useQuasar();
 const useCondominos = useCondominosStore();
 const store = useStore();
 const tipoAtual = computed(() => store.formularioAtual);
+const useFuncionario = useFuncionariosStore();
 
 const colunasPorTipo: Record<string, string[]> = {
   interno: [
@@ -86,7 +89,6 @@ const colunasPorTipo: Record<string, string[]> = {
 };
 
 const computedColumns = computed(() => {
-  // Aqui você pode adaptar a lógica para buscar as colunas com base no tipo atual, se necessário
   const tipo = tipoAtual.value;
   const colunas = colunasPorTipo[tipo];
   if (!colunas) {
@@ -114,12 +116,27 @@ const computedColumns = computed(() => {
 
 const encomendas = computed(() => {
   const tipo = tipoAtual.value;
-  return useCondominos.condominos.reduce((acc: Delivery[], condomino) => {
-    acc.push(
-      ...condomino.encomendas.filter((encomenda) => encomenda.tipo === tipo)
-    );
-    return acc;
-  }, []);
+  const encomendasCondominos = useCondominos.condominos.reduce(
+    (acc: Delivery[], condomino) => {
+      acc.push(
+        ...condomino.encomendas.filter((encomenda) => encomenda.tipo === tipo)
+      );
+      return acc;
+    },
+    []
+  );
+
+  const encomendasFuncionarios = useFuncionario.funcionarios.reduce(
+    (acc: Delivery[], funcionario) => {
+      acc.push(
+        ...funcionario.encomendas.filter((encomenda) => encomenda.tipo === tipo)
+      );
+      return acc;
+    },
+    []
+  );
+
+  return [...encomendasCondominos, ...encomendasFuncionarios];
 });
 
 const editarItem = (item: any) => {
@@ -133,8 +150,8 @@ const deletarItem = (item: any) => {
     cancel: true,
     persistent: true,
   }).onOk(() => {
-    // useCondominos.deletarEncomenda(item.id);
     router.push(`/deletar-encomenda/${item.id}`);
   });
 };
 </script>
+../stores/condominosStore src/stores/funcionarioStore

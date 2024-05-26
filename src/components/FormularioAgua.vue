@@ -258,7 +258,7 @@
     </div>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import axios from 'axios'; // Importe o axios

@@ -55,15 +55,19 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { useCondominosStore } from '../stores/condominos-store';
+import { useEncomendasStore } from '../stores/encomendaStore';
 import { useQuasar } from 'quasar';
 import { ref, onBeforeUnmount } from 'vue';
+import { useCondominosStore } from 'src/stores/condominosStore';
+import { useFuncionariosStore } from 'src/stores/funcionarioStore';
 
 const $router = useRouter();
 const $q = useQuasar();
+const useEncomendas = useEncomendasStore();
+const useCondominos = useCondominosStore();
+const useFuncionarios = useFuncionariosStore();
 
 const encomendaId = Number($router.currentRoute.value.params.id);
-const useCondominos = useCondominosStore();
 
 let timer: NodeJS.Timeout | null = null;
 
@@ -82,17 +86,38 @@ const hideLoading = () => {
 };
 
 //capturando a encomenda
-const encomenda = useCondominos.condominos
-  .flatMap((condomino) => condomino.encomendas)
-  .find((encomenda) => encomenda.id === encomendaId);
+const encomenda = useEncomendas.encomendas.find(
+  (encomenda) => encomenda.id === encomendaId
+);
 
 let justificativa = ref('');
 
 const deletarEncomenda = async () => {
   showLoading();
   await new Promise((resolve) => setTimeout(resolve, 1000));
+  // Encontrar a encomenda no array de encomendas
+  const encomenda = useEncomendas.encomendas.find(
+    (encomenda) => encomenda.id === encomendaId
+  );
   if (encomenda) {
-    useCondominos.deletarEncomenda(encomenda.id);
+    var index = 1;
+    const condomino = useCondominos.condominos.find((condomino) => {
+      index = condomino.encomendas.indexOf(encomenda);
+      return index !== -1;
+    });
+    const funcionario = useFuncionarios.funcionarios.find((funcionario) => {
+      index = funcionario.encomendas.indexOf(encomenda);
+      return index !== -1;
+    });
+    if (condomino) {
+      condomino.encomendas.splice(index, 1);
+      condomino.encomendas = [...condomino.encomendas]; // Criar uma nova cópia do array
+      useEncomendas.deletarEncomenda(encomenda.id); // Atualizar a contagem de encomendas
+    } else if (funcionario) {
+      funcionario.encomendas.splice(index, 1);
+      funcionario.encomendas = [...funcionario.encomendas]; // Criar uma nova cópia do array
+      useEncomendas.deletarEncomenda(encomenda.id); // Atualizar a contagem de encomendas
+    }
     justificativa.value = '';
     hideLoading();
     $q.notify({

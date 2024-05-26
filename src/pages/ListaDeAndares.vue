@@ -90,7 +90,7 @@
   </q-page>
 </template>
 <script setup>
-import { useCondominosStore } from '../stores/condominos-store';
+import { useCondominosStore } from '../stores/condominosStore';
 
 const store = useCondominosStore();
 
@@ -144,3 +144,4 @@ const columns = [
   },
 ];
 </script>
+../stores/condominosStore

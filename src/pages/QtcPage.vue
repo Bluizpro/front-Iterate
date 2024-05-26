@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import QtcComponent from '../components/QtcComponent.vue'; // Importe o componente AnotacaoComponent
 
 const qtcInfors = ref(

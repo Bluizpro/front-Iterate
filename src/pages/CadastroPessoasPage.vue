@@ -2,6 +2,7 @@
   <q-page padding>
     <FormVisitante v-if="store.formularioAtual == 'visitante'" />
     <FormCondomino v-if="store.formularioAtual == 'condômino'" />
+    <FormFuncionario v-if="store.formularioAtual == 'funcionario'" />
     <CardButao :lista-de-dados="pessoas" v-if="store.formularioAtual == ''" />
   </q-page>
 </template>
@@ -13,12 +14,17 @@ import { useStore } from '../stores/example-store';
 import { listData } from '../components/Imodels';
 import FormVisitante from 'src/components/Formulario/FormVisitante.vue';
 import FormCondomino from 'src/components/Formulario/FormCondomino.vue';
+import FormFuncionario from 'src/components/Formulario/FormFuncionario.vue';
 
 const store = useStore();
 
 const pessoas = ref<listData>({
-  imagem: ['/imagem/visitantes.png', '/imagem/condominio.png'],
+  imagem: [
+    '/imagem/visitantes.png',
+    '/imagem/condominio.png',
+    '/imagem/funcionario.png',
+  ],
 
-  tipo: ['visitante', 'condômino'],
+  tipo: ['visitante', 'condômino', 'funcionario'],
 });
 </script>

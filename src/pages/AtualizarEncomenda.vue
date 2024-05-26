@@ -67,9 +67,9 @@
   </q-page>
 </template>
 
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { useCondominosStore } from '../stores/condominos-store';
+import { useEncomendasStore } from '../stores/encomendaStore'; // Atualizado para useEncomendasStore
 import { useQuasar } from 'quasar';
 import { onBeforeUnmount } from 'vue';
 
@@ -100,11 +100,10 @@ const $router = useRouter();
 const $q = useQuasar();
 
 const encomendaId = Number($router.currentRoute.value.params.id);
-const useCondominos = useCondominosStore();
+const useEncomendas = useEncomendasStore(); // Atualizado para useEncomendas
 
 //capturando encomenda pelo id
-const encomenda = useCondominos.condominos
-  .flatMap((condomino) => condomino.encomendas)
+const encomenda = useEncomendas.encomendas // Atualizado para useEncomendas.encomendas
   .find((encomenda) => encomenda.id === encomendaId);
 
 let encomendaEditada: Delivery = { ...encomenda } as
@@ -149,7 +148,7 @@ const salvarEncomenda = async () => {
     encomendaEditada = newEncomendaEditada as Delivery;
 
     // Atualizar a encomenda no store
-    useCondominos.atualizarEncomenda(encomenda.id, encomendaEditada);
+    useEncomendas.atualizarEncomenda(encomenda.id, encomendaEditada); // Atualizado para useEncomendas.atualizarEncomenda
     hideLoading();
     // Exibir notificação
     $q.notify({
@@ -165,5 +164,108 @@ const salvarEncomenda = async () => {
       message: 'Por favor, preencha todos os campos obrigatórios',
     });
   }
+};
+</script>
+ -->
+<script setup lang="ts">
+import { useRouter } from 'vue-router';
+import { useEncomendasStore } from '../stores/encomendaStore';
+import { useQuasar } from 'quasar';
+import { onBeforeUnmount } from 'vue';
+
+import {
+  Delivery,
+  EncomendaSedex,
+  EncomendaInterno,
+  EncomendaExterno,
+} from '../components/Imodels';
+import { ref } from 'vue';
+
+let timer: NodeJS.Timeout | null = null;
+onBeforeUnmount(() => {
+  if (timer !== null) {
+    clearTimeout(timer);
+    $q.loading.hide();
+  }
+});
+
+const showLoading = () => {
+  $q.loading.show();
+};
+const hideLoading = () => {
+  $q.loading.hide();
+};
+
+const $router = useRouter();
+const $q = useQuasar();
+
+const encomendaId = Number($router.currentRoute.value.params.id);
+const useEncomendas = useEncomendasStore();
+
+// Capturando a encomenda pelo id
+const encomenda = useEncomendas.encomendas.find(
+  (encomenda) => encomenda.id === encomendaId
+);
+
+let encomendaEditada: Delivery = { ...encomenda } as
+  | EncomendaSedex
+  | EncomendaInterno
+  | EncomendaExterno;
+
+const form = ref<Partial<Delivery>>({
+  destinatario: encomendaEditada.destinatario,
+  remetente: encomendaEditada.remetente,
+  notaFiscal: encomendaEditada.notaFiscal,
+  empresa: encomendaEditada.empresa,
+  local: encomendaEditada.local,
+  recebedor: encomendaEditada.recebedor,
+  conteudo: encomendaEditada.conteudo,
+});
+
+const salvarEncomenda = async () => {
+  showLoading();
+
+  // Se a encomenda for indefinida, retorna
+  if (!encomenda) {
+    hideLoading();
+    return;
+  }
+
+  const newEncomendaEditada: Partial<Delivery> = {
+    ...encomendaEditada,
+    ...form.value,
+  };
+
+  // Verificar se todas as propriedades essenciais estão presentes
+  if (
+    'id' in newEncomendaEditada &&
+    'data' in newEncomendaEditada &&
+    'hora' in newEncomendaEditada &&
+    'destinatario' in newEncomendaEditada &&
+    'conteudo' in newEncomendaEditada &&
+    'tipo' in newEncomendaEditada &&
+    'notaFiscal' in newEncomendaEditada
+  ) {
+    encomendaEditada = newEncomendaEditada as Delivery;
+
+    // Atualizar a encomenda no store
+    await useEncomendasStore().atualizarEncomenda(
+      encomenda.id,
+      encomendaEditada
+    );
+
+    $q.notify({
+      type: 'positive',
+      message: 'Encomenda atualizada com sucesso',
+    });
+    $router.push('/usuario/Lista-de-Encomendas');
+  } else {
+    $q.notify({
+      type: 'negative',
+      message: 'Por favor, preencha todos os campos obrigatórios',
+    });
+  }
+
+  hideLoading();
 };
 </script>

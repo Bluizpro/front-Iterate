@@ -31,7 +31,7 @@
   </q-dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { defineProps, defineEmits, ref } from 'vue';
 import { VueSignaturePad } from 'vue-signature-pad';
 import { useAssinaturaStore } from '../stores/assinatura';

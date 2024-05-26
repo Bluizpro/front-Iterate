@@ -97,15 +97,17 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from 'vue';
 import { useStore } from '../../stores/example-store';
-import { useCondominosStore } from '../../stores/condominos-store';
+import { useCondominosStore } from '../../stores/condominosStore';
 import { Delivery } from '../Imodels';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { onMounted } from 'vue';
+import { useFuncionariosStore } from '../../stores/funcionarioStore';
 import axios from 'axios';
 const store = useStore();
 const $q = useQuasar();
 const condominoStore = useCondominosStore();
+const funcionarioStore = useFuncionariosStore();
 const $router = useRouter();
 
 onMounted(() => {
@@ -140,6 +142,9 @@ const gerarNovoIdEncomenda = (): number => {
   } while (
     condominoStore.condominos.some((condomino) =>
       condomino.encomendas.some((encomenda) => encomenda.id === novoId)
+    ) ||
+    funcionarioStore.funcionarios.some((funcionario) =>
+      funcionario.encomendas.some((encomenda) => encomenda.id === novoId)
     )
   );
 
@@ -148,7 +153,7 @@ const gerarNovoIdEncomenda = (): number => {
 
 const gerarNovaEncomenda = (): Delivery => {
   const novoId = gerarNovoIdEncomenda();
-  return {
+  const novaEncomenda: Delivery = {
     id: novoId,
     data: encomenda.value.data,
     hora: encomenda.value.hora,
@@ -158,6 +163,7 @@ const gerarNovaEncomenda = (): Delivery => {
     tipo: 'sedex',
     notaFiscal: encomenda.value.notaFiscal,
   };
+  return novaEncomenda;
 };
 
 let timer: NodeJS.Timeout | null = null;
@@ -181,29 +187,58 @@ const cadastrar = async () => {
 
   const novaEncomenda = gerarNovaEncomenda();
 
-  const adicionadaSucesso = await condominoStore.adicionarEncomendaACondomino(
-    encomenda.value.conjunto,
-    novaEncomenda
-  );
-  hideLoading();
-  if (adicionadaSucesso) {
-    // Obter o condomínio correspondente ao conjunto
-    const condomino = condominoStore.condominos.find(
-      (condomino) => condomino.conjunto === encomenda.value.conjunto
+  const conjunto = encomenda.value.conjunto;
+  const adicionadaSucessoCondominio =
+    await condominoStore.adicionarEncomendaACondomino(conjunto, novaEncomenda);
+  const adicionadaSucessoFuncionario =
+    await funcionarioStore.adicionarEncomendaAFuncionario(
+      conjunto,
+      novaEncomenda
     );
 
-    if (condomino && condomino.telefone) {
-      // Enviar a mensagem de WhatsApp
-      axios
-        .post('http://localhost:3000/send-whatsapp/encomenda', {
-          message: `Olá ${encomenda.value.destinatario}, sua encomenda foi entregue à portaria.`,
-          telefone: condomino.telefone,
-        })
-        .catch((error) => {
-          console.error('Erro ao enviar a mensagem de WhatsApp:', error);
-        });
-    } else {
-      console.error('Condomínio não encontrado ou sem número de telefone.');
+  hideLoading();
+  function enviarMensagem(telefone: string, mensagem: string) {
+    axios
+      .post('http://localhost:3000/send-whatsapp/encomenda', {
+        message: mensagem,
+        telefone: telefone,
+      })
+      .catch((error) => {
+        console.error('Erro ao enviar a mensagem de WhatsApp:', error);
+      });
+  }
+
+  if (adicionadaSucessoCondominio || adicionadaSucessoFuncionario) {
+    let destinatarioMensagem = encomenda.value.destinatario;
+    let mensagem = '';
+    let telefone = '';
+
+    if (adicionadaSucessoCondominio) {
+      const condomino = condominoStore.condominos.find(
+        (condomino) => condomino.conjunto === conjunto
+      );
+      if (condomino && condomino.telefone) {
+        mensagem = `Olá ${destinatarioMensagem}, sua encomenda foi entregue à portaria.`;
+        telefone = condomino.telefone;
+      } else {
+        console.error('Condomínio não encontrado ou sem número de telefone.');
+      }
+    }
+
+    if (adicionadaSucessoFuncionario) {
+      const funcionario = funcionarioStore.funcionarios.find(
+        (funcionario) => funcionario.conjunto === conjunto
+      );
+      if (funcionario && funcionario.telefone) {
+        mensagem = `Olá ${destinatarioMensagem}, sua encomenda foi entregue ao funcionário.`;
+        telefone = funcionario.telefone;
+      } else {
+        console.error('Funcionário não encontrado ou sem número de telefone.');
+      }
+    }
+
+    if (mensagem && telefone) {
+      enviarMensagem(telefone, mensagem);
     }
 
     $q.notify({
@@ -230,3 +265,4 @@ const voltar = () => {
   $router.push('/usuario/Lista-de-Encomendas');
 };
 </script>
+../../stores/condominosStore src/stores/funcionarioStore

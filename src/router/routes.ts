@@ -34,14 +34,19 @@ const routes = [
         component: () => import('pages/CadastroLeituraDeAgua.vue'),
       },
       {
-        path: 'Lista-de-Andares',
+        path: 'Lista-de-visitante',
         name: 'listaDeVisitante',
         component: () => import('pages/ListaVisitantePage.vue'),
       },
       {
-        path: 'Lista-de-visitante',
+        path: 'Lista-de-Andares',
         name: 'listaDeAndares',
         component: () => import('pages/ListaDeAndares.vue'),
+      },
+      {
+        path: 'ListaFuncionario',
+        name: 'listaFuncionario',
+        component: () => import('pages/ListaFuncionariosPage.vue'),
       },
       {
         path: 'Lista-de-Encomendas',

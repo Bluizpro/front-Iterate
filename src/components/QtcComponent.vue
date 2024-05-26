@@ -95,7 +95,7 @@
   </q-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch, onMounted, onUpdated } from 'vue';
 import { useQuasar } from 'quasar';
 

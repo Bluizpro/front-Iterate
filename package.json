@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "controle de fluxo de encomendas",
   "productName": "Iterate",
-  "author": "renan almeida, bruno perez",
+  "author": "bruno perez",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.ts,.vue ./",
@@ -21,6 +21,7 @@
     "jspdf": "^2.5.1",
     "nodemailer": "^6.9.13",
     "pinia": "^2.0.11",
+    "pinia-plugin-persist": "^1.0.0",
     "quasar": "^2.6.0",
     "twilio": "^4.21.0",
     "uuid": "^9.0.1",

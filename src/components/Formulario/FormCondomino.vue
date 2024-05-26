@@ -155,9 +155,8 @@
 import { computed, onBeforeUnmount, ref } from 'vue';
 import { useStore } from '../../stores/example-store';
 import { useQuasar } from 'quasar';
-import { useCondominosStore } from '../../stores/condominos-store';
+import { Condomino, useCondominosStore } from '../../stores/condominosStore';
 import { useRouter } from 'vue-router';
-import { Condomino } from '../../stores/condominos-store';
 
 const store = useStore();
 const $q = useQuasar();
@@ -254,3 +253,4 @@ const cadastrar = async () => {
   }
 }
 </style>
+../../stores/condominosStore../../stores/condominosStore

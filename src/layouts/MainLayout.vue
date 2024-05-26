@@ -77,6 +77,11 @@ const linksList = ref([
     link: 'listaCorrespondencia',
   },
   {
+    title: 'Lista de Funcionarios',
+    icon: 'format_list_bulleted',
+    link: 'listaFuncionario',
+  },
+  {
     title: 'QTC',
     icon: '💬',
     link: 'qtc',
