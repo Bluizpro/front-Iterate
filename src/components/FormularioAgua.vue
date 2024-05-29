@@ -7,7 +7,7 @@
     <q-card class="my-card">
       <q-card-section>
         <div class="container">
-          <h2 style="text-align: center">Leitura Inicial</h2>
+          <h6 style="text-align: center">Leitura Inicial</h6>
           <div class="row">
             <div class="col-12">
               <q-input
@@ -75,18 +75,92 @@
         </div>
       </q-card-section>
     </q-card>
-
     <!-- Segundo card -->
     <q-card class="my-card">
       <q-card-section>
         <div class="container">
-          <h2 style="text-align: center">Leitura Parcial</h2>
+          <h6 style="text-align: center">Leitura Parcial</h6>
           <div class="row">
             <div class="col-12">
               <q-input
                 required
                 disable
-                name="dataMeioPeriodo"
+                name="dataParcial"
+                outlined
+                dense
+                clearable
+                clear-icon="close"
+                v-model="leituraAgua.data"
+                color="indigo-13"
+                label="Data"
+                class="my-custom-size"
+                :rules="[(val) => (val && val.length > 0) || 'Digite a data']"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="event" />
+                </template>
+              </q-input>
+            </div>
+            <div class="col-10">
+              <q-input
+                required
+                disable
+                name="horaMeio"
+                outlined
+                dense
+                clearable
+                clear-icon="close"
+                v-model="leituraAgua.Parcial"
+                color="indigo-13"
+                label="Hora Parcial"
+                class="my-custom-size"
+                :rules="[
+                  (val) =>
+                    (val && val.length > 0) || 'Digite a hora Meio periodo',
+                ]"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="access_time" />
+                </template>
+              </q-input>
+            </div>
+            <div class="col-10">
+              <q-input
+                required
+                name="leituraParcial"
+                outlined
+                dense
+                clearable
+                clear-icon="close"
+                v-model="leituraAgua.leituraParcial"
+                color="indigo-13"
+                label="Leitura Parcial"
+                class="my-custom-size"
+                :rules="[
+                  (val) =>
+                    (val && val.length > 0) || 'Digite a leitura Meio Periodo',
+                ]"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="book" />
+                </template>
+              </q-input>
+            </div>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+    <!-- terceiro card -->
+    <q-card class="my-card">
+      <q-card-section>
+        <div class="container">
+          <h6 style="text-align: center">Leitura Parcial 2</h6>
+          <div class="row">
+            <div class="col-12">
+              <q-input
+                required
+                disable
+                name="dataParcial"
                 outlined
                 dense
                 clearable
@@ -106,12 +180,12 @@
               <q-input
                 required
                 disable
-                name="horaMeio"
+                name="horaParcial"
                 outlined
                 dense
                 clearable
                 clear-icon="close"
-                v-model="leituraAgua.horaMeio"
+                v-model="leituraAgua.horaParcial2"
                 color="indigo-13"
                 label="Hora Meio Período"
                 class="my-custom-size"
@@ -128,14 +202,14 @@
             <div class="col-12">
               <q-input
                 required
-                name="leituraMeioPeriodo"
+                name="leituraMeio"
                 outlined
                 dense
                 clearable
                 clear-icon="close"
-                v-model="leituraAgua.leituraMeioPeriodo"
+                v-model="leituraAgua.leituraParcial2"
                 color="indigo-13"
-                label="Leitura Meio Período"
+                label="Leitura Parcial 2"
                 class="my-custom-size"
                 :rules="[
                   (val) =>
@@ -151,12 +225,11 @@
         </div>
       </q-card-section>
     </q-card>
-
-    <!-- Terceiro card -->
+    <!-- quarto card -->
     <q-card class="my-card">
       <q-card-section>
         <div class="container">
-          <h2 style="text-align: center">Leitura Final</h2>
+          <h6 style="text-align: center">Leitura Final</h6>
           <div class="row">
             <div class="col-12">
               <q-input
@@ -227,7 +300,6 @@
         </div>
       </q-card-section>
     </q-card>
-
     <div class="row q-gutter-md">
       <!-- Botão de Calcular -->
       <div class="q-mt-lg">
@@ -272,9 +344,12 @@ let leituraAgua = ref({
   hora: new Date().toLocaleTimeString(),
   leituraInicial: '',
   vistoInicial: '',
-  dataMeioPeriodo: new Date().toLocaleDateString(),
-  horaMeio: '23:00',
-  leituraMeioPeriodo: '',
+  dataParcial: new Date().toLocaleDateString(),
+  Parcial: '11:00',
+  leituraParcial: '',
+  dataMeio: new Date().toLocaleDateString(),
+  horaParcial2: '23:00',
+  leituraParcial2: '',
   dataFinal: tomorrow.toLocaleDateString(),
   horaFinal: '06:00',
   leituraFinal: '',
@@ -285,36 +360,33 @@ let leituraAgua = ref({
 let isFormValid = computed(() => {
   return (
     leituraAgua.value.leituraInicial &&
-    leituraAgua.value.leituraMeioPeriodo &&
+    leituraAgua.value.leituraParcial &&
     leituraAgua.value.leituraFinal
   );
 });
 
 async function calcular() {
   let leituraInicial = parseInt(leituraAgua.value.leituraInicial.slice(3));
-  let leituraMeioPeriodo = parseInt(
-    leituraAgua.value.leituraMeioPeriodo.slice(3)
-  );
+  let leituraParcial = parseInt(leituraAgua.value.leituraParcial.slice(3));
+  let leituraParcial2 = parseInt(leituraAgua.value.leituraParcial2.slice(3));
   let leituraFinal = parseInt(leituraAgua.value.leituraFinal.slice(3));
 
-  let consumoMeioPeriodo = leituraMeioPeriodo - leituraInicial;
+  let consumo = leituraParcial - leituraParcial2 - leituraInicial;
   let consumoFinal = leituraFinal - leituraInicial;
 
-  if (consumoFinal > 6000 && Number.isInteger(consumoMeioPeriodo)) {
+  consumoFinal = Number(consumoFinal.toFixed(2));
+
+  if (consumoFinal > 6000 && !isNaN(consumo)) {
     $q.notify({
       color: 'red-5',
       textColor: 'white',
       icon: 'warning',
-      message: `O consumo ultrapassou 6000m³. Consumo atual: ${consumoFinal.toFixed(
-        0
-      )} m³!`,
+      message: `O consumo ultrapassou 6000m³. Consumo atual: ${consumoFinal} m³!`,
     });
 
     try {
       await axios.post('http://localhost:3000/send-whatsapp', {
-        message: `O consumo ultrapassou 6000m³. Consumo atual: ${consumoFinal.toFixed(
-          0
-        )} m³!`,
+        message: `O consumo ultrapassou 6000m³. Consumo atual: ${consumoFinal} m³!`,
       });
       console.log('Mensagem enviada com sucesso!');
     } catch (error) {
@@ -322,17 +394,25 @@ async function calcular() {
     }
   }
 
-  leituraAgua.value.consumo = `${consumoFinal.toFixed(0)} m³!`;
+  leituraAgua.value.consumo = `${consumoFinal} m³!`;
 }
 </script>
+
 <style scoped lang="scss">
 .my-card {
-  width: calc(33.33% - 20px);
+  width: calc(19rem - 30px); // 25% da largura total, menos 20px de margem
+  margin-right: 50px;
 }
+
+.my-card:last-child {
+  margin-right: 0; // remove a margem do último cartão
+}
+
 .q-mb-md {
   margin-bottom: 20px;
 }
+
 .my-custom-size {
-  width: 200px; /* ou qualquer tamanho que você deseja */
+  width: 150px; // ou qualquer tamanho que você deseja
 }
 </style>
