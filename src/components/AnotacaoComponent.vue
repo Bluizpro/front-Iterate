@@ -96,43 +96,34 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUpdated } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import { useQuasar } from 'quasar';
+import dayjs from 'dayjs';
 
 const $q = useQuasar();
 const formsPerPage = 5;
 const currentPage = ref(1);
+const usuarioLogado = localStorage.getItem('usuarioLogado') ?? '';
 const forms = ref(
-  JSON.parse(localStorage.getItem('anotacoes')) || [
+  JSON.parse(localStorage.getItem('anotacoes') ?? '[]') || [
     {
-      data: new Date().toLocaleDateString(), // Retorna a data no formato "dd/mm/yyyy"
-      hora: new Date().toLocaleTimeString(), // Retorna a hora no formato "hh:mm:ss"
-      usuario: localStorage.getItem('usuarioLogado') || '',
+      data: dayjs().format('YYYY-MM-DD'),
+      hora: dayjs().format('HH:mm:ss'),
+      usuario: usuarioLogado,
       conjunto: '',
       paciente: '',
-      //  status: '',
       info: '',
-      salvo: false, // Adicione esta linha
+      salvo: false,
     },
   ]
 );
+
+let intervalId: ReturnType<typeof setInterval>;
 
 watch(
   forms,
   () => {
     localStorage.setItem('anotacoes', JSON.stringify(forms.value));
-  },
-  { deep: true }
-);
-
-watch(
-  forms,
-  (newForms, oldForms) => {
-    if (newForms.length > oldForms.length) {
-      const lastIndex = newForms.length - 1;
-      newForms[lastIndex].data = new Date().toLocaleDateString();
-      newForms[lastIndex].hora = new Date().toLocaleTimeString();
-    }
   },
   { deep: true }
 );
@@ -145,25 +136,30 @@ const paginatedForms = computed(() => {
   return forms.value.slice(start, end);
 });
 
-onMounted(updateDateTime);
-onUpdated(updateDateTime);
-
 function updateDateTime() {
-  const start = (currentPage.value - 1) * formsPerPage;
-  const end = Math.min(start + formsPerPage, forms.value.length);
-  for (let i = start; i < end; i++) {
+  const currentDateTime = dayjs();
+
+  for (let i = 0; i < forms.value.length; i++) {
     if (!forms.value[i].salvo) {
-      forms.value[i].data = new Date().toLocaleDateString();
-      forms.value[i].hora = new Date().toLocaleTimeString();
+      forms.value[i].data = currentDateTime.format('YYYY-MM-DD');
+      forms.value[i].hora = currentDateTime.format('HH:mm:ss');
     }
   }
 }
 
-const onSubmit = (index) => {
+onMounted(() => {
+  updateDateTime();
+  intervalId = setInterval(updateDateTime, 1000);
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId);
+});
+
+const onSubmit = (index: string | number) => {
   if (
     forms.value[index].usuario === '' ||
     forms.value[index].paciente === '' ||
-    // forms.value[index].status === '' ||
     forms.value[index].conjunto === '' ||
     forms.value[index].info === ''
   ) {
@@ -174,16 +170,15 @@ const onSubmit = (index) => {
       message: 'Por favor, preencha todos os campos',
     });
   } else {
-    forms.value[index].salvo = true; // Adicione esta linha
+    forms.value[index].salvo = true;
     forms.value.push({
       data: new Date().toLocaleDateString(),
       hora: new Date().toLocaleTimeString(),
       usuario: localStorage.getItem('usuarioLogado') || '',
       conjunto: '',
       paciente: '',
-      //status: '',
       info: '',
-      salvo: false, // Adicione esta linha
+      salvo: false,
     });
 
     $q.notify({
@@ -195,37 +190,35 @@ const onSubmit = (index) => {
   }
 };
 
-const onReset = (index) => {
+const onReset = (index: string | number) => {
   if (forms.value.length > 1) {
     forms.value.splice(index, 1);
   } else {
     forms.value[index].paciente = '';
     forms.value[index].conjunto = '';
-    // forms.value[index].status = '';
     forms.value[index].info = '';
-    forms.value[index].salvo = false; // Adicione esta linha
+    forms.value[index].salvo = false;
   }
 };
 
-//const statusOptions = ['J/S', 'N/S'];
 const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
 
-const colorClass = (info) => {
+const colorClass = (info: any) => {
   switch (info) {
     case 'AG/2T':
-      return 'yellow-background'; // Amarelo
+      return 'yellow-background';
     case 'AG':
-      return 'red-background'; // Vermelho
+      return 'red-background';
     case 'AG/CM':
-      return 'green-background'; // Verde
+      return 'green-background';
     case 'PS':
-      return 'background'; // Branco
+      return 'background';
     case 'AG/CF':
-      return 'orange-background'; // Laranja
+      return 'orange-background';
     case 'PS/+1T':
-      return 'blue-background'; // Azul-royal
+      return 'blue-background';
     default:
-      return ''; // Caso padrão (sem cor específica)
+      return '';
   }
 };
 </script>

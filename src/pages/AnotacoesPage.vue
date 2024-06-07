@@ -17,15 +17,15 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import AnotacaoComponent from '../components/AnotacaoComponent.vue'; // Importe o componente AnotacaoComponent
+import AnotacaoComponent from '../components/AnotacaoComponent.vue';
+import dayjs from 'dayjs';
 
 const forms = ref([
   {
-    data: new Date().toLocaleDateString(),
-    hora: new Date().toLocaleTimeString(),
+    data: dayjs().format('YYYY-MM-DD'),
+    hora: dayjs().format('HH:mm:ss'),
     usuario: localStorage.getItem('usuarioLogado') || '',
     paciente: '',
-    // status: '',
     info: '',
   },
 ]); // Inicialize com um formulário vazio
@@ -47,11 +47,10 @@ const onSubmit = (index) => {
   } else {
     // Quando salvar, adicione um novo formulário ao array
     forms.value.push({
-      data: new Date().toLocaleDateString(),
-      hora: new Date().toLocaleTimeString(),
+      data: dayjs().format('YYYY-MM-DD'),
+      hora: dayjs().format('HH:mm:ss'),
       usuario: localStorage.getItem('usuarioLogado') || '',
       paciente: '',
-      // status: '',
       info: '',
     });
 
@@ -66,7 +65,7 @@ const onSubmit = (index) => {
 
 const onReset = (index) => {
   forms.value[index].paciente = '';
-  // forms.value[index].status = '';
+
   forms.value[index].conjunto === '';
 
   forms.value[index].info = '';

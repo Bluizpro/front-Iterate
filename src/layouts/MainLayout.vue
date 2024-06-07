@@ -58,7 +58,7 @@ const router = useRouter();
 const linksList = ref([
   {
     title: 'Anotacões',
-    icon: '📝',
+    icon: 'note_add',
     link: 'anotacao',
   },
   {
@@ -77,39 +77,34 @@ const linksList = ref([
     link: 'listaCorrespondencia',
   },
   {
-    title: 'Lista de Funcionarios',
-    icon: 'format_list_bulleted',
-    link: 'listaFuncionario',
-  },
-  {
     title: 'QTC',
-    icon: '💬',
+    icon: 'feedback',
     link: 'qtc',
   },
   {
-    title: 'Ocorrência',
-    icon: '⚠️',
+    title: 'Ocorrencia',
+    icon: 'warning',
     link: 'ocorrencia',
   },
   {
     title: 'Leitura de Água',
-    icon: '🌊',
+    icon: 'water',
     link: 'agua',
   },
 
   {
-    title: 'Relatório',
-    icon: '📄',
+    title: 'Relatorio',
+    icon: 'assignment',
     link: 'relatorio',
   },
   {
-    title: 'Craviculário',
-    icon: '🔑',
+    title: 'Craviculario',
+    icon: '_keys',
     link: 'craviculario',
   },
   {
-    title: 'Saída',
-    icon: '🚪',
+    title: 'Saida',
+    icon: 'logout',
     link: 'logout',
   },
 ]);
@@ -158,5 +153,9 @@ const handleLinkClick = async (link: { link: string }) => {
   font-weight: bold;
   color: #c0c0c4;
   margin-left: 5px;
+}
+.q-header,
+.q-toolbar {
+  background-color: #0905e6 !important;
 }
 </style>
