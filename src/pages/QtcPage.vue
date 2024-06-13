@@ -1,4 +1,4 @@
-<!-- <template>
+<template>
   <q-page>
     <h1 style="font-size: 1.5em; text-align: center">QTC</h1>
     <div class="border">
@@ -81,9 +81,8 @@ const onReset = (index) => {
   background-color: rgb(235 208 208 / 20%);
 }
 </style>
- -->
 
-<template>
+<!-- <template>
   <q-page>
     <h1 style="font-size: 1.5em; text-align: center">QTC</h1>
     <div class="border">
@@ -107,3 +106,4 @@ import QtcComponent from '../components/QtcComponent.vue';
   background-color: rgb(235 208 208 / 20%);
 }
 </style>
+ -->
