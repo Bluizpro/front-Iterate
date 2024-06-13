@@ -101,7 +101,7 @@ import { useQuasar } from 'quasar';
 import dayjs from 'dayjs';
 
 const $q = useQuasar();
-const formsPerPage = 5;
+const formsPerPage = 7;
 const currentPage = ref(1);
 const usuarioLogado = localStorage.getItem('usuarioLogado') ?? '';
 let intervalId: ReturnType<typeof setInterval>;
