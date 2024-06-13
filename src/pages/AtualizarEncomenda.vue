@@ -1,8 +1,6 @@
 <template>
   <q-page v-if="encomenda" padding>
-    <h1 class="q-heading text-h5 text-weight-medium text-center">
-      Atualizar encomenda
-    </h1>
+    <h1 style="font-size: 1.5em; text-align: center">Atualizar encomenda</h1>
     <q-card>
       <q-card-section>
         <q-form>

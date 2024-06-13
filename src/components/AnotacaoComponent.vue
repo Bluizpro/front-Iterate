@@ -104,10 +104,11 @@ const $q = useQuasar();
 const formsPerPage = 5;
 const currentPage = ref(1);
 const usuarioLogado = localStorage.getItem('usuarioLogado') ?? '';
+let intervalId: ReturnType<typeof setInterval>;
 const forms = ref(
   JSON.parse(localStorage.getItem('anotacoes') ?? '[]') || [
     {
-      data: dayjs().format('YYYY-MM-DD'),
+      data: dayjs().format('DD/MM/YYYY'),
       hora: dayjs().format('HH:mm:ss'),
       usuario: usuarioLogado,
       conjunto: '',
@@ -117,8 +118,6 @@ const forms = ref(
     },
   ]
 );
-
-let intervalId: ReturnType<typeof setInterval>;
 
 watch(
   forms,
@@ -141,7 +140,7 @@ function updateDateTime() {
 
   for (let i = 0; i < forms.value.length; i++) {
     if (!forms.value[i].salvo) {
-      forms.value[i].data = currentDateTime.format('YYYY-MM-DD');
+      forms.value[i].data = currentDateTime.format('DD/MM/YYYY');
       forms.value[i].hora = currentDateTime.format('HH:mm:ss');
     }
   }
@@ -174,7 +173,7 @@ const onSubmit = (index: string | number) => {
     forms.value.push({
       data: new Date().toLocaleDateString(),
       hora: new Date().toLocaleTimeString(),
-      usuario: localStorage.getItem('usuarioLogado') || '',
+      usuario: usuarioLogado,
       conjunto: '',
       paciente: '',
       info: '',
@@ -203,7 +202,7 @@ const onReset = (index: string | number) => {
 
 const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
 
-const colorClass = (info: any) => {
+const colorClass = (info: unknown) => {
   switch (info) {
     case 'AG/2T':
       return 'yellow-background';

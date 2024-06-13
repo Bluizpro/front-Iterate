@@ -25,21 +25,19 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { useCondominosStore } from '../../stores/condominos-store';
+import { useEncomendasStore } from '../../stores/encomendaStore';
 import { useQuasar } from 'quasar';
 
 const router = useRouter();
 const $q = useQuasar();
+const encomendasStore = useEncomendasStore();
 
 const encomendaId = Number(router.currentRoute.value.params.id);
-const useCondominos = useCondominosStore();
-const encomenda = useCondominos.condominos
-  .flatMap((condomino) => condomino.encomendas)
-  .find((encomenda) => encomenda.id === encomendaId);
+const encomenda = encomendasStore.encomendas.find((e) => e.id === encomendaId);
 
 const deletarEncomenda = () => {
   if (encomenda) {
-    useCondominos.deletarEncomenda(encomenda.id);
+    encomendasStore.deletarEncomenda(encomenda.id);
     $q.notify({
       type: 'positive',
       message: 'Encomenda deletada com sucesso',
@@ -54,4 +52,3 @@ const deletarEncomenda = () => {
   }
 };
 </script>
-../../stores/condominosStore

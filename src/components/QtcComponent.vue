@@ -96,42 +96,34 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUpdated } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted, onUpdated } from 'vue';
 import { useQuasar } from 'quasar';
+import dayjs from 'dayjs';
 
 const $q = useQuasar();
 const formsPerPage = 5;
 const currentPage = ref(1);
+const usuarioLogado = localStorage.getItem('usuarioLogado') ?? '';
 const forms = ref(
-  JSON.parse(localStorage.getItem('qtcInfors')) || [
+  JSON.parse(localStorage.getItem('qtcInfors') ?? '[]') || [
     {
-      data: new Date().toLocaleDateString(), // Retorna a data no formato "dd/mm/yyyy"
-      hora: new Date().toLocaleTimeString(), // Retorna a hora no formato "hh:mm:ss"
-      usuario: localStorage.getItem('usuarioLogado') || '',
+      data: dayjs().format('YYYY-MM-DD'),
+      hora: dayjs().format('HH:mm:ss'),
+      usuario: usuarioLogado,
       prestador: '',
       informacoes: '',
       conjunto: '',
-      salvo: false, // Adicione esta linha
+      salvo: false,
     },
   ]
 );
+
+let intervalId: ReturnType<typeof setInterval>;
 
 watch(
   forms,
   () => {
     localStorage.setItem('qtcInfors', JSON.stringify(forms.value));
-  },
-  { deep: true }
-);
-
-watch(
-  forms,
-  (newForms, oldForms) => {
-    if (newForms.length > oldForms.length) {
-      const lastIndex = newForms.length - 1;
-      newForms[lastIndex].data = new Date().toLocaleDateString();
-      newForms[lastIndex].hora = new Date().toLocaleTimeString();
-    }
   },
   { deep: true }
 );
@@ -148,17 +140,25 @@ onMounted(updateDateTime);
 onUpdated(updateDateTime);
 
 function updateDateTime() {
-  const start = (currentPage.value - 1) * formsPerPage;
-  const end = Math.min(start + formsPerPage, forms.value.length);
-  for (let i = start; i < end; i++) {
+  const currentDateTime = dayjs();
+
+  for (let i = 0; i < forms.value.length; i++) {
     if (!forms.value[i].salvo) {
-      forms.value[i].data = new Date().toLocaleDateString();
-      forms.value[i].hora = new Date().toLocaleTimeString();
+      forms.value[i].data = currentDateTime.format('DD/MM/YYYY');
+      forms.value[i].hora = currentDateTime.format('HH:mm:ss');
     }
   }
 }
 
-const onSubmit = (index) => {
+onMounted(() => {
+  updateDateTime();
+  intervalId = setInterval(updateDateTime, 1000);
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId);
+});
+const onSubmit = (index: string | number) => {
   if (
     forms.value[index].usuario === '' ||
     forms.value[index].prestador === '' ||
@@ -192,7 +192,7 @@ const onSubmit = (index) => {
   }
 };
 
-const onReset = (index) => {
+const onReset = (index: string | number) => {
   if (forms.value.length > 1) {
     forms.value.splice(index, 1);
   } else {

@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <q-page>
     <h1 style="font-size: 1.5em; text-align: center">QTC</h1>
     <div class="border">
@@ -18,19 +18,18 @@
 <script setup>
 import { ref } from 'vue';
 import QtcComponent from '../components/QtcComponent.vue'; // Importe o componente AnotacaoComponent
-
-const qtcInfors = ref(
-  JSON.parse(localStorage.getItem('qtcInfors')) || [
-    {
-      data: '',
-      hora: '', // Retorna a hora no formato "hh:mm:ss"
-      usuario: localStorage.getItem('usuarioLogado') || '',
-      paciente: '',
-      status: '',
-      info: '',
-    },
-  ]
-);
+import dayjs from 'dayjs';
+const usuarioLogado = localStorage.getItem('usuarioLogado') ?? '';
+const qtcInfors = ref([
+  {
+    data: dayjs().format('DD/MM/YYYY'),
+    hora: dayjs().format('HH:mm:ss'),
+    usuario: usuarioLogado,
+    paciente: '',
+    status: '',
+    info: '',
+  },
+]);
 
 const onSubmit = (index) => {
   if (
@@ -48,9 +47,9 @@ const onSubmit = (index) => {
   } else {
     // Quando salvar, adicione um novo formulário ao array
     qtcInfors.value.push({
-      data: new Date().toLocaleDateString(),
-      hora: new Date().toLocaleTimeString(),
-      usuario: localStorage.getItem('usuarioLogado') || '',
+      data: dayjs().format('DD/MM/YYYY'),
+      hora: dayjs().format('HH:mm:ss'),
+      usuario: usuarioLogado,
       paciente: '',
       informacoes: '',
       conjunto: '',
@@ -78,6 +77,32 @@ const onReset = (index) => {
   margin-left: 1rem;
   margin-top: 1rem;
 
+  margin-right: 2rem;
+  background-color: rgb(235 208 208 / 20%);
+}
+</style>
+ -->
+
+<template>
+  <q-page>
+    <h1 style="font-size: 1.5em; text-align: center">QTC</h1>
+    <div class="border">
+      <div class="note-container">
+        <QtcComponent />
+      </div>
+    </div>
+  </q-page>
+</template>
+
+<script setup>
+import QtcComponent from '../components/QtcComponent.vue';
+</script>
+
+<style scoped lang="scss">
+.border {
+  border: 1px solid #000 !important;
+  margin-left: 1rem;
+  margin-top: 1rem;
   margin-right: 2rem;
   background-color: rgb(235 208 208 / 20%);
 }

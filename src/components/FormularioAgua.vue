@@ -1,7 +1,4 @@
 <template>
-  <h1 class="q-heading text-h5 text-weight-medium text-center">
-    Formulário de Controle de Água
-  </h1>
   <div class="q-pa-md row items-start q-gutter-md">
     <!-- Primeiro card -->
     <q-card class="my-card">

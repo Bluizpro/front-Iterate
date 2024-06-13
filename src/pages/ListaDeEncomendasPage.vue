@@ -1,23 +1,20 @@
 <template>
   <q-page>
     <ListaDeEncomendas v-if="storeForm.formularioAtual == 'interno'">
-      <h1 class="q-heading text-h5 text-weight-medium text-center">
-        Encomendas Internas
-      </h1>
+      <!-- <h1 class="q-heading text-h5 text-weight-medium text-center"> -->
+      <h1 style="font-size: 1.5em; text-align: center">Encomendas Internas</h1>
       <BotoesCadastrarEBaixa />
     </ListaDeEncomendas>
 
     <ListaDeEncomendas v-if="storeForm.formularioAtual == 'sedex'">
-      <h1 class="q-heading text-h5 text-weight-medium text-center">
-        Encomendas sedex
-      </h1>
+      <!-- <h1 class="q-heading text-h5 text-weight-medium text-center"> -->
+      <h1 style="font-size: 1.5em; text-align: center">Encomendas sedex</h1>
       <BotoesCadastrarEBaixa />
     </ListaDeEncomendas>
 
     <ListaDeEncomendas v-if="storeForm.formularioAtual == 'externo'">
-      <h1 class="q-heading text-h5 text-weight-medium text-center">
-        Encomendas externas
-      </h1>
+      <!-- <h1 class="q-heading text-h5 text-weight-medium text-center"> -->
+      <h1 style="font-size: 1.5em; text-align: center">Encomendas externas</h1>
       <BotoesCadastrarEBaixa />
     </ListaDeEncomendas>
   </q-page>

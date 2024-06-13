@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <h1 class="q-heading text-h5 text-weight-medium text-center">
+    <h1 style="font-size: 1.5em; text-align: center">
       Cadastro de {{ titulo }}
     </h1>
     <div class="row items-center justify-evenly">
