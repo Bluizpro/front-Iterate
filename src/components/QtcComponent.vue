@@ -107,7 +107,7 @@ const usuarioLogado = localStorage.getItem('usuarioLogado') ?? '';
 const forms = ref(
   JSON.parse(localStorage.getItem('qtcInfors') ?? '[]') || [
     {
-      data: dayjs().format('YYYY-MM-DD'),
+      data: dayjs().format('DD/MM/YYYY'),
       hora: dayjs().format('HH:mm:ss'),
       usuario: usuarioLogado,
       prestador: '',
