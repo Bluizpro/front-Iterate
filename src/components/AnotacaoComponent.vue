@@ -63,14 +63,6 @@
           :class="colorClass(anotacao.info)"
           class="col-1"
         />
-        <!-- <q-select
-          outlined
-          v-model="anotacao.status"
-          :options="statusOptions"
-          label="Status "
-          class="col"
-        /> -->
-
         <q-btn
           icon="save"
           color="primary"
@@ -199,7 +191,6 @@ const onReset = (index: string | number) => {
     forms.value[index].salvo = false;
   }
 };
-
 const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
 
 const colorClass = (info: unknown) => {

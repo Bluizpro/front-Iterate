@@ -21,3 +21,4 @@ import AnotacaoComponent from '../components/AnotacaoComponent.vue';
   background-color: rgb(235 208 208 / 20%);
 }
 </style>
+

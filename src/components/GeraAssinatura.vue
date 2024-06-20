@@ -32,30 +32,29 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref } from 'vue';
-import { VueSignaturePad } from 'vue-signature-pad';
+import { defineProps, defineEmits, ref, Ref } from 'vue';
+import VueSignaturePad from 'vue-signature-pad';
 import { useAssinaturaStore } from '../stores/assinatura';
 
 const props = defineProps(['exibirModal']);
-const emit = defineEmits(['update:exibirModal', 'salvarAssinatura']);
-const signaturePad = ref(null);
+const emit = defineEmits(['update:exibirModal', 'assinaturaGerada']);
+const signaturePad: Ref<InstanceType<typeof VueSignaturePad> | null> = ref(null);
 const store = useAssinaturaStore();
 
-const updateExibirModal = (value) => {
+const updateExibirModal = (value: any) => {
   emit('update:exibirModal', value);
 };
 
 const salvarAssinatura = async () => {
-  // Adicione a palavra-chave async
-  const { isEmpty, data } = signaturePad.value.saveSignature();
+  const { isEmpty, data } = signaturePad.value!.saveSignature();
   if (!isEmpty) {
-    // Armazena a assinatura na loja Pinia
-    await store.salvarAssinatura(data); // Adicione a palavra-chave await
-    console.log('URL da assinatura:', store.url);
+    await store.salvarAssinatura(data);
+    emit('assinaturaGerada', store.currentAssinatura);
   }
-  emit('salvarAssinatura');
 };
 </script>
+
+
 
 <style scoped lang="scss">
 .assinatura-container {
