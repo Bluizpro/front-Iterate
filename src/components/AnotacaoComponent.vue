@@ -59,8 +59,8 @@
           outlined
           v-model="anotacao.info"
           :options="infoOptions"
-          label="Informações"
           :class="colorClass(anotacao.info)"
+          label="Informações"
           class="col-1"
         />
         <q-btn
@@ -88,17 +88,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted, onUpdated } from 'vue';
 import { useQuasar } from 'quasar';
 import dayjs from 'dayjs';
 
 const $q = useQuasar();
-const formsPerPage = 7;
+const formsPerPage = 5;
 const currentPage = ref(1);
 const usuarioLogado = localStorage.getItem('usuarioLogado') ?? '';
-let intervalId: ReturnType<typeof setInterval>;
 const forms = ref(
-  JSON.parse(localStorage.getItem('anotacoes') ?? '[]') || [
+  JSON.parse(localStorage.getItem('qtcInfors') ?? '[]') || [
     {
       data: dayjs().format('DD/MM/YYYY'),
       hora: dayjs().format('HH:mm:ss'),
@@ -110,6 +109,27 @@ const forms = ref(
     },
   ]
 );
+const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
+
+const colorClass = (info: unknown) => {
+  switch (info) {
+    case 'AG/2T':
+      return 'yellow-background';
+    case 'AG':
+      return 'red-background';
+    case 'AG/CM':
+      return 'green-background';
+    case 'PS':
+      return 'background';
+    case 'AG/CF':
+      return 'orange-background';
+    case 'PS/+1T':
+      return 'blue-background';
+    default:
+      return '';
+  }
+};
+let intervalId: ReturnType<typeof setInterval>;
 
 watch(
   forms,
@@ -126,6 +146,9 @@ const paginatedForms = computed(() => {
   const end = start + formsPerPage;
   return forms.value.slice(start, end);
 });
+
+onMounted(updateDateTime);
+onUpdated(updateDateTime);
 
 function updateDateTime() {
   const currentDateTime = dayjs();
@@ -146,7 +169,6 @@ onMounted(() => {
 onUnmounted(() => {
   clearInterval(intervalId);
 });
-
 const onSubmit = (index: string | number) => {
   if (
     forms.value[index].usuario === '' ||
@@ -161,7 +183,7 @@ const onSubmit = (index: string | number) => {
       message: 'Por favor, preencha todos os campos',
     });
   } else {
-    forms.value[index].salvo = true;
+    forms.value[index].salvo = true; // Adicione esta linha
     forms.value.push({
       data: new Date().toLocaleDateString(),
       hora: new Date().toLocaleTimeString(),
@@ -189,26 +211,6 @@ const onReset = (index: string | number) => {
     forms.value[index].conjunto = '';
     forms.value[index].info = '';
     forms.value[index].salvo = false;
-  }
-};
-const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
-
-const colorClass = (info: unknown) => {
-  switch (info) {
-    case 'AG/2T':
-      return 'yellow-background';
-    case 'AG':
-      return 'red-background';
-    case 'AG/CM':
-      return 'green-background';
-    case 'PS':
-      return 'background';
-    case 'AG/CF':
-      return 'orange-background';
-    case 'PS/+1T':
-      return 'blue-background';
-    default:
-      return '';
   }
 };
 </script>

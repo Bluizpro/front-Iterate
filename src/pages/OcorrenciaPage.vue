@@ -63,23 +63,19 @@ const addNote = () => {
     localStorage.setItem('notes', JSON.stringify(notes));
   }
 };
-
 const deleteNote = (index) => {
   notes.splice(index, 1);
   localStorage.setItem('notes', JSON.stringify(notes));
 };
-
 const togglePriority = (index) => {
   notes[index].priority = !notes[index].priority;
   localStorage.setItem('notes', JSON.stringify(notes));
 };
-
 onMounted(() => {
   if (localStorage.getItem('notes')) {
     notes.push(...JSON.parse(localStorage.getItem('notes')));
   }
 });
-
 onUnmounted(() => {
   localStorage.setItem('notes', JSON.stringify(notes));
 });
@@ -102,6 +98,7 @@ onUnmounted(() => {
   padding: 20px;
   margin-top: 1rem;
   border-radius: 15px;
+  margin-left: 12px;
 }
 .border {
   border: 1px solid #000 !important;
@@ -130,7 +127,7 @@ onUnmounted(() => {
   }
 }
 .priority {
-  color: rgb(252, 2, 2);
+  color: rgb(245, 70, 70);
 }
 .no-priority {
   color: black;
