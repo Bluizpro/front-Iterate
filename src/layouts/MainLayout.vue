@@ -96,16 +96,15 @@ const linksList = ref([
     icon: 'water',
     link: 'agua',
   },
-
-  {
-    title: 'Relatorio',
-    icon: 'assignment',
-    link: 'relatorio',
-  },
   {
     title: 'Craviculario',
     icon: '_keys',
     link: 'craviculario',
+  },
+  {
+    title: 'Relatorio',
+    icon: 'assignment',
+    link: 'relatorio',
   },
   {
     title: 'Saida',
