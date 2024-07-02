@@ -1,12 +1,14 @@
 <template>
-  <q-page>
-    <h1 style="font-size: 1.5em; text-align: center">Anotacões</h1>
-    <div class="border">
-      <div class="note-container">
-        <AnotacaoComponent />
+  <q-layout>
+    <q-page>
+      <h1 style="font-size: 1.5em; text-align: center">Anotacões</h1>
+      <div class="border">
+        <div class="note-container">
+          <AnotacaoComponent />
+        </div>
       </div>
-    </div>
-  </q-page>
+    </q-page>
+  </q-layout>
 </template>
 
 <script setup>
