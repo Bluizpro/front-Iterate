@@ -10,7 +10,7 @@
         bordered
         title="Lista de Encomendas"
         :rows="encomendas"
-        :columns="computedColumns"
+        :visible-columns="computedColumns"
         row-key="id"
         binary-state-sort
       >
@@ -57,7 +57,6 @@ import { Delivery } from '../components/Imodels';
 import { useStore } from '../stores/example-store';
 import { useQuasar } from 'quasar';
 import { useFuncionariosStore } from 'src/stores/funcionarioStore';
-import { useEncomendasStore } from 'src/stores/encomendaStore';
 
 const router = useRouter();
 const $q = useQuasar();
@@ -100,6 +99,7 @@ const computedColumns = computed(() => {
       label: coluna.charAt(0).toUpperCase() + coluna.slice(1), // primeira letra maiúscula
       align: 'left',
       required: true,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       field: (row: any) => row[coluna],
       sortable: true,
     })),
@@ -139,11 +139,21 @@ const encomendas = computed(() => {
   return [...encomendasCondominos, ...encomendasFuncionarios];
 });
 
-const editarItem = (item: any) => {
+/* const editarItem = (item: any) => {
   router.push(`/editar-encomenda/${item.id}`);
-};
+}; */
 
-const deletarItem = (item: any) => {
+/* const deletarItem = (item: any) => {
+  $q.dialog({
+    title: 'Deletar',
+    message: 'Você Deseja realmente deletar?',
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    router.push(`/deletar-encomenda/${item.id}`);
+  });
+}; */
+const deletarItem = (item: Delivery) => {
   $q.dialog({
     title: 'Deletar',
     message: 'Você Deseja realmente deletar?',

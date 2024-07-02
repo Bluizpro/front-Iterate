@@ -97,7 +97,7 @@ const formsPerPage = 5;
 const currentPage = ref(1);
 const usuarioLogado = localStorage.getItem('usuarioLogado') ?? '';
 const forms = ref(
-  JSON.parse(localStorage.getItem('qtcInfors') ?? '[]') || [
+  JSON.parse(localStorage.getItem('anotacoes') ?? '[]') || [
     {
       data: dayjs().format('DD/MM/YYYY'),
       hora: dayjs().format('HH:mm:ss'),

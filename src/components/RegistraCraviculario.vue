@@ -105,11 +105,18 @@ watch(search, () => {
   }
 });
 
-const isKeyRegistered = (key: number) => {
+/* const isKeyRegistered = (key: number) => {
   let item = localStorage.getItem('chavesRetiradas');
   let chavesRetiradas = item ? JSON.parse(item) : [];
   return chavesRetiradas.some(
     (chave: any) => chave.conjunto === key.toString()
+  );
+}; */
+const isKeyRegistered = (key: number) => {
+  let item = localStorage.getItem('chavesRetiradas');
+  let chavesRetiradas: { conjunto: string }[] = item ? JSON.parse(item) : [];
+  return chavesRetiradas.some(
+    (chave: { conjunto: string }) => chave.conjunto === key.toString()
   );
 };
 

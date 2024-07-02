@@ -108,6 +108,7 @@ import { defineProps, defineEmits, ref } from 'vue';
 import { VueSignaturePad } from 'vue-signature-pad';
 import { useAssinaturaStore } from '../stores/assinatura';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps(['exibirModal']);
 const emit = defineEmits(['update:exibirModal', 'salvarAssinatura']);
 const signaturePad = ref(null);

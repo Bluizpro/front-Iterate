@@ -157,12 +157,12 @@ import { computed, onBeforeUnmount, ref } from 'vue';
 import { useStore } from '../../stores/example-store';
 import { useQuasar } from 'quasar';
 import { Condomino, useCondominosStore } from '../../stores/condominosStore';
-import { useRouter } from 'vue-router';
+/* import { useRouter } from 'vue-router'; */
 
 const store = useStore();
 const $q = useQuasar();
 const condominosStore = useCondominosStore();
-const $router = useRouter();
+//const $router = useRouter();
 
 let timer: NodeJS.Timeout | null = null;
 onBeforeUnmount(() => {

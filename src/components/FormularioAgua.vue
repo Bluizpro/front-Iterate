@@ -328,7 +328,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useQuasar } from 'quasar';
 import axios from 'axios'; // Importe o axios
 const $q = useQuasar();
@@ -354,13 +354,13 @@ let leituraAgua = ref({
   consumo: '',
 });
 
-let isFormValid = computed(() => {
+/* let isFormValid = computed(() => {
   return (
     leituraAgua.value.leituraInicial &&
     leituraAgua.value.leituraParcial &&
     leituraAgua.value.leituraFinal
   );
-});
+}); */
 
 async function calcular() {
   let leituraInicial = parseInt(leituraAgua.value.leituraInicial.slice(3));
