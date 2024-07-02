@@ -338,13 +338,13 @@ const onReset = (index: string | number) => {
           :class="colorClass(anotacao.info)"
           class="col"
         />
-        <q-select
+        <!--     <q-select
           outlined
           v-model="anotacao.status"
           :options="statusOptions"
           label="Status "
           class="col"
-        />
+        /> -->
 
         <q-btn
           icon="save"
@@ -369,7 +369,8 @@ const onReset = (index: string | number) => {
     </div>
   </q-page>
 </template>
-<script setup>
+
+<!-- <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 const $q = useQuasar();
@@ -442,7 +443,17 @@ const onReset = (index) => {
     forms.value[index].info = '';
   }
 };
-const statusOptions = ['J/S', 'N/S'];
+function updateDateTime() {
+  const currentDateTime = dayjs();
+
+  for (let i = 0; i < forms.value.length; i++) {
+    if (!forms.value[i].salvo) {
+      forms.value[i].data = currentDateTime.format('DD/MM/YYYY');
+      forms.value[i].hora = currentDateTime.format('HH:mm:ss');
+    }
+  }
+}
+//const statusOptions = ['J/S', 'N/S'];
 const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
 const colorClass = (info) => {
   switch (info) {
@@ -503,6 +514,189 @@ const colorClass = (info) => {
 .orange-background {
   background-color: rgb(253, 202, 107);
 }
+.blue-background {
+  background-color: rgb(147, 147, 247);
+}
+.paginação {
+  margin-top: 2rem;
+}
+</style>
+ -->
+<script setup lang="ts">
+import { computed, ref, watch, onMounted, onUnmounted, onUpdated } from 'vue';
+import { useQuasar } from 'quasar';
+import dayjs from 'dayjs';
+
+const $q = useQuasar();
+const formsPerPage = 5;
+const currentPage = ref(1);
+const usuarioLogado = localStorage.getItem('usuarioLogado') ?? '';
+const forms = ref(
+  JSON.parse(localStorage.getItem('anotacoes') ?? '[]') || [
+    {
+      data: dayjs().format('DD/MM/YYYY'),
+      hora: dayjs().format('HH:mm:ss'),
+      usuario: usuarioLogado,
+      conjunto: '',
+      paciente: '',
+      info: '',
+      salvo: false,
+    },
+  ]
+);
+const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
+
+const colorClass = (info: unknown) => {
+  switch (info) {
+    case 'AG/2T':
+      return 'yellow-background';
+    case 'AG':
+      return 'red-background';
+    case 'AG/CM':
+      return 'green-background';
+    case 'PS':
+      return 'background';
+    case 'AG/CF':
+      return 'orange-background';
+    case 'PS/+1T':
+      return 'blue-background';
+    default:
+      return '';
+  }
+};
+let intervalId: ReturnType<typeof setInterval>;
+
+watch(
+  forms,
+  () => {
+    localStorage.setItem('anotacoes', JSON.stringify(forms.value));
+  },
+  { deep: true }
+);
+
+const maxPages = computed(() => Math.ceil(forms.value.length / formsPerPage));
+
+const paginatedForms = computed(() => {
+  const start = (currentPage.value - 1) * formsPerPage;
+  const end = start + formsPerPage;
+  return forms.value.slice(start, end);
+});
+
+onMounted(updateDateTime);
+onUpdated(updateDateTime);
+
+function updateDateTime() {
+  const currentDateTime = dayjs();
+
+  for (let i = 0; i < forms.value.length; i++) {
+    if (!forms.value[i].salvo) {
+      forms.value[i].data = currentDateTime.format('DD/MM/YYYY');
+      forms.value[i].hora = currentDateTime.format('HH:mm:ss');
+    }
+  }
+}
+
+onMounted(() => {
+  updateDateTime();
+  intervalId = setInterval(updateDateTime, 1000);
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId);
+});
+const onSubmit = (index: string | number) => {
+  if (
+    forms.value[index].usuario === '' ||
+    forms.value[index].paciente === '' ||
+    forms.value[index].conjunto === '' ||
+    forms.value[index].info === ''
+  ) {
+    $q.notify({
+      color: 'red-5',
+      textColor: 'white',
+      icon: 'warning',
+      message: 'Por favor, preencha todos os campos',
+    });
+  } else {
+    forms.value[index].salvo = true; // Adicione esta linha
+    forms.value.push({
+      data: new Date().toLocaleDateString(),
+      hora: new Date().toLocaleTimeString(),
+      usuario: usuarioLogado,
+      conjunto: '',
+      paciente: '',
+      info: '',
+      salvo: false,
+    });
+
+    $q.notify({
+      color: 'green-4',
+      textColor: 'white',
+      icon: 'cloud_done',
+      message: 'Salvo Com Sucesso',
+    });
+  }
+};
+
+const onReset = (index: string | number) => {
+  if (forms.value.length > 1) {
+    forms.value.splice(index, 1);
+  } else {
+    forms.value[index].paciente = '';
+    forms.value[index].conjunto = '';
+    forms.value[index].info = '';
+    forms.value[index].salvo = false;
+  }
+};
+</script>
+
+<style scoped lang="scss">
+.row.items-start.justify-start {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.q-form .q-field {
+  border: 1px solid #ccc;
+  border-radius: 10px; // Ajuste este valor para alterar a curvatura da borda
+}
+
+.note-container {
+  border: 3px solid #ccc;
+  padding: 2rem;
+  width: 95%;
+  height: 100px;
+  align-items: flex-start;
+  margin: auto;
+  margin-top: 1rem;
+}
+.button-save,
+.button-done {
+  margin-left: 5px !important;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 5px;
+}
+.yellow-background {
+  background-color: rgb(250, 250, 144);
+}
+
+.red-background {
+  background-color: #f07171;
+}
+.green-background {
+  background-color: rgb(152, 228, 152);
+}
+
+.background {
+  background-color: rgb(255, 255, 255);
+}
+
+.orange-background {
+  background-color: rgb(253, 202, 107);
+}
+
 .blue-background {
   background-color: rgb(147, 147, 247);
 }
