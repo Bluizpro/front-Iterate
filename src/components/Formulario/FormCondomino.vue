@@ -122,7 +122,7 @@
           v-model="form.interfone"
           color="indigo-13"
           label="Interfone"
-          :options="['sim', 'não']"
+          :options="['sim', 'não', '2/T']"
           :rules="[(val:string) => (val && val.length > 0) || 'Selecione uma opção']"
         >
           <template v-slot:prepend>

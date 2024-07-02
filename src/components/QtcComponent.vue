@@ -32,12 +32,6 @@
         >
         </q-input>
         <q-input
-          outlined
-          v-model="qtcInfor.conjunto"
-          label="Conjunto"
-          class="col-1"
-        />
-        <q-input
           disable
           name="Usuario"
           outlined
@@ -47,6 +41,12 @@
           class="col-1 usuario"
         >
         </q-input>
+        <q-input
+          outlined
+          v-model="qtcInfor.conjunto"
+          label="Conjunto"
+          class="col-1"
+        />
         <q-input
           outlined
           v-model="qtcInfor.prestador"
