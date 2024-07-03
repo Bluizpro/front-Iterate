@@ -91,7 +91,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted, onUpdated } from 'vue';
+import {
+  computed,
+  ref,
+  watch,
+  onMounted,
+  onUnmounted /* onUpdated */,
+} from 'vue';
 import { useQuasar } from 'quasar';
 import dayjs from 'dayjs';
 
@@ -132,7 +138,6 @@ const colorClass = (info: unknown) => {
       return '';
   }
 };
-let intervalId: ReturnType<typeof setInterval>;
 
 watch(
   forms,
@@ -149,7 +154,8 @@ const paginatedForms = computed(() => {
   const end = start + formsPerPage;
   return forms.value.slice(start, end);
 });
-
+// se tiver erro na tela pode ser aqui!
+let intervalId: ReturnType<typeof setInterval>;
 onMounted(updateDateTime);
 //onUpdated(updateDateTime);
 

@@ -345,8 +345,109 @@ const onReset = (index: string | number) => {
     </div>
   </q-page>
 </template>
+<script setup lang="ts">
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
+import dayjs from 'dayjs';
+import { useQuasar } from 'quasar';
+const $q = useQuasar();
+const formsPerPage = 5;
+const currentPage = ref(1);
+const forms = ref(
+  JSON.parse(localStorage.getItem('qtcInfors') ?? '[]') || [
+    {
+      data: dayjs().format('DD/MM/YYYY'),
+      hora: dayjs().format('HH:mm:ss'),
+      usuario: localStorage.getItem('usuarioLogado') || '',
+      paciente: '',
+      informacoes: '',
+      conjunto: '',
+      salvo: false,
+    },
+  ]
+);
 
-<script setup>
+let intervalId: ReturnType<typeof setInterval>;
+
+function updateFormDateTime() {
+  const currentDateTime = dayjs();
+
+  for (let i = 0; i < forms.value.length; i++) {
+    if (!forms.value[i].salvo) {
+      forms.value[i].data = currentDateTime.format('DD/MM/YYYY');
+      forms.value[i].hora = currentDateTime.format('HH:mm:ss');
+    }
+  }
+}
+
+onMounted(() => {
+  updateFormDateTime();
+  intervalId = setInterval(updateFormDateTime, 1000);
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId);
+});
+
+watch(
+  forms,
+  () => {
+    localStorage.setItem('qtcInfors', JSON.stringify(forms.value));
+  },
+  { deep: true }
+);
+
+const maxPages = computed(() => Math.ceil(forms.value.length / formsPerPage));
+const paginatedForms = computed(() => {
+  const start = (currentPage.value - 1) * formsPerPage;
+  const end = start + formsPerPage;
+  return forms.value.slice(start, end);
+});
+
+const onSubmit = (index: string | number) => {
+  if (
+    forms.value[index].usuario === '' ||
+    forms.value[index].paciente === '' ||
+    forms.value[index].informacoes === '' ||
+    forms.value[index].conjunto === ''
+  ) {
+    $q.notify({
+      color: 'red-5',
+      textColor: 'white',
+      icon: 'warning',
+      message: 'Por favor, preencha todos os campos',
+    });
+  } else {
+    forms.value[index].salvo = true;
+    forms.value.push({
+      data: dayjs().format('DD/MM/YYYY'),
+      hora: dayjs().format('HH:mm:ss'),
+      usuario: localStorage.getItem('usuarioLogado') || '',
+      paciente: '',
+      informacoes: '',
+      conjunto: '',
+      salvo: false,
+    });
+    $q.notify({
+      color: 'green-4',
+      textColor: 'white',
+      icon: 'cloud_done',
+      message: 'Salvo Com Sucesso',
+    });
+  }
+};
+
+const onReset = (index: string | number) => {
+  if (forms.value.length > 1) {
+    forms.value.splice(index, 1);
+  } else {
+    forms.value[index].paciente = '';
+    forms.value[index].conjunto = '';
+    forms.value[index].informacoes = '';
+    forms.value[index].salvo = false;
+  }
+};
+</script>
+<!-- <script setup>
 import { computed, ref, watch } from 'vue';
 import dayjs from 'dayjs';
 import { useQuasar } from 'quasar';
@@ -378,7 +479,6 @@ const paginatedForms = computed(() => {
   const end = start + formsPerPage;
   return forms.value.slice(start, end);
 });
-
 const onSubmit = (index) => {
   if (
     forms.value[index].usuario === '' ||
@@ -409,19 +509,18 @@ const onSubmit = (index) => {
     });
   }
 };
+
 const onReset = (index) => {
-  const savedForms = JSON.parse(localStorage.getItem('savedInfors')) || [];
-  savedForms.push(forms.value[index]);
-  localStorage.setItem('savedInfors', JSON.stringify(savedForms));
   if (forms.value.length > 1) {
     forms.value.splice(index, 1);
   } else {
     forms.value[index].paciente = '';
-    forms.value[index].informacoes = '';
     forms.value[index].conjunto = '';
+    forms.value[index].info = '';
+    forms.value[index].salvo = false;
   }
 };
-</script>
+</script> -->
 
 <style scoped lang="scss">
 .row.items-start.justify-start {
