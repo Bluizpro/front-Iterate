@@ -348,6 +348,7 @@ const onReset = (index: string | number) => {
 
 <script setup>
 import { computed, ref, watch } from 'vue';
+import dayjs from 'dayjs';
 import { useQuasar } from 'quasar';
 const $q = useQuasar();
 const formsPerPage = 5;
@@ -355,8 +356,8 @@ const currentPage = ref(1);
 const forms = ref(
   JSON.parse(localStorage.getItem('qtcInfors')) || [
     {
-      data: new Date().toLocaleDateString(),
-      hora: new Date().toLocaleTimeString(),
+      data: dayjs().format('DD/MM/YYYY'),
+      hora: dayjs().format('HH:mm:ss'),
       usuario: localStorage.getItem('usuarioLogado') || '',
       paciente: '',
       informacoes: '',
@@ -377,6 +378,7 @@ const paginatedForms = computed(() => {
   const end = start + formsPerPage;
   return forms.value.slice(start, end);
 });
+
 const onSubmit = (index) => {
   if (
     forms.value[index].usuario === '' ||
