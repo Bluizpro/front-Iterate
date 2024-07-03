@@ -479,6 +479,7 @@ const paginatedForms = computed(() => {
   const end = start + formsPerPage;
   return forms.value.slice(start, end);
 });
+
 let intervalId;
 
 onMounted(() => {
@@ -509,6 +510,7 @@ const onSubmit = (index) => {
       message: 'Por favor, preencha todos os campos',
     });
   } else {
+    forms.value[index].salvo = true;
     forms.value.push({
       data: new Date().toLocaleDateString(),
       hora: new Date().toLocaleTimeString(),
@@ -524,7 +526,6 @@ const onSubmit = (index) => {
       icon: 'cloud_done',
       message: 'Salvo Com Sucesso',
     });
-    currentPage.value = Math.ceil(forms.value.length / formsPerPage);
   }
 };
 
