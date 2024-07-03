@@ -345,7 +345,7 @@ const onReset = (index: string | number) => {
     </div>
   </q-page>
 </template>
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import dayjs from 'dayjs';
 import { useQuasar } from 'quasar';
@@ -446,8 +446,8 @@ const onReset = (index: string | number) => {
     forms.value[index].salvo = false;
   }
 };
-</script>
-<!-- <script setup>
+</script> -->
+<script setup>
 import { computed, ref, watch } from 'vue';
 import dayjs from 'dayjs';
 import { useQuasar } from 'quasar';
@@ -520,7 +520,7 @@ const onReset = (index) => {
     forms.value[index].salvo = false;
   }
 };
-</script> -->
+</script>
 
 <style scoped lang="scss">
 .row.items-start.justify-start {

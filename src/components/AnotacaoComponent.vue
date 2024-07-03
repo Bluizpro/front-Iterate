@@ -90,27 +90,21 @@
   </q-page>
 </template>
 
-<script setup lang="ts">
-import {
-  computed,
-  ref,
-  watch,
-  onMounted,
-  onUnmounted /* onUpdated */,
-} from 'vue';
+<!-- <script setup>
+import { computed, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import dayjs from 'dayjs';
 
 const $q = useQuasar();
-const formsPerPage = 5;
+const formsPerPage = 7;
 const currentPage = ref(1);
-const usuarioLogado = localStorage.getItem('usuarioLogado') ?? '';
+
 const forms = ref(
-  JSON.parse(localStorage.getItem('anotacoes') ?? '[]') || [
+  JSON.parse(localStorage.getItem('anotacoes')) || [
     {
       data: dayjs().format('DD/MM/YYYY'),
       hora: dayjs().format('HH:mm:ss'),
-      usuario: usuarioLogado,
+      usuario: localStorage.getItem('usuarioLogado') || '',
       conjunto: '',
       paciente: '',
       info: '',
@@ -118,26 +112,6 @@ const forms = ref(
     },
   ]
 );
-const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
-
-const colorClass = (info: unknown) => {
-  switch (info) {
-    case 'AG/2T':
-      return 'yellow-background';
-    case 'AG':
-      return 'red-background';
-    case 'AG/CM':
-      return 'green-background';
-    case 'PS':
-      return 'background';
-    case 'AG/CF':
-      return 'orange-background';
-    case 'PS/+1T':
-      return 'blue-background';
-    default:
-      return '';
-  }
-};
 
 watch(
   forms,
@@ -148,37 +122,64 @@ watch(
 );
 
 const maxPages = computed(() => Math.ceil(forms.value.length / formsPerPage));
+const paginatedForms = computed(() => {
+  const start = (currentPage.value - 1) * formsPerPage;
+  const end = start + formsPerPage;
+  return forms.value.slice(start, end);
+}); -->
+<script setup>
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
+import { useQuasar } from 'quasar';
+import dayjs from 'dayjs';
 
+const $q = useQuasar();
+const formsPerPage = 7;
+const currentPage = ref(1);
+
+const forms = ref(
+  JSON.parse(localStorage.getItem('anotacoes')) || [
+    {
+      data: dayjs().format('DD/MM/YYYY'),
+      hora: dayjs().format('HH:mm:ss'),
+      usuario: localStorage.getItem('usuarioLogado') || '',
+      conjunto: '',
+      paciente: '',
+      info: '',
+      salvo: false,
+    },
+  ]
+);
+
+watch(
+  forms,
+  () => {
+    localStorage.setItem('anotacoes', JSON.stringify(forms.value));
+  },
+  { deep: true }
+);
+
+const maxPages = computed(() => Math.ceil(forms.value.length / formsPerPage));
 const paginatedForms = computed(() => {
   const start = (currentPage.value - 1) * formsPerPage;
   const end = start + formsPerPage;
   return forms.value.slice(start, end);
 });
-// se tiver erro na tela pode ser aqui!
-let intervalId: ReturnType<typeof setInterval>;
-onMounted(updateDateTime);
-//onUpdated(updateDateTime);
 
-function updateDateTime() {
-  const currentDateTime = dayjs();
-
-  for (let i = 0; i < forms.value.length; i++) {
-    if (!forms.value[i].salvo) {
-      forms.value[i].data = currentDateTime.format('DD/MM/YYYY');
-      forms.value[i].hora = currentDateTime.format('HH:mm:ss');
-    }
-  }
-}
+let intervalId;
 
 onMounted(() => {
-  updateDateTime();
-  intervalId = setInterval(updateDateTime, 1000);
+  intervalId = setInterval(() => {
+    forms.value.forEach((form, index) => {
+      forms.value[index].hora = dayjs().format('HH:mm:ss');
+    });
+  }, 1000);
 });
 
 onUnmounted(() => {
   clearInterval(intervalId);
 });
-const onSubmit = (index: string | number) => {
+
+const onSubmit = (index) => {
   if (
     forms.value[index].usuario === '' ||
     forms.value[index].paciente === '' ||
@@ -192,27 +193,27 @@ const onSubmit = (index: string | number) => {
       message: 'Por favor, preencha todos os campos',
     });
   } else {
-    forms.value[index].salvo = true; // Adicione esta linha
+    forms.value[index].salvo = true;
     forms.value.push({
-      data: new Date().toLocaleDateString(),
-      hora: new Date().toLocaleTimeString(),
-      usuario: usuarioLogado,
+      data: dayjs().format('DD/MM/YYYY'),
+      hora: dayjs().format('HH:mm:ss'),
+      usuario: localStorage.getItem('usuarioLogado') || '',
       conjunto: '',
       paciente: '',
       info: '',
       salvo: false,
     });
-
     $q.notify({
       color: 'green-4',
       textColor: 'white',
       icon: 'cloud_done',
       message: 'Salvo Com Sucesso',
     });
+    currentPage.value = Math.ceil(forms.value.length / formsPerPage);
   }
 };
 
-const onReset = (index: string | number) => {
+const onReset = (index) => {
   if (forms.value.length > 1) {
     forms.value.splice(index, 1);
   } else {
@@ -220,6 +221,26 @@ const onReset = (index: string | number) => {
     forms.value[index].conjunto = '';
     forms.value[index].info = '';
     forms.value[index].salvo = false;
+  }
+};
+
+const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
+const colorClass = (info) => {
+  switch (info) {
+    case 'AG/2T':
+      return 'yellow-background'; // Amarelo
+    case 'AG':
+      return 'red-background'; // Vermelho
+    case 'AG/CM':
+      return 'green-background'; // Verde
+    case 'PS':
+      return 'background'; // Branco
+    case 'AG/CF':
+      return 'orange-background'; // Laranja
+    case 'PS/+1T':
+      return 'blue-background'; // Azul-royal
+    default:
+      return ''; // Caso padrão (sem cor específica)
   }
 };
 </script>
