@@ -28,10 +28,6 @@ export const usuarioStore = defineStore('usuario', {
 
     listaDeUsuario: [
       {
-        usuario: 'renan',
-        senha: '123456',
-      },
-      {
         usuario: 'bruno',
         senha: '123456',
       },
@@ -56,22 +52,22 @@ export const usuarioStore = defineStore('usuario', {
   }),
 
   actions: {
-    async fazerLogin(): Promise<boolean> {
-      const usuario = this.usuario;
+    async fazerLogin(): Promise<Usuario | null> {
+      const usuario = this.usuario.toLowerCase();
       const senha = this.senha;
 
       const usuarioValido = this.listaDeUsuario.find(
-        (user) => user.usuario === usuario && user.senha === senha
+        (user) => user.usuario.toLowerCase() === usuario && user.senha === senha
       );
 
       if (usuarioValido) {
-        this.nomeUsuario = usuario;
-        this.usuarioLogado = usuario;
-        localStorage.setItem('usuarioLogado', usuario); // Salvar o usuário logado no localStorage
+        this.nomeUsuario = usuarioValido.usuario;
+        this.usuarioLogado = usuarioValido.usuario;
+        localStorage.setItem('usuarioLogado', usuarioValido.usuario);
         this.limparCamposFormulario();
-        return true; // Login bem-sucedido
+        return usuarioValido;
       } else {
-        return false; // Login falhou
+        return null;
       }
     },
     limparCamposFormulario() {

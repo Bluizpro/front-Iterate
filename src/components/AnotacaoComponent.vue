@@ -17,8 +17,11 @@
           v-model="anotacao.data"
           color="indigo-13"
           label="Data"
-          class="col-1"
+          class="col-2"
         >
+          <template v-slot:prepend>
+            <q-icon name="date_range" />
+          </template>
         </q-input>
         <q-input
           disable
@@ -28,8 +31,11 @@
           v-model="anotacao.hora"
           color="indigo-13"
           label="Hora"
-          class="col-1"
+          class="col-2 hora"
         >
+          <template v-slot:prepend>
+            <q-icon name="access_time" />
+          </template>
         </q-input>
         <q-input
           disable
@@ -212,7 +218,6 @@ const onSubmit = (index) => {
     currentPage.value = Math.ceil(forms.value.length / formsPerPage);
   }
 };
-
 const onReset = (index) => {
   if (forms.value.length > 1) {
     forms.value.splice(index, 1);
@@ -223,7 +228,6 @@ const onReset = (index) => {
     forms.value[index].salvo = false;
   }
 };
-
 const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
 const colorClass = (info) => {
   switch (info) {

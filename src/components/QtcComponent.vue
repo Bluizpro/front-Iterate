@@ -448,12 +448,14 @@ const onReset = (index: string | number) => {
 };
 </script> -->
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import dayjs from 'dayjs';
 import { useQuasar } from 'quasar';
+
 const $q = useQuasar();
-const formsPerPage = 5;
+const formsPerPage = 7;
 const currentPage = ref(1);
+
 const forms = ref(
   JSON.parse(localStorage.getItem('qtcInfors')) || [
     {
@@ -463,6 +465,7 @@ const forms = ref(
       paciente: '',
       informacoes: '',
       conjunto: '',
+      salvo: false,
     },
   ]
 );
@@ -479,6 +482,20 @@ const paginatedForms = computed(() => {
   const end = start + formsPerPage;
   return forms.value.slice(start, end);
 });
+let intervalId;
+
+onMounted(() => {
+  intervalId = setInterval(() => {
+    forms.value.forEach((form, index) => {
+      forms.value[index].hora = dayjs().format('HH:mm:ss');
+    });
+  }, 1000);
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId);
+});
+
 const onSubmit = (index) => {
   if (
     forms.value[index].usuario === '' ||
@@ -507,6 +524,7 @@ const onSubmit = (index) => {
       icon: 'cloud_done',
       message: 'Salvo Com Sucesso',
     });
+    currentPage.value = Math.ceil(forms.value.length / formsPerPage);
   }
 };
 
@@ -515,8 +533,8 @@ const onReset = (index) => {
     forms.value.splice(index, 1);
   } else {
     forms.value[index].paciente = '';
+    forms.value[index].informacoes = '';
     forms.value[index].conjunto = '';
-    forms.value[index].info = '';
     forms.value[index].salvo = false;
   }
 };
