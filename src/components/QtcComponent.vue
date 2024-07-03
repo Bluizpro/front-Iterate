@@ -294,14 +294,11 @@ const onReset = (index: string | number) => {
           label="Nome do usuário"
           class="col-1 usuario"
         >
-          <template v-slot:prepend>
-            <q-icon name="person" />
-          </template>
         </q-input>
         <q-input
           outlined
-          v-model="qtcInfor.paciente"
-          label="Paciente"
+          v-model="qtcInfor.prestador"
+          label="Prestador"
           color="indigo-13"
           class="col-2 paciente"
         />
@@ -462,7 +459,7 @@ const forms = ref(
       data: dayjs().format('DD/MM/YYYY'),
       hora: dayjs().format('HH:mm:ss'),
       usuario: localStorage.getItem('usuarioLogado') || '',
-      paciente: '',
+      prestador: '',
       informacoes: '',
       conjunto: '',
       salvo: false,
@@ -487,7 +484,9 @@ let intervalId;
 onMounted(() => {
   intervalId = setInterval(() => {
     forms.value.forEach((form, index) => {
-      forms.value[index].hora = dayjs().format('HH:mm:ss');
+      if (!form.salvo) {
+        forms.value[index].hora = dayjs().format('HH:mm:ss');
+      }
     });
   }, 1000);
 });
@@ -499,7 +498,7 @@ onUnmounted(() => {
 const onSubmit = (index) => {
   if (
     forms.value[index].usuario === '' ||
-    forms.value[index].paciente === '' ||
+    forms.value[index].prestador === '' ||
     forms.value[index].informacoes === '' ||
     forms.value[index].conjunto === ''
   ) {
@@ -514,9 +513,10 @@ const onSubmit = (index) => {
       data: new Date().toLocaleDateString(),
       hora: new Date().toLocaleTimeString(),
       usuario: localStorage.getItem('usuarioLogado') || '',
-      paciente: '',
+      prestador: '',
       informacoes: '',
       conjunto: '',
+      salvo: false,
     });
     $q.notify({
       color: 'green-4',
@@ -532,10 +532,9 @@ const onReset = (index) => {
   if (forms.value.length > 1) {
     forms.value.splice(index, 1);
   } else {
-    forms.value[index].paciente = '';
+    forms.value[index].prestador = '';
     forms.value[index].informacoes = '';
     forms.value[index].conjunto = '';
-    forms.value[index].salvo = false;
   }
 };
 </script>

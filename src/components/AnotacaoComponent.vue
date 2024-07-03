@@ -46,9 +46,6 @@
           label="Nome do usuário"
           class="col-1"
         >
-          <template v-slot:prepend>
-            <q-icon name="person" />
-          </template>
         </q-input>
         <q-input
           outlined
@@ -176,7 +173,9 @@ let intervalId;
 onMounted(() => {
   intervalId = setInterval(() => {
     forms.value.forEach((form, index) => {
-      forms.value[index].hora = dayjs().format('HH:mm:ss');
+      if (!form.salvo) {
+        forms.value[index].hora = dayjs().format('HH:mm:ss');
+      }
     });
   }, 1000);
 });
@@ -199,15 +198,15 @@ const onSubmit = (index) => {
       message: 'Por favor, preencha todos os campos',
     });
   } else {
-    forms.value[index].salvo = true;
+    forms.value[index].salvo = true; // Marca a anotação como salva
     forms.value.push({
-      data: dayjs().format('DD/MM/YYYY'),
-      hora: dayjs().format('HH:mm:ss'),
+      data: new Date().toLocaleDateString(),
+      hora: new Date().toLocaleTimeString(),
       usuario: localStorage.getItem('usuarioLogado') || '',
       conjunto: '',
       paciente: '',
       info: '',
-      salvo: false,
+      salvo: false, // Nova anotação não está salva
     });
     $q.notify({
       color: 'green-4',
@@ -215,7 +214,6 @@ const onSubmit = (index) => {
       icon: 'cloud_done',
       message: 'Salvo Com Sucesso',
     });
-    currentPage.value = Math.ceil(forms.value.length / formsPerPage);
   }
 };
 const onReset = (index) => {
@@ -225,7 +223,6 @@ const onReset = (index) => {
     forms.value[index].paciente = '';
     forms.value[index].conjunto = '';
     forms.value[index].info = '';
-    forms.value[index].salvo = false;
   }
 };
 const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
