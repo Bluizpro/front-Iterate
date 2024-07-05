@@ -16,7 +16,7 @@
             style="border-radius: 4rem"
           />
         </div>
-        <span class="centered-text"> ITERATE TECNOLOGIA </span>
+        <span class="centered-text"> TECNOLOGIA </span>
         <q-input
           required
           filled

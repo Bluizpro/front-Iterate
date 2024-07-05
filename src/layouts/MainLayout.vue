@@ -14,7 +14,7 @@
           <q-avatar>
             <img src="../assets/logo6.jpeg" />
           </q-avatar>
-          <span class="title-text">ITERATE TECNOLOGIA AVANÇADA</span>
+          <span class="title-text">GESTOR DE ENCOMENDA</span>
         </q-toolbar-title>
         <!-- Painel -->
         <PainelInterSedex />
@@ -155,8 +155,8 @@ const handleLinkClick = async (link: { link: string }) => {
 .title-text {
   font-size: 14px;
   font-weight: bold;
-  color: #c0c0c4;
-  margin-left: 5px;
+  color: #9898e0;
+  margin-left: 10px;
 }
 .q-header,
 .q-toolbar {
