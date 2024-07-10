@@ -10,7 +10,7 @@
         bordered
         title="Lista de Encomendas"
         :rows="encomendas"
-        :visible-columns="computedColumns"
+        :columns="computedColumns"
         row-key="id"
         binary-state-sort
       >
