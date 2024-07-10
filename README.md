@@ -11,7 +11,7 @@
 <h2 align="center">Descrição</h2>
 
 <p align="center">
-  Este é um sistema web para o gerenciamento de encomendas em condomínios. Permite registrar, rastrear e gerenciar encomendas internas, sedex e externas.
+  Este é um sistema web para o gerenciamento de encomendas em condomínios. Permite registrar, rastrear e gerenciar encomendas internas, sedex e externas, entre outras informacões como registro de chaves.
 </p>
 
 ## Funcionalidades
@@ -33,4 +33,4 @@ Para usar o sistema, basta acessar a interface web. É possível filtrar as enco
 
 ## Contato
 
-Se você tiver alguma dúvida ou sugestão, sinta-se à vontade para entrar em contato com a equipe de desenvolvimento por e-mail em renan.almeida.dev@hotmail.com e brunoluizperez@gmail.com
+Se você tiver alguma dúvida ou sugestão, sinta-se à vontade para entrar em contato com a equipe de desenvolvimento por e-mail em brunoluizperez@gmail.com
