@@ -1,4 +1,4 @@
-<h1 align="center">Sistema de Gerenciamento de Encomendas</h1>
+<h1 align="center">Sistema de Gestor de Encomenda</h1>
 
 <p align="center">
   <img src="/public/app.png" alt="Imagem do Projeto" width="80%">
