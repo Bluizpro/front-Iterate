@@ -5,10 +5,19 @@
     </div>
 
     <div class="q-pa-md">
-      <q-table
+      <!--    <q-table
         flat
         bordered
         title="Lista de Encomendas"
+        :rows="encomendas"
+        :columns="computedColumns"
+        row-key="id"
+        binary-state-sort
+      > -->
+      <q-table
+        flat
+        bordered
+        title="Lista de Correspondências"
         :rows="encomendas"
         :columns="computedColumns"
         row-key="id"

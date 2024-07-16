@@ -12,7 +12,7 @@
         />
         <q-toolbar-title>
           <q-avatar>
-            <img src="../assets/logo6.jpeg" />
+            <img src="../assets/logoTekoha1.jpg" />
           </q-avatar>
           <span class="title-text">GESTOR DE ENCOMENDA</span>
         </q-toolbar-title>

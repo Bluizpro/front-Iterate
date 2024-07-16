@@ -2,7 +2,7 @@
   "name": "controle-de-encomendas",
   "version": "0.0.1",
   "description": "controle de fluxo de encomendas",
-  "productName": "Tecnologia",
+  "productName": "Gestor De Encomendas",
   "author": "bruno perez",
   "private": true,
   "scripts": {

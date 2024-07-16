@@ -10,13 +10,13 @@
       >
         <div class="row items-center justify-evenly">
           <img
-            src="../assets/logo6.jpeg"
+            src="../assets/logoTekoha1.jpg"
             alt=""
             class="col-md-4 col-sm-4 col-xs-4"
             style="border-radius: 4rem"
           />
         </div>
-        <span class="centered-text"> TECNOLOGIA </span>
+        <span class="centered-text">TEKOHÁ CODE </span>
         <q-input
           required
           filled
@@ -26,7 +26,6 @@
           lazy-rules
           :rules="[(val:string) => formSubmitted || val.length > 0 || 'Digite seu usuário']"
         />
-        <!--  -->
         <q-input
           required
           filled
@@ -35,9 +34,9 @@
           label="Senha *"
           clear-icon="close"
           :rules="[
-            (val:string) => formSubmitted || val.length > 0 || 'Campo Obrigatório',
-            (val:string) => formSubmitted || val.length > 4 || 'Mínimo de 5 caracteres',
-          ]"
+        (val:string) => formSubmitted || val.length > 0 || 'Campo Obrigatório',
+        (val:string) => formSubmitted || val.length > 4 || 'Mínimo de 5 caracteres',
+      ]"
         >
           <template v-slot:append>
             <q-icon
@@ -56,9 +55,6 @@
             class="col-md-12 col-sm-12 col-xs-12"
           />
         </div>
-        <!--<div class="text-subtitle text-center text-brand">
-          Esqueceu a senha?
-        </div>-->
       </q-form>
     </q-card>
     <!-- Ícone de luz no canto superior direito -->
@@ -146,14 +142,16 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .text-brand {
   color: #4871d7da !important;
 }
 
-.dark-mode {
-  background-color: #2e2929;
-}
+/* .dark-mode {
+  background-color: #1a1a1a !important;
+  color: white;
+} */
+
 .centered-text {
   display: block;
   text-align: center;
