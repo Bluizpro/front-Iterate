@@ -10,7 +10,7 @@
       >
         <div class="row items-center justify-evenly">
           <img
-            src="../assets/logoTekoha1.jpg"
+            src="../assets/Tekoha1.jpg"
             alt=""
             class="col-md-4 col-sm-4 col-xs-4"
             style="border-radius: 4rem"
