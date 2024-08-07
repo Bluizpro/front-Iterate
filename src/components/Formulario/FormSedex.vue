@@ -99,7 +99,7 @@
 import { onBeforeUnmount, ref } from 'vue';
 import { useStore } from '../../stores/example-store';
 import { useCondominosStore } from '../../stores/condominosStore';
-import { Delivery } from '../Imodels';
+import { Delivery } from '../../stores/Imodels';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { onMounted } from 'vue';

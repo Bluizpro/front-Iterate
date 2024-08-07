@@ -116,7 +116,7 @@ import { onBeforeUnmount, ref } from 'vue';
 import { useStore } from '../../stores/example-store';
 import { useRouter } from 'vue-router';
 import { useCondominosStore } from '../../stores/condominosStore';
-import { Delivery } from '../Imodels';
+import { Delivery } from '../../stores/Imodels';
 import { useQuasar } from 'quasar';
 import { onMounted } from 'vue';
 import { useFuncionariosStore } from '../../stores/funcionarioStore';

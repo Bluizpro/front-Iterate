@@ -176,7 +176,7 @@ import {
   EncomendaSedex,
   EncomendaInterno,
   EncomendaExterno,
-} from '../components/Imodels';
+} from '../stores/Imodels';
 import { ref } from 'vue';
 
 let timer: NodeJS.Timeout | null = null;
@@ -202,7 +202,7 @@ const useEncomendas = useEncomendasStore();
 
 // Capturando a encomenda pelo id
 const encomenda = useEncomendas.encomendas.find(
-  (encomenda) => encomenda.id === encomendaId
+  (encomenda: { id: number }) => encomenda.id === encomendaId
 );
 
 let encomendaEditada: Delivery = { ...encomenda } as

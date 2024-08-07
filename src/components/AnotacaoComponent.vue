@@ -93,73 +93,17 @@
   </q-page>
 </template>
 
-<!-- <script setup>
-import { computed, ref, watch } from 'vue';
-import { useQuasar } from 'quasar';
-import dayjs from 'dayjs';
-
-const $q = useQuasar();
-const formsPerPage = 7;
-const currentPage = ref(1);
-
-const forms = ref(
-  JSON.parse(localStorage.getItem('anotacoes')) || [
-    {
-      data: dayjs().format('DD/MM/YYYY'),
-      hora: dayjs().format('HH:mm:ss'),
-      usuario: localStorage.getItem('usuarioLogado') || '',
-      conjunto: '',
-      paciente: '',
-      info: '',
-      salvo: false,
-    },
-  ]
-);
-
-watch(
-  forms,
-  () => {
-    localStorage.setItem('anotacoes', JSON.stringify(forms.value));
-  },
-  { deep: true }
-);
-
-const maxPages = computed(() => Math.ceil(forms.value.length / formsPerPage));
-const paginatedForms = computed(() => {
-  const start = (currentPage.value - 1) * formsPerPage;
-  const end = start + formsPerPage;
-  return forms.value.slice(start, end);
-}); -->
 <script setup>
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useQuasar } from 'quasar';
 import dayjs from 'dayjs';
+import * as AnnotationService from '../services/anotacaoApi';
 
 const $q = useQuasar();
 const formsPerPage = 7;
 const currentPage = ref(1);
 
-const forms = ref(
-  JSON.parse(localStorage.getItem('anotacoes')) || [
-    {
-      data: dayjs().format('DD/MM/YYYY'),
-      hora: dayjs().format('HH:mm:ss'),
-      usuario: localStorage.getItem('usuarioLogado') || '',
-      conjunto: '',
-      paciente: '',
-      info: '',
-      salvo: false,
-    },
-  ]
-);
-
-watch(
-  forms,
-  () => {
-    localStorage.setItem('anotacoes', JSON.stringify(forms.value));
-  },
-  { deep: true }
-);
+const forms = ref([]);
 
 const maxPages = computed(() => Math.ceil(forms.value.length / formsPerPage));
 const paginatedForms = computed(() => {
@@ -170,7 +114,7 @@ const paginatedForms = computed(() => {
 
 let intervalId;
 
-onMounted(() => {
+/* onMounted(async () => {
   intervalId = setInterval(() => {
     forms.value.forEach((form, index) => {
       if (!form.salvo) {
@@ -178,18 +122,110 @@ onMounted(() => {
       }
     });
   }, 1000);
+
+  try {
+    const loadedAnnotations = await AnnotationService.getAnnotations();
+
+    // Atualiza forms com as anotações carregadas
+    forms.value = loadedAnnotations;
+
+    // Recupera o formulário vazio do localStorage
+    const emptyForm = JSON.parse(localStorage.getItem('emptyForm') || '{}');
+    if (Object.keys(emptyForm).length === 0) {
+      // Adiciona um novo formulário vazio se não houver no localStorage
+      const newEmptyForm = {
+        data: dayjs().format('DD/MM/YYYY'),
+        hora: dayjs().format('HH:mm:ss'),
+        usuario: localStorage.getItem('usuarioLogado') || '',
+        conjunto: '',
+        paciente: '',
+        info: '',
+        salvo: false,
+      };
+      localStorage.setItem('emptyForm', JSON.stringify(newEmptyForm));
+      forms.value.push(newEmptyForm);
+    } else {
+      // Adiciona o formulário vazio recuperado do localStorage
+      forms.value.push(emptyForm);
+    }
+  } catch (error) {
+    console.error('Erro ao carregar anotações:', error);
+    $q.notify({
+      color: 'red-5',
+      textColor: 'white',
+      icon: 'warning',
+      message: 'Erro ao carregar anotações',
+    });
+  }
+});
+onUnmounted(() => {
+  clearInterval(intervalId);
+}); */
+
+onMounted(async () => {
+  intervalId = setInterval(() => {
+    forms.value.forEach((form, index) => {
+      // Atualiza a hora apenas para formulários vazios e não salvos
+      if (
+        !form.salvo &&
+        form.conjunto === '' &&
+        form.paciente === '' &&
+        form.info === ''
+      ) {
+        forms.value[index].hora = dayjs().format('HH:mm:ss');
+        localStorage.setItem('emptyForm', JSON.stringify(forms.value[index]));
+      }
+    });
+  }, 1000);
+
+  try {
+    const loadedAnnotations = await AnnotationService.getAnnotations();
+    // Atualiza forms com as anotações carregadas
+    forms.value = loadedAnnotations;
+
+    // Recupera o formulário vazio do localStorage
+    const emptyForm = JSON.parse(localStorage.getItem('emptyForm') || '{}');
+    if (Object.keys(emptyForm).length === 0) {
+      // Adiciona um novo formulário vazio se não houver no localStorage
+      const newEmptyForm = {
+        data: dayjs().format('DD/MM/YYYY'),
+        hora: dayjs().format('HH:mm:ss'),
+        usuario: localStorage.getItem('usuarioLogado') || '',
+        conjunto: '',
+        paciente: '',
+        info: '',
+        salvo: false,
+      };
+      localStorage.setItem('emptyForm', JSON.stringify(newEmptyForm));
+      forms.value.push(newEmptyForm);
+    } else {
+      // Adiciona o formulário vazio recuperado do localStorage
+      forms.value.push(emptyForm);
+    }
+  } catch (error) {
+    console.error('Erro ao carregar anotações:', error);
+    $q.notify({
+      color: 'red-5',
+      textColor: 'white',
+      icon: 'warning',
+      message: 'Erro ao carregar anotações',
+    });
+  }
 });
 
 onUnmounted(() => {
   clearInterval(intervalId);
 });
 
-const onSubmit = (index) => {
+const onSubmit = async (index) => {
+  const form = forms.value[index];
+
+  // Verifica se todos os campos obrigatórios estão preenchidos
   if (
-    forms.value[index].usuario === '' ||
-    forms.value[index].paciente === '' ||
-    forms.value[index].conjunto === '' ||
-    forms.value[index].info === ''
+    form.usuario === '' ||
+    form.paciente === '' ||
+    form.conjunto === '' ||
+    form.info === ''
   ) {
     $q.notify({
       color: 'red-5',
@@ -197,54 +233,120 @@ const onSubmit = (index) => {
       icon: 'warning',
       message: 'Por favor, preencha todos os campos',
     });
-  } else {
-    forms.value[index].salvo = true; // Marca a anotação como salva
-    forms.value.push({
-      data: new Date().toLocaleDateString(),
-      hora: new Date().toLocaleTimeString(),
-      usuario: localStorage.getItem('usuarioLogado') || '',
-      conjunto: '',
-      paciente: '',
-      info: '',
-      salvo: false, // Nova anotação não está salva
+    return; // Para de executar a função se algum campo estiver vazio
+  }
+
+  try {
+    // Cria uma nova anotação e salva
+    const savedForm = await AnnotationService.createAnnotation({
+      ...form,
+      data: form.data, // Certifica-se de que data está sendo passada
+      hora: form.hora, // Certifica-se de que hora está sendo passada
     });
+
+    // Atualiza o formulário salvo no array
+    forms.value[index] = { ...savedForm, salvo: true };
+
+    // Adiciona um novo formulário vazio apenas se todos os existentes estiverem salvos
+    const allFormsSaved = forms.value.every((form) => form.salvo);
+    if (allFormsSaved) {
+      forms.value.push({
+        data: dayjs().format('DD/MM/YYYY'),
+        hora: dayjs().format('HH:mm:ss'),
+        usuario: localStorage.getItem('usuarioLogado') || '',
+        conjunto: '',
+        paciente: '',
+        info: '',
+        salvo: false,
+      });
+    }
+
     $q.notify({
       color: 'green-4',
       textColor: 'white',
       icon: 'cloud_done',
       message: 'Salvo Com Sucesso',
     });
+  } catch (error) {
+    $q.notify({
+      color: 'red-5',
+      textColor: 'white',
+      icon: 'warning',
+      message: 'Erro ao salvar anotação',
+    });
   }
 };
-const onReset = (index) => {
-  if (forms.value.length > 1) {
-    forms.value.splice(index, 1);
-  } else {
-    forms.value[index].paciente = '';
-    forms.value[index].conjunto = '';
-    forms.value[index].info = '';
+
+const onReset = async (index) => {
+  try {
+    const form = forms.value[index];
+    if (form.id) {
+      console.log('Tentando arquivar anotação com ID:', form.id);
+      const response = await AnnotationService.archiveAnnotation(form.id);
+      console.log('Resposta da API:', response);
+
+      // Remover o formulário específico do array
+      forms.value.splice(index, 1);
+    } else {
+      console.log('Formulário não salvo, não será arquivado.');
+    }
+
+    // Se não houver formulários restantes ou só houver o formulário vazio, adicionar um formulário inicial vazio
+    if (
+      forms.value.length === 0 ||
+      (forms.value.length === 1 && !forms.value[0].salvo)
+    ) {
+      forms.value = [
+        {
+          data: dayjs().format('DD/MM/YYYY'),
+          hora: dayjs().format('HH:mm:ss'),
+          usuario: localStorage.getItem('usuarioLogado') || '',
+          conjunto: '',
+          paciente: '',
+          info: '',
+          salvo: false,
+        },
+      ];
+    }
+
+    $q.notify({
+      color: 'green-4',
+      textColor: 'white',
+      icon: 'cloud_done',
+      message: 'Anotação arquivada com sucesso',
+    });
+  } catch (error) {
+    console.error('Erro ao arquivar anotação:', error);
+    $q.notify({
+      color: 'red-5',
+      textColor: 'white',
+      icon: 'warning',
+      message: 'Erro ao arquivar anotação',
+    });
   }
 };
+
 const infoOptions = ['AG/2T', 'PS', 'PS/+1T', 'AG', 'AG/CF', 'AG/CM'];
 const colorClass = (info) => {
   switch (info) {
     case 'AG/2T':
-      return 'yellow-background'; // Amarelo
+      return 'yellow-background';
     case 'AG':
-      return 'red-background'; // Vermelho
+      return 'red-background';
     case 'AG/CM':
-      return 'green-background'; // Verde
+      return 'green-background';
     case 'PS':
-      return 'background'; // Branco
+      return 'background';
     case 'AG/CF':
-      return 'orange-background'; // Laranja
+      return 'orange-background';
     case 'PS/+1T':
-      return 'blue-background'; // Azul-royal
+      return 'blue-background';
     default:
-      return ''; // Caso padrão (sem cor específica)
+      return '';
   }
 };
 </script>
+
 <style scoped lang="scss">
 .row.items-start.justify-start {
   flex-direction: row;

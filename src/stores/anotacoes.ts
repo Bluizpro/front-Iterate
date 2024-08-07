@@ -1,4 +1,5 @@
 interface AnotacaoStorage {
+  id: string; // Novo campo de ID
   data: string;
   hora: string;
   conjunto: number;
@@ -8,24 +9,19 @@ interface AnotacaoStorage {
   info: string;
 }
 
-// Inicializa um objeto vazio para armazenar as anotações
-let anotacoes: AnotacaoStorage[] = [];
+// Função para gerar um ID único para cada anotação
+function gerarIdAnotacao(): string {
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
 
 // Função para salvar uma anotação no localStorage
 function salvarAnotacao(anotacao: AnotacaoStorage) {
+  // Gera um ID único para a nova anotação
+  anotacao.id = gerarIdAnotacao();
+
   // Adiciona a nova anotação à lista
   anotacoes.push(anotacao);
 
   // Salva a lista atualizada no localStorage
   localStorage.setItem('anotacoes', JSON.stringify(anotacoes));
-}
-
-// Função para carregar as anotações do localStorage
-function carregarAnotacoes() {
-  const savedAnotacoes = localStorage.getItem('anotacoes');
-
-  if (savedAnotacoes) {
-    // Converte a string salva de volta em uma lista de anotações
-    anotacoes = JSON.parse(savedAnotacoes);
-  }
 }

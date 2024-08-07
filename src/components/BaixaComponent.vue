@@ -62,7 +62,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useCondominosStore } from '../stores/condominosStore';
-import { Delivery } from '../components/Imodels';
+import { Delivery } from '../stores/Imodels';
 import { useQuasar } from 'quasar';
 import { useStore } from '../stores/example-store';
 import { useFuncionariosStore } from '../stores/funcionarioStore';

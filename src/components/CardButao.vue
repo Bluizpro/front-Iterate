@@ -30,7 +30,7 @@
 <script setup lang="ts">
 import { defineProps, type PropType } from 'vue';
 import { useStore } from '../stores/example-store';
-import { listData } from '../components/Imodels';
+import { listData } from '../stores/Imodels';
 import { useRouter } from 'vue-router';
 
 const store = useStore();

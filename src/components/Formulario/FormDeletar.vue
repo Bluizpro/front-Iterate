@@ -33,7 +33,9 @@ const $q = useQuasar();
 const encomendasStore = useEncomendasStore();
 
 const encomendaId = Number(router.currentRoute.value.params.id);
-const encomenda = encomendasStore.encomendas.find((e) => e.id === encomendaId);
+const encomenda = encomendasStore.encomendas.find(
+  (e: { id: number }) => e.id === encomendaId
+);
 
 const deletarEncomenda = () => {
   if (encomenda) {

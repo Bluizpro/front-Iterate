@@ -62,7 +62,7 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCondominosStore } from '../stores/condominosStore';
-import { Delivery } from '../components/Imodels';
+import { Delivery } from '../stores/Imodels';
 import { useStore } from '../stores/example-store';
 import { useQuasar } from 'quasar';
 import { useFuncionariosStore } from 'src/stores/funcionarioStore';
