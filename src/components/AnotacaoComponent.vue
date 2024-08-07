@@ -114,54 +114,6 @@ const paginatedForms = computed(() => {
 
 let intervalId;
 
-/* onMounted(async () => {
-  intervalId = setInterval(() => {
-    forms.value.forEach((form, index) => {
-      if (!form.salvo) {
-        forms.value[index].hora = dayjs().format('HH:mm:ss');
-      }
-    });
-  }, 1000);
-
-  try {
-    const loadedAnnotations = await AnnotationService.getAnnotations();
-
-    // Atualiza forms com as anotações carregadas
-    forms.value = loadedAnnotations;
-
-    // Recupera o formulário vazio do localStorage
-    const emptyForm = JSON.parse(localStorage.getItem('emptyForm') || '{}');
-    if (Object.keys(emptyForm).length === 0) {
-      // Adiciona um novo formulário vazio se não houver no localStorage
-      const newEmptyForm = {
-        data: dayjs().format('DD/MM/YYYY'),
-        hora: dayjs().format('HH:mm:ss'),
-        usuario: localStorage.getItem('usuarioLogado') || '',
-        conjunto: '',
-        paciente: '',
-        info: '',
-        salvo: false,
-      };
-      localStorage.setItem('emptyForm', JSON.stringify(newEmptyForm));
-      forms.value.push(newEmptyForm);
-    } else {
-      // Adiciona o formulário vazio recuperado do localStorage
-      forms.value.push(emptyForm);
-    }
-  } catch (error) {
-    console.error('Erro ao carregar anotações:', error);
-    $q.notify({
-      color: 'red-5',
-      textColor: 'white',
-      icon: 'warning',
-      message: 'Erro ao carregar anotações',
-    });
-  }
-});
-onUnmounted(() => {
-  clearInterval(intervalId);
-}); */
-
 onMounted(async () => {
   intervalId = setInterval(() => {
     forms.value.forEach((form, index) => {
