@@ -2,24 +2,47 @@
   <q-page>
     <div class="q-pa-md">
       <q-table
-        v-if="funcionariosStore && funcionariosStore.funcionarios"
         flat
         bordered
-        title="Lista de Funcionarios"
-        :rows="funcionariosStore.funcionarios"
+        title="Lista de Colaboradores"
+        :rows="
+          funcionariosStore.funcionarios.length > 0
+            ? funcionariosStore.funcionarios
+            : [{}]
+        "
         :columns="columns"
         row-key="conjunto"
         binary-state-sort
       >
         <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="dataCadastro" :props="props">{{
-              props.row.dataCadastro
-            }}</q-td>
-            <q-td key="conjunto" :props="props">{{ props.row.conjunto }}</q-td>
-            <q-td key="nome" :props="props">{{ props.row.nome }}</q-td>
-            <q-td key="setor" :props="props">{{ props.row.setor }}</q-td>
-            <q-td key="telefone" :props="props">{{ props.row.telefone }}</q-td>
+            <!-- Verifica se há dados no row -->
+            <q-td key="dataHora" :props="props">
+              <span v-if="props.row.dataHora">
+                {{ formatarData(props.row.dataHora) }}
+              </span>
+              <span v-else> Nenhum colaborador encontrado. </span>
+            </q-td>
+            <q-td key="conjunto" :props="props">
+              <span v-if="props.row.conjunto">
+                {{ props.row.conjunto }}
+              </span>
+            </q-td>
+            <q-td key="nome" :props="props">
+              <span v-if="props.row.nome">
+                {{ props.row.nome }}
+              </span>
+            </q-td>
+            <q-td key="setor" :props="props">
+              <span v-if="props.row.setor">
+                {{ props.row.setor }}
+              </span>
+            </q-td>
+            <q-td key="telefone" :props="props">
+              <span v-if="props.row.telefone">
+                {{ props.row.telefone }}
+              </span>
+            </q-td>
           </q-tr>
         </template>
       </q-table>
@@ -27,60 +50,74 @@
   </q-page>
 </template>
 
-<script setup lang="ts">
+<script setup>
+import { onMounted } from 'vue';
 import { useFuncionariosStore } from '../stores/funcionarioStore';
+import { getFuncionario } from '../services/funcionarioApi';
+
 const columns = [
   {
-    name: 'dataCadastro',
+    name: 'dataHora',
     label: 'Data de Cadastro',
     align: 'center',
-    field: 'dataCadastro', // Acessa a propriedade 'dataCadastro' do objeto da linha
-    format: (val) => `${val}`,
+    field: 'dataHora',
     sortable: true,
   },
   {
     name: 'conjunto',
     label: 'Conjunto',
     align: 'center',
-    field: 'conjunto', // Acessa a propriedade 'conjunto' do objeto da linha
-    format: (val) => `${val}`,
+    field: 'conjunto',
     sortable: true,
   },
   {
     name: 'nome',
     label: 'Nome',
     align: 'center',
-    field: 'nome', // Acessa a propriedade 'nome' do objeto da linha
-    format: (val) => `${val}`,
+    field: 'nome',
     sortable: true,
   },
   {
     name: 'setor',
     label: 'Setor',
     align: 'center',
-    field: 'setor', // Acessa a propriedade 'nome' do objeto da linha
-    format: (val) => `${val}`,
+    field: 'setor',
     sortable: true,
   },
   {
     name: 'telefone',
     label: 'Telefone',
-    field: 'telefone', // Acessa a propriedade 'telefone' do objeto da linha
+    field: 'telefone',
     align: 'left',
   },
-
-  // Adicione mais colunas conforme necessário
 ];
 
-const funcionariosStore = useFuncionariosStore(); // Use o funcionariosStore
-funcionariosStore.init(); // Inicialize o funcionariosStore para carregar os funcionarios do localStorage
+const funcionariosStore = useFuncionariosStore();
+
+onMounted(async () => {
+  try {
+    const funcionarios = await getFuncionario();
+    funcionariosStore.funcionarios = funcionarios;
+  } catch (error) {
+    console.error('Erro ao carregar funcionários:', error);
+  }
+});
+
+function formatarData(dataString) {
+  const data = new Date(dataString);
+  const dia = data.getDate().toString().padStart(2, '0');
+  const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+  const ano = data.getFullYear();
+  const horas = data.getHours().toString().padStart(2, '0');
+  const minutos = data.getMinutes().toString().padStart(2, '0');
+  const segundos = data.getSeconds().toString().padStart(2, '0');
+
+  return `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
+}
 </script>
+
 <style scoped>
 .q-table {
-  margin: 20px; /* Ajuste este valor conforme necessário */
-}
-.q-table td[name='setor'] {
-  padding-right: 3rem !important; /* Ajuste este valor conforme necessário */
+  margin: 20px;
 }
 </style>
-../stores/funcionarioStore

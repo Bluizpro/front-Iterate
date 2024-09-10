@@ -113,7 +113,7 @@ const chave = ref({
   dataDevolucao: '', // novo campo para data de devolução
   horaDevolucao: '', // novo campo para hora de devolução
   usuarioDevolucao: '',
-  assinatura: '',
+  /*   assinatura: '', */
 });
 const exibirModalAssinatura = ref(false);
 const chavesRetiradas = ref([]);

@@ -2,15 +2,24 @@ export interface listData {
   imagem: string[];
   tipo: string[];
 }
+// Em Imodels.ts ou onde você define suas interfaces
+// Aqui está uma representação de interface em JavaScript, não uma exportação real
+export const EncomendaConsulta = {
+  conjunto: String,
+  destinatario: String,
+  conteudo: String,
+  tipo: String, // Pode ser 'interno', 'sedex', ou 'externo'
+};
+
 interface Selecionavel {
   selecionado?: boolean;
-  dataBaixa?: Date; // Adicione esta linha
+  dataBaixa?: Date; // Campo adicionado
 }
 
 export interface EncomendaSedex extends Selecionavel {
   id: number;
-  data: string;
-  hora: string;
+  data: string; // Considere usar Date se possível
+  hora: string; // Considere usar Date se possível
   conjunto: string;
   destinatario: string;
   conteudo: string;
@@ -20,8 +29,8 @@ export interface EncomendaSedex extends Selecionavel {
 
 export interface EncomendaInterno extends Selecionavel {
   id: number;
-  data: string;
-  hora: string;
+  data: string; // Considere usar Date se possível
+  hora: string; // Considere usar Date se possível
   conjunto: string;
   destinatario: string;
   remetente: string;
@@ -32,8 +41,8 @@ export interface EncomendaInterno extends Selecionavel {
 
 export interface EncomendaExterno extends Selecionavel {
   id: number;
-  data: string;
-  hora: string;
+  data: string; // Considere usar Date se possível
+  hora: string; // Considere usar Date se possível
   conjunto: string;
   destinatario: string;
   conteudo: string;
@@ -48,10 +57,11 @@ export interface RetiradaChave {
   conjunto: string;
   usuario: string;
 }
+
 export interface DevolucaoChave {
   data: Date;
   hora: Date;
-  conjuto: string;
+  conjunto: string; // Corrigido de "conjuto" para "conjunto"
   usuario: string;
   usuarioDevolucao: string;
 }

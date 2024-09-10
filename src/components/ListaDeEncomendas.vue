@@ -5,15 +5,6 @@
     </div>
 
     <div class="q-pa-md">
-      <!--    <q-table
-        flat
-        bordered
-        title="Lista de Encomendas"
-        :rows="encomendas"
-        :columns="computedColumns"
-        row-key="id"
-        binary-state-sort
-      > -->
       <q-table
         flat
         bordered
@@ -31,21 +22,15 @@
               :props="props"
             >
               <template v-if="column.name === 'actions'">
-                <!--  <q-btn
-                  @click="editarItem(props.row)"
-                  color="positive"
-                  dense
-                  size="sm"
-                  ><q-icon name="update"
-                /></q-btn> -->
                 <q-btn
                   @click="deletarItem(props.row)"
                   class="q-ml-sm"
                   color="negative"
                   dense
                   size="sm"
-                  ><q-icon name="delete"
-                /></q-btn>
+                >
+                  <q-icon name="delete" />
+                </q-btn>
               </template>
               <template v-else>
                 {{ props.row[column.name] }}
@@ -58,23 +43,51 @@
   </q-page>
 </template>
 
-<script setup lang="ts">
-import { computed } from 'vue';
+<script setup>
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useCondominosStore } from '../stores/condominosStore';
-import { Delivery } from '../stores/Imodels';
 import { useStore } from '../stores/example-store';
 import { useQuasar } from 'quasar';
-import { useFuncionariosStore } from 'src/stores/funcionarioStore';
+import { getCorrespondenciasInternas } from '../services/encomenInterAPI';
+import { getCorrespondenciasSedex } from '../services/encomenSedexAPI';
+import { getCorrespondenciasExterno } from '../services/encomenExternoAPI';
 
 const router = useRouter();
 const $q = useQuasar();
-const useCondominos = useCondominosStore();
 const store = useStore();
-const tipoAtual = computed(() => store.formularioAtual);
-const useFuncionario = useFuncionariosStore();
 
-const colunasPorTipo: Record<string, string[]> = {
+const encomendas = ref([]); // Criar uma referência para armazenar as encomendas
+
+const tipoAtual = computed(() => store.formularioAtual);
+
+const carregarCorrespondencias = async (tipo) => {
+  try {
+    let dados;
+    if (tipo === 'interno') {
+      dados = await getCorrespondenciasInternas();
+    } else if (tipo === 'sedex') {
+      dados = await getCorrespondenciasSedex();
+    } else if (tipo === 'externo') {
+      dados = await getCorrespondenciasExterno();
+    } else {
+      throw new Error(`Tipo desconhecido: ${tipo}`);
+    }
+
+    // Adiciona o tipo de encomenda a cada item
+    encomendas.value = dados.map((item) => ({
+      ...item,
+      tipo, // Adiciona o tipo ao item
+    }));
+  } catch (error) {
+    console.error('Erro ao carregar correspondências:', error);
+  }
+};
+
+onMounted(async () => {
+  await carregarCorrespondencias(tipoAtual.value); // Carregar com base no tipo atual
+});
+
+const colunasPorTipo = {
   interno: [
     'data',
     'hora',
@@ -105,11 +118,10 @@ const computedColumns = computed(() => {
   return [
     ...colunas.map((coluna) => ({
       name: coluna,
-      label: coluna.charAt(0).toUpperCase() + coluna.slice(1), // primeira letra maiúscula
+      label: coluna.charAt(0).toUpperCase() + coluna.slice(1),
       align: 'left',
       required: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      field: (row: any) => row[coluna],
+      field: (row) => row[coluna],
       sortable: true,
     })),
     {
@@ -122,55 +134,15 @@ const computedColumns = computed(() => {
     },
   ];
 });
-
-const encomendas = computed(() => {
-  const tipo = tipoAtual.value;
-  const encomendasCondominos = useCondominos.condominos.reduce(
-    (acc: Delivery[], condomino) => {
-      acc.push(
-        ...condomino.encomendas.filter((encomenda) => encomenda.tipo === tipo)
-      );
-      return acc;
-    },
-    []
-  );
-
-  const encomendasFuncionarios = useFuncionario.funcionarios.reduce(
-    (acc: Delivery[], funcionario) => {
-      acc.push(
-        ...funcionario.encomendas.filter((encomenda) => encomenda.tipo === tipo)
-      );
-      return acc;
-    },
-    []
-  );
-
-  return [...encomendasCondominos, ...encomendasFuncionarios];
-});
-
-/* const editarItem = (item: any) => {
-  router.push(`/editar-encomenda/${item.id}`);
-}; */
-
-/* const deletarItem = (item: any) => {
+const deletarItem = (item) => {
   $q.dialog({
     title: 'Deletar',
-    message: 'Você Deseja realmente deletar?',
+    message: `Você deseja realmente deletar a encomenda do tipo ${item.tipo}?`,
     cancel: true,
     persistent: true,
   }).onOk(() => {
-    router.push(`/deletar-encomenda/${item.id}`);
-  });
-}; */
-const deletarItem = (item: Delivery) => {
-  $q.dialog({
-    title: 'Deletar',
-    message: 'Você Deseja realmente deletar?',
-    cancel: true,
-    persistent: true,
-  }).onOk(() => {
-    router.push(`/deletar-encomenda/${item.id}`);
+    // Redireciona para a página de deleção passando o id e o tipo da encomenda
+    router.push(`/deletar-encomenda/${item.tipo}/${item.id}`);
   });
 };
 </script>
-../stores/condominosStore src/stores/funcionarioStore

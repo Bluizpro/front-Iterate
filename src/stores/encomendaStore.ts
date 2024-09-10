@@ -1,24 +1,55 @@
+// src/stores/encomendaStore.ts
+
 import { defineStore } from 'pinia';
-import { Delivery } from 'src/components/Imodels';
 import { watch } from 'vue';
+import {
+  createCorrespondenciaInterno,
+  getCorrespondenciasInternas,
+  updateCorrespondenciaInterno,
+  deleteCorrespondenciaInterno,
+} from '../services/encomenInterAPI';
+
+import {
+  createCorrespondenciaExterno,
+  getCorrespondenciasExterno,
+  updateCorrespondenciaExterno,
+  deleteCorrespondenciaExterno,
+} from '../services/encomenExternoAPI';
+
+import {
+  getCorrespondenciaSedexById,
+  deleteCorrespondenciaSedex,
+} from '../services/encomenSedexAPI';
+
+export interface Delivery {
+  id: number;
+  tipo: string; // 'interno', 'externo', 'sedex'
+  [key: string]: any;
+}
 
 export interface EncomendasState {
-  encomendas: Delivery[];
+  encomendasInternas: Delivery[];
+  encomendasExternas: Delivery[];
+  encomendasSedex: Delivery[];
 }
 
 export const useEncomendasStore = defineStore('encomendasStore', {
   state: (): EncomendasState => ({
-    encomendas: [],
+    encomendasInternas: [],
+    encomendasExternas: [],
+    encomendasSedex: [],
   }),
+
   actions: {
     init() {
       const savedState = localStorage.getItem('encomendasStore');
       if (savedState) {
-        this.encomendas = JSON.parse(savedState);
+        const parsedState = JSON.parse(savedState);
+        this.$patch(parsedState);
       }
 
       watch(
-        () => this.encomendas,
+        () => this.$state,
         (newState) => {
           localStorage.setItem('encomendasStore', JSON.stringify(newState));
         },
@@ -26,52 +57,74 @@ export const useEncomendasStore = defineStore('encomendasStore', {
       );
     },
 
-    adicionarEncomenda(encomenda: Delivery) {
-      this.$patch((state) => {
-        state.encomendas.push(encomenda);
-      });
+    async fetchEncomendasInternas() {
+      this.encomendasInternas = await getCorrespondenciasInternas();
     },
-    // e aqui deleta encomenda
-    deletarEncomenda(id: number) {
-      this.$patch((state) => {
-        const index = state.encomendas.findIndex(
-          (encomenda) => encomenda.id === id
-        );
-        if (index !== -1) {
-          state.encomendas.splice(index, 1);
-        }
-      });
+
+    async fetchEncomendasExternas() {
+      this.encomendasExternas = await getCorrespondenciasExterno();
     },
-    //aqui da baixa na encomenda
-    removerEncomenda(id: number) {
-      this.$patch((state) => {
-        const index = state.encomendas.findIndex(
-          (encomenda) => encomenda.id === id
-        );
-        if (index !== 1) {
-          state.encomendas.splice(index, 1);
-        }
-      });
+
+    async fetchEncomendasSedex(id: number) {
+      const encomenda = await getCorrespondenciaSedexById(id);
+      this.encomendasSedex.push(encomenda);
     },
-    atualizarEncomenda(id: number, encomendaEditada: Delivery) {
-      const index = this.encomendas.findIndex((e) => e.id === id);
+
+    async adicionarEncomendaInterna(encomenda: Delivery) {
+      const novaEncomenda = await createCorrespondenciaInterno(encomenda);
+      this.encomendasInternas.push(novaEncomenda);
+    },
+
+    async adicionarEncomendaExterna(encomenda: Delivery) {
+      const novaEncomenda = await createCorrespondenciaExterno(encomenda);
+      this.encomendasExternas.push(novaEncomenda);
+    },
+
+    async atualizarEncomendaInterna(id: number, encomendaEditada: Delivery) {
+      await updateCorrespondenciaInterno(id, encomendaEditada);
+      const index = this.encomendasInternas.findIndex((e) => e.id === id);
       if (index !== -1) {
-        this.encomendas[index] = encomendaEditada;
+        this.encomendasInternas[index] = encomendaEditada;
       }
     },
+
+    async atualizarEncomendaExterna(id: number, encomendaEditada: Delivery) {
+      await updateCorrespondenciaExterno(id, encomendaEditada);
+      const index = this.encomendasExternas.findIndex((e) => e.id === id);
+      if (index !== -1) {
+        this.encomendasExternas[index] = encomendaEditada;
+      }
+    },
+
+    async deletarEncomendaInterna(id: number) {
+      await deleteCorrespondenciaInterno(id);
+      this.encomendasInternas = this.encomendasInternas.filter(
+        (e) => e.id !== id
+      );
+    },
+
+    async deletarEncomendaExterna(id: number) {
+      await deleteCorrespondenciaExterno(id);
+      this.encomendasExternas = this.encomendasExternas.filter(
+        (e) => e.id !== id
+      );
+    },
+
+    async deletarEncomendaSedex(id: number) {
+      await deleteCorrespondenciaSedex(id);
+      this.encomendasSedex = this.encomendasSedex.filter((e) => e.id !== id);
+    },
   },
+
   getters: {
-    getQuantidadeEncomendasInterno(): number {
-      return this.encomendas.filter((encomenda) => encomenda.tipo === 'interno')
-        .length;
+    getTotalEncomendasInternas(state): number {
+      return state.encomendasInternas.length;
     },
-    getQuantidadeEncomendasSedex(): number {
-      return this.encomendas.filter((encomenda) => encomenda.tipo === 'sedex')
-        .length;
+    getTotalEncomendasExternas(state): number {
+      return state.encomendasExternas.length;
     },
-    getQuantidadeEncomendasExterno(): number {
-      return this.encomendas.filter((encomenda) => encomenda.tipo === 'externo')
-        .length;
+    getTotalEncomendasSedex(state): number {
+      return state.encomendasSedex.length;
     },
   },
 });

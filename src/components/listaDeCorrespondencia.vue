@@ -1,140 +1,165 @@
 <template>
   <q-page>
-    <div class="q-pa-md">
-      <div class="search-container">
-        <label
-          style="font-size: 1.5em; text-align: center"
-          for="search"
-          class="search-label"
-        >
-        </label>
-        <div class="search-input">
-          <input id="search" type="text" v-model="search" />
-          <i class="material-icons search-icon" v-if="!search">search</i>
+    <div class="border">
+      <div class="q-pa-md">
+        <div class="search-container">
+          <label
+            style="font-size: 1.5em; text-align: center"
+            for="search"
+            class="search-label"
+          >
+          </label>
+          <div class="search-input">
+            <input id="search" type="text" v-model="search" />
+            <i class="material-icons search-icon" v-if="!search">search</i>
+          </div>
         </div>
+        <q-table
+          v-if="filteredEncomendas.length > 0"
+          flat
+          bordered
+          title="Lista de Correspondências"
+          :rows="filteredEncomendas"
+          :columns="computedColumns"
+          row-key="id"
+          binary-state-sort
+        />
+        <div v-else>{{ noEncomendasMessage }}</div>
       </div>
-      <q-table
-        v-if="filteredEncomendas.length > 0"
-        flat
-        bordered
-        title="Lista de Correspondências"
-        :rows="filteredEncomendas"
-        :column="computedColumns"
-        row-key="id"
-        binary-state-sort
-      />
-      <div v-else>{{ noEncomendasMessage }}</div>
     </div>
   </q-page>
 </template>
 
-<script setup lang="ts">
-import { computed, ref } from 'vue';
-import {
-  useCondominosStore,
-  EncomendaConsulta,
-} from '../stores/condominosStore';
+<script>
+import { ref, computed, watchEffect } from 'vue';
+import { useCondominosStore } from '../stores/condominosStore';
 import { useFuncionariosStore } from '../stores/funcionarioStore';
+import { EncomendaConsulta } from '../stores/Imodels';
+// Certifique-se de que esta importação está correta
 
-const useCondominos = useCondominosStore();
-const search = ref('');
-const useFuncionario = useFuncionariosStore();
+export default {
+  setup() {
+    const useCondominos = useCondominosStore();
+    const search = ref('');
+    const useFuncionario = useFuncionariosStore();
 
-function getEncomendasInternasESedex(): EncomendaConsulta[] {
-  let encomendasCondominos = useCondominos.condominos.reduce(
-    (acc: EncomendaConsulta[], condomino) => {
-      acc.push(
-        ...condomino.encomendas
-          .filter(
-            (encomenda) =>
-              encomenda.tipo === 'interno' || encomenda.tipo === 'sedex'
-          )
-          .map((encomenda) => ({
-            conjunto: encomenda.conjunto,
-            destinatario: encomenda.destinatario,
-            conteudo: encomenda.conteudo,
-            tipo: encomenda.tipo,
-          }))
+    function getEncomendasInternasESedex() {
+      let encomendasCondominos = useCondominos.condominos.reduce(
+        (acc, condomino) => {
+          if (condomino.encomendas) {
+            acc.push(
+              ...condomino.encomendas
+                .filter(
+                  (encomenda) =>
+                    encomenda.tipo === 'interno' || encomenda.tipo === 'sedex'
+                )
+                .map((encomenda) => ({
+                  conjunto: encomenda.conjunto,
+                  destinatario: encomenda.destinatario,
+                  conteudo: encomenda.conteudo,
+                  tipo: encomenda.tipo,
+                }))
+            );
+          }
+          return acc;
+        },
+        []
       );
-      return acc;
-    },
-    []
-  );
 
-  let encomendasFuncionarios = useFuncionario.funcionarios.reduce(
-    (acc: EncomendaConsulta[], funcionario) => {
-      acc.push(
-        ...funcionario.encomendas
-          .filter(
-            (encomenda) =>
-              encomenda.tipo === 'interno' || encomenda.tipo === 'sedex'
-          )
-          .map((encomenda) => ({
-            conjunto: encomenda.conjunto,
-            destinatario: encomenda.destinatario,
-            conteudo: encomenda.conteudo,
-            tipo: encomenda.tipo,
-          }))
+      let encomendasFuncionarios = useFuncionario.funcionarios.reduce(
+        (acc, funcionario) => {
+          if (funcionario.encomendas) {
+            acc.push(
+              ...funcionario.encomendas
+                .filter(
+                  (encomenda) =>
+                    encomenda.tipo === 'interno' || encomenda.tipo === 'sedex'
+                )
+                .map((encomenda) => ({
+                  conjunto: encomenda.conjunto,
+                  destinatario: encomenda.destinatario,
+                  conteudo: encomenda.conteudo,
+                  tipo: encomenda.tipo,
+                }))
+            );
+          }
+          return acc;
+        },
+        []
       );
-      return acc;
-    },
-    []
-  );
 
-  return [...encomendasCondominos, ...encomendasFuncionarios];
-}
+      return [...encomendasCondominos, ...encomendasFuncionarios];
+    }
 
-const encomendasConsulta = computed(getEncomendasInternasESedex);
-const noEncomendasMessage = computed(() => {
-  return filteredEncomendas.value.length === 0 ? 'Não há encomendas.' : '';
-});
+    // Computed properties
+    const encomendasConsulta = computed(() => getEncomendasInternasESedex());
 
-const filteredEncomendas = computed(() => {
-  const searchValue = search.value.toLowerCase().trim();
-  return encomendasConsulta.value.filter(
-    (encomenda) =>
-      encomenda.conjunto.toLowerCase().includes(searchValue) ||
-      encomenda.destinatario.toLowerCase().includes(searchValue)
-  );
-});
+    const filteredEncomendas = computed(() => {
+      const searchValue = search.value.toLowerCase().trim();
+      return encomendasConsulta.value.filter(
+        (encomenda) =>
+          encomenda.conjunto.toLowerCase().includes(searchValue) ||
+          encomenda.destinatario.toLowerCase().includes(searchValue)
+      );
+    });
 
-const computedColumns = computed(() => {
-  return [
-    {
-      name: 'conjunto',
-      label: 'Conjunto',
-      align: 'left',
-      required: true,
-      field: 'conjunto',
-      sortable: true,
-    },
-    {
-      name: 'destinatario',
-      label: 'Destinatario',
-      align: 'left',
-      required: true,
-      field: 'destinatario',
-      sortable: true,
-    },
-    {
-      name: 'conteudo',
-      label: 'Conteúdo',
-      align: 'left',
-      required: true,
-      field: 'conteudo',
-      sortable: true,
-    },
-    {
-      name: 'tipo',
-      label: 'Tipo',
-      align: 'left',
-      required: true,
-      field: 'tipo',
-      sortable: true,
-    },
-  ];
-});
+    const noEncomendasMessage = computed(() => {
+      return filteredEncomendas.value.length === 0 ? 'Não há encomendas.' : '';
+    });
+
+    const computedColumns = computed(() => {
+      return [
+        {
+          name: 'conjunto',
+          label: 'Conjunto',
+          align: 'left',
+          required: true,
+          field: 'conjunto',
+          sortable: true,
+        },
+        {
+          name: 'destinatario',
+          label: 'Destinatário',
+          align: 'left',
+          required: true,
+          field: 'destinatario',
+          sortable: true,
+        },
+        {
+          name: 'conteudo',
+          label: 'Conteúdo',
+          align: 'left',
+          required: true,
+          field: 'conteudo',
+          sortable: true,
+        },
+        {
+          name: 'tipo',
+          label: 'Tipo',
+          align: 'left',
+          required: true,
+          field: 'tipo',
+          sortable: true,
+        },
+      ];
+    });
+
+    // Initialize data on mount
+    watchEffect(() => {
+      useCondominos.init(); // Certifique-se de que há um método init() em useCondominos
+      useFuncionario.init(); // Certifique-se de que há um método init() em useFuncionario
+    });
+
+    return {
+      search,
+      filteredEncomendas,
+      noEncomendasMessage,
+      computedColumns,
+    };
+  },
+};
 </script>
+
 <style scoped lang="scss">
 .search-container {
   display: flex;
@@ -170,5 +195,12 @@ const computedColumns = computed(() => {
   top: 7px;
   font-size: 23px;
 }
+.border {
+  border: 1px solid #000 !important;
+  margin-left: 4rem;
+  margin-top: 2rem;
+  margin-right: 5rem;
+  padding: 5rem;
+  background-color: rgb(235 208 208 / 20%);
+}
 </style>
-../stores/condominosStore src/stores/funcionarioStore

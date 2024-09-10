@@ -1,44 +1,45 @@
 <template>
   <div class="border">
     <div class="search-container">
-      <label
-        style="font-size: 1.5em; text-align: center"
-        for="search"
-        class="search-label"
-        >Pesquisar:</label
-      >
+      <label for="search" class="search-label">Pesquisar:</label>
       <div class="search-input">
-        <input id="search" type="text" v-model="search" />
-        <i class="material-icons search-icon" v-if="!search">search</i>
+        <input
+          id="search"
+          type="text"
+          v-model="search"
+          aria-label="Campo de pesquisa"
+        />
+        <i class="material-icons search-icon" v-if="!search" aria-hidden="true"
+          >search</i
+        >
       </div>
     </div>
     <div class="cards-container">
-      <div v-if="message">{{ message }}</div>
+      <div v-if="message" class="message">{{ message }}</div>
       <div
         class="key-container border"
         v-for="key in paginatedKeys"
         :key="key"
-        @click="
-          isKeyAvailableAndNotRegistered(key.toString())
-            ? handleClick(key)
-            : null
-        "
+        @click="handleCardClick(key)"
         :class="{
           selected: selectedKey === key,
           disabled: !isKeyAvailableAndNotRegistered(key.toString()),
         }"
+        tabindex="0"
+        role="button"
       >
         <div>Chave {{ key }}</div>
         <i class="material-icons" style="font-size: 36px">key</i>
         <input
           type="checkbox"
           v-model="selectedKeys[key]"
-          :checked="!isKeyAvailableAndNotRegistered(key.toString())"
-          :style="{ backgroundColor: selectedKeys[key] ? 'red' : '' }"
+          :checked="selectedKeys[key]"
+          :style="{ backgroundColor: selectedKeys[key] ? '#ff0000' : '' }"
+          aria-label="Selecionar chave"
         />
       </div>
     </div>
-    <div class="q-pa-lg flex flex-center">
+    <div class="pagination-container">
       <q-pagination
         v-model="currentPage"
         :max="totalPages"
@@ -56,13 +57,13 @@
         rounded
         color="indigo-14"
         class="register-button"
-        v-on:click="listachave()"
+        @click="navigateToListaChave"
       />
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRetiradaChaveStore } from '../stores/retirada-chave';
@@ -76,13 +77,13 @@ const keys = Array.from({ length: 128 }, (_, i) => i + 11).filter(
 const currentPage = ref(1);
 const keysPerPage = 16;
 const search = ref('');
-let selectedKeys = ref<Record<number, boolean>>({});
+let selectedKeys = ref({});
 let message = ref('');
-let selectedKey = ref<number | null>(null);
+let selectedKey = ref(null);
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredKeys.value.length / keysPerPage);
-});
+const totalPages = computed(() =>
+  Math.ceil(filteredKeys.value.length / keysPerPage)
+);
 
 const paginatedKeys = computed(() => {
   const start = (currentPage.value - 1) * keysPerPage;
@@ -92,46 +93,35 @@ const paginatedKeys = computed(() => {
 
 const filteredKeys = computed(() => {
   if (search.value) {
-    return keys.filter((key) => key.toString() === search.value.trim());
+    return keys.filter((key) => key.toString().includes(search.value.trim()));
   }
   return keys;
 });
 
 watch(search, () => {
-  if (search.value && filteredKeys.value.length === 0) {
-    message.value = 'Chave não encontrada';
-  } else {
-    message.value = '';
-  }
+  message.value = filteredKeys.value.length ? '' : 'Chave não encontrada';
 });
 
-/* const isKeyRegistered = (key: number) => {
-  let item = localStorage.getItem('chavesRetiradas');
-  let chavesRetiradas = item ? JSON.parse(item) : [];
-  return chavesRetiradas.some(
-    (chave: any) => chave.conjunto === key.toString()
-  );
-}; */
-const isKeyRegistered = (key: number) => {
-  let item = localStorage.getItem('chavesRetiradas');
-  let chavesRetiradas: { conjunto: string }[] = item ? JSON.parse(item) : [];
-  return chavesRetiradas.some(
-    (chave: { conjunto: string }) => chave.conjunto === key.toString()
-  );
+const isKeyRegistered = (key) => {
+  const item = localStorage.getItem('chavesRetiradas');
+  const chavesRetiradas = item ? JSON.parse(item) : [];
+  return chavesRetiradas.some((chave) => chave.conjunto === key.toString());
 };
 
-const isKeyAvailableAndNotRegistered = (key: string) => {
+const isKeyAvailableAndNotRegistered = (key) => {
   return (
     retiradaChaveStore.isKeyAvailable(key) && !isKeyRegistered(Number(key))
   );
 };
 
-const handleClick = (key: number) => {
-  selectedKey.value = key;
-  router.push({ name: 'RetiradaChaves', params: { key: key.toString() } });
+const handleCardClick = (key) => {
+  if (isKeyAvailableAndNotRegistered(key.toString())) {
+    selectedKey.value = key;
+    router.push({ name: 'RetiradaChaves', params: { key: key.toString() } });
+  }
 };
 
-const listachave = () => {
+const navigateToListaChave = () => {
   router.push({ name: 'listaChave' });
 };
 </script>
@@ -141,13 +131,12 @@ const listachave = () => {
   border: 1px solid #000;
   margin-left: 2rem;
   margin-right: 1rem;
-  background-color: rgb(235 208 208 / 20%);
+  background-color: rgba(235, 208, 208, 0.2);
 }
 
 .search-container {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
   margin-top: 3rem;
 }
 
@@ -159,15 +148,15 @@ const listachave = () => {
 .search-input {
   position: relative;
   width: 8rem;
-  color: #000;
 }
 
 #search {
   width: 100%;
   height: 2rem;
   padding-left: 2rem;
-  text-align: left;
   background-color: #d9d2d2;
+  border: none;
+  border-radius: 4px;
 }
 
 .search-icon {
@@ -177,9 +166,6 @@ const listachave = () => {
   font-size: 23px;
 }
 
-.search-container i {
-  margin-left: 0rem;
-}
 .cards-container {
   display: flex;
   justify-content: center;
@@ -199,35 +185,45 @@ const listachave = () => {
   width: 10rem;
   height: 5rem;
   cursor: pointer;
-  position: relative; /* Para posicionar o checkbox */
-}
-.key-container.selected {
-  background-color: rgb(19, 59, 241);
+  position: relative;
+  transition: background-color 0.3s ease;
 }
 
-.checkbox {
-  position: absolute;
-  bottom: 5px; /* Ajuste conforme necessário */
-  right: 5px; /* Ajuste conforme necessário */
+.key-container.disabled {
+  background-color: #e25555;
+  cursor: not-allowed;
 }
-.q-pa-lg.flex.flex-center {
+
+.key-checkbox {
+  margin-top: 0.5rem;
+}
+
+.pagination-container {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 5px;
   margin-top: 10px;
 }
+
 .button-container {
-  padding: 10px; /* Ajuste o valor conforme necessário */
+  padding: 10px;
   margin-left: 2rem;
 }
-.key-container {
-  transition: background-color 0.3s ease;
+
+.message {
+  color: red;
+  font-weight: bold;
+  text-align: center;
 }
-.selected {
-  background-color: rgb(19, 59, 241);
-}
-.key-container.disabled {
-  background-color: red; /* ou qualquer cor que você preferir */
+
+@media (max-width: 768px) {
+  .search-input {
+    width: 100%;
+  }
+  .key-container {
+    width: 100%;
+    height: auto;
+  }
 }
 </style>

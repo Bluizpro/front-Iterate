@@ -5,7 +5,7 @@
         v-if="visitantesStore && visitantesStore.visitantes"
         flat
         bordered
-        title="Lista de Visitante"
+        title="Lista de Visitantes"
         :rows="visitantesStore.visitantes"
         :columns="columns"
         row-key="conjunto"
@@ -13,13 +13,12 @@
       >
         <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="dataCadastro" :props="props">{{
-              props.row.dataCadastro
-            }}</q-td>
+            <q-td key="dataHora" :props="props">
+              {{ formatarData(props.row.dataHora) }}
+            </q-td>
             <q-td key="conjunto" :props="props">{{ props.row.conjunto }}</q-td>
-
             <q-td key="nome" :props="props">{{ props.row.nome }}</q-td>
-            <q-td key="cpf" :props="props">{{ props.row.cpf }}</q-td>
+            <!-- Remover a coluna de CPF -->
             <q-td key="autorizacao" :props="props">{{
               props.row.autorizacao
             }}</q-td>
@@ -31,59 +30,79 @@
   </q-page>
 </template>
 
-<script setup>
-import { useVisitantesStore } from '../stores/visitanteStorage';
+<script setup lang="ts">
+import { useVisitantesStore } from '../stores/visitanteStore'; // Certifique-se de que o caminho está correto
+
 const columns = [
   {
-    name: 'dataCadastro',
+    name: 'dataHora',
     label: 'Data de Cadastro',
     align: 'center',
-    field: 'dataCadastro', // Acessa a propriedade 'dataCadastro' do objeto da linha
-    format: (val) => `${val}`,
+    field: 'dataHora',
     sortable: true,
   },
   {
     name: 'conjunto',
-    label: 'numero do Conjunto',
+    label: 'Número do Conjunto',
     align: 'center',
-    field: 'conjunto', // Acessa a propriedade 'conjunto' do objeto da linha
-    format: (val) => `${val}`,
+    field: 'conjunto',
     sortable: true,
   },
   {
     name: 'nome',
-    label: 'nome Completo',
+    label: 'Nome Completo',
     align: 'center',
-    field: 'nome', // Acessa a propriedade 'nomeCompleto' do objeto da linha
-    format: (val) => `${val}`,
+    field: 'nome',
     sortable: true,
   },
-  {
-    name: 'cpf',
-    label: 'CPF ou RG',
-    align: 'center',
-    field: 'cpf',
-    format: (val) => (val ? '*'.repeat(val.length) : ''), // Verifica se o valor existe antes de repetir o asterisco
-    sortable: true,
-  },
+  // Remover a coluna de CPF
   {
     name: 'autorizacao',
     label: 'Autorização',
     align: 'center',
-    field: 'autorizacao', // Acessa a propriedade 'autorizacao' do objeto da linha
-    format: (val) => `${val}`,
+    field: 'autorizacao',
     sortable: true,
   },
   {
     name: 'empresa',
     label: 'Empresa',
     align: 'center',
-    field: 'empresa', // Acessa a propriedade 'empresa' do objeto da linha
-    format: (val) => `${val}`,
+    field: 'empresa',
     sortable: true,
   },
 ];
 
-const visitantesStore = useVisitantesStore(); // Use o visitantesStore
+const visitantesStore = useVisitantesStore();
 visitantesStore.init(); // Inicialize o visitantesStore para carregar os visitantes do localStorage
+
+// Função para formatar a data
+function formatarData(dataString: string): string {
+  const data = new Date(dataString);
+  if (isNaN(data.getTime())) {
+    // Verifica se a data é inválida
+    return '';
+  }
+  const dia = data.getDate().toString().padStart(2, '0');
+  const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+  const ano = data.getFullYear();
+  return `${dia}/${mes}/${ano}`;
+}
 </script>
+
+<style scoped>
+.q-table {
+  margin: 20px;
+}
+.q-table td[name='setor'] {
+  padding-right: 3rem !important;
+}
+</style>
+
+<style scoped>
+.q-table {
+  margin: 20px;
+}
+.q-table td[name='setor'] {
+  padding-right: 3rem !important;
+}
+</style>

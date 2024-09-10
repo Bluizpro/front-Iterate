@@ -90,9 +90,10 @@ const routes = [
         component: () => import('pages/CravicularioPage.vue'),
       },
       {
-        path: '/deletar-encomenda/:id?',
+        path: '/deletar-encomenda/:tipo/:id',
         component: () => import('pages/DeletarEncomenda.vue'),
       },
+
       {
         path: '/editar-encomenda/:id?',
         component: () => import('pages/AtualizarEncomenda.vue'),
@@ -112,6 +113,11 @@ const routes = [
         path: '/baixa-chave/:conjunto',
         name: 'BaixaChave',
         component: () => import('src/components/Formulario/FormBaixaChave.vue'),
+      },
+      {
+        path: '/locatario',
+        name: 'LocatarioForm',
+        component: () => import('src/components/Formulario/FormLocatario.vue'),
       },
     ],
   },

@@ -11,7 +11,7 @@
 import CardButao from 'src/components/CardButao.vue';
 import { ref } from 'vue';
 import { useStore } from '../stores/example-store';
-import { listData } from '../components/Imodels';
+import { listData } from '../stores/Imodels';
 import FormVisitante from 'src/components/Formulario/FormVisitante.vue';
 import FormCondomino from 'src/components/Formulario/FormCondomino.vue';
 import FormFuncionario from 'src/components/Formulario/FormFuncionario.vue';

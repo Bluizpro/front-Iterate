@@ -39,7 +39,7 @@
                     <div>Data: {{ chave.data }}</div>
                     <div>Hora: {{ chave.hora }}</div>
                     <div>Usuário: {{ chave.usuario }}</div>
-                    <img :src="chave.assinatura" alt="Assinatura do usuário" />
+                    <!--  <img :src="chave.assinatura" alt="Assinatura do usuário" /> -->
                   </q-card-section>
                 </q-card>
               </div>

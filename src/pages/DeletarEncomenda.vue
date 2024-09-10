@@ -45,7 +45,11 @@
       label="Justificativa"
       counter
       hint="Digite uma justificativa com pelo menos 20 caracteres"
-      :rules="[(val:string) => val && val.length >= 20 || 'A justificativa deve ter no mínimo 20 caracteres']"
+      :rules="[
+        (val) =>
+          (val && val.length >= 20) ||
+          'A justificativa deve ter no mínimo 20 caracteres',
+      ]"
     />
   </q-page>
   <q-page v-else>
@@ -53,24 +57,33 @@
   </q-page>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { useRouter } from 'vue-router';
-import { useEncomendasStore } from '../stores/encomendaStore';
 import { useQuasar } from 'quasar';
-import { ref, onBeforeUnmount } from 'vue';
-import { useCondominosStore } from 'src/stores/condominosStore';
-import { useFuncionariosStore } from 'src/stores/funcionarioStore';
+import { ref, onBeforeUnmount, onMounted } from 'vue';
+import {
+  deleteCorrespondenciaInterno,
+  getCorrespondenciaInternaById,
+} from '../services/encomenInterAPI';
+import {
+  deleteCorrespondenciaExterno,
+  getCorrespondenciaExternoById,
+} from '../services/encomenExternoAPI';
+import {
+  deleteCorrespondenciaSedex,
+  getCorrespondenciaSedexById,
+} from '../services/encomenSedexAPI';
 
 const $router = useRouter();
 const $q = useQuasar();
-const useEncomendas = useEncomendasStore();
-const useCondominos = useCondominosStore();
-const useFuncionarios = useFuncionariosStore();
+const tipoEncomenda = $router.currentRoute.value.params.tipo; // Tipo da encomenda
+const encomendaId = Number($router.currentRoute.value.params.id); // ID da encomenda
+const encomenda = ref(null); // Dados da encomenda
+const justificativa = ref(''); // Justificativa da deleção
 
-const encomendaId = Number($router.currentRoute.value.params.id);
+let timer = null;
 
-let timer: NodeJS.Timeout | null = null;
-
+// Função para esconder o loader ao desmontar o componente
 onBeforeUnmount(() => {
   if (timer !== null) {
     clearTimeout(timer);
@@ -78,60 +91,73 @@ onBeforeUnmount(() => {
   }
 });
 
+// Funções para exibir/esconder o loading
 const showLoading = () => {
   $q.loading.show();
 };
+
 const hideLoading = () => {
   $q.loading.hide();
 };
 
-//capturando a encomenda
-const encomenda = useEncomendas.encomendas.find(
-  (encomenda) => encomenda.id === encomendaId
-);
-
-let justificativa = ref('');
-
-const deletarEncomenda = async () => {
+const fetchEncomenda = async () => {
   showLoading();
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  // Encontrar a encomenda no array de encomendas
-  const encomenda = useEncomendas.encomendas.find(
-    (encomenda) => encomenda.id === encomendaId
-  );
-  if (encomenda) {
-    var index = 1;
-    const condomino = useCondominos.condominos.find((condomino) => {
-      index = condomino.encomendas.indexOf(encomenda);
-      return index !== -1;
-    });
-    const funcionario = useFuncionarios.funcionarios.find((funcionario) => {
-      index = funcionario.encomendas.indexOf(encomenda);
-      return index !== -1;
-    });
-    if (condomino) {
-      condomino.encomendas.splice(index, 1);
-      condomino.encomendas = [...condomino.encomendas]; // Criar uma nova cópia do array
-      useEncomendas.deletarEncomenda(encomenda.id); // Atualizar a contagem de encomendas
-    } else if (funcionario) {
-      funcionario.encomendas.splice(index, 1);
-      funcionario.encomendas = [...funcionario.encomendas]; // Criar uma nova cópia do array
-      useEncomendas.deletarEncomenda(encomenda.id); // Atualizar a contagem de encomendas
+  try {
+    if (tipoEncomenda === 'interno') {
+      encomenda.value = await getCorrespondenciaInternaById(encomendaId);
+    } else if (tipoEncomenda === 'externo') {
+      encomenda.value = await getCorrespondenciaExternoById(encomendaId);
+    } else if (tipoEncomenda === 'sedex') {
+      encomenda.value = await getCorrespondenciaSedexById(encomendaId);
+    } else {
+      throw new Error('Tipo de encomenda inválido');
     }
-    justificativa.value = '';
+
+    if (!encomenda.value) {
+      throw new Error('Encomenda não encontrada');
+    }
+
+    console.log('Dados da encomenda:', encomenda.value);
+  } catch (error) {
+    $q.notify({
+      type: 'negative',
+      message: `Erro ao carregar a encomenda: ${error.message}`,
+    });
+    console.error('Erro ao buscar encomenda:', error);
+  } finally {
     hideLoading();
+  }
+};
+
+// Função que roda ao montar o componente para buscar a encomenda
+onMounted(() => {
+  fetchEncomenda();
+});
+
+// Função para deletar a encomenda com base no tipo
+const deletarEncomenda = async () => {
+  try {
+    if (tipoEncomenda === 'interno') {
+      await deleteCorrespondenciaInterno(encomendaId);
+    } else if (tipoEncomenda === 'sedex') {
+      await deleteCorrespondenciaSedex(encomendaId);
+    } else if (tipoEncomenda === 'externo') {
+      await deleteCorrespondenciaExterno(encomendaId);
+    } else {
+      throw new Error(`Tipo de encomenda desconhecido: ${tipoEncomenda}`);
+    }
+
     $q.notify({
       type: 'positive',
       message: 'Encomenda deletada com sucesso',
     });
     $router.push('/usuario/Lista-de-Encomendas');
-  } else {
-    hideLoading();
+  } catch (error) {
     $q.notify({
       type: 'negative',
-      message: 'Encomenda não encontrada',
+      message: `Erro ao deletar a encomenda: ${error.message}`,
     });
-    $router.push('/usuario/Lista-de-Encomendas');
+    console.error('Erro ao deletar encomenda:', error);
   }
 };
 </script>

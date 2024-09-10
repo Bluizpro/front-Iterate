@@ -1,8 +1,7 @@
 <template>
   <q-page>
-    <!-- <h1 class="q-heading text-h5 text-weight-medium text-center"> -->
     <h1 style="font-size: 1.5em; text-align: center">
-      Cadastro de {{ titulo }}
+      Cadastro de Colaboradores
     </h1>
     <div class="border">
       <div class="row items-center justify-evenly">
@@ -20,7 +19,7 @@
             v-model="form.conjunto"
             color="indigo-13"
             label="Número do conjunto"
-            :rules="[(val:string) => (val && val.length > 0) || 'Digite o numero']"
+            :rules="[(val:string) => (val && val.length > 0) || 'Digite o número']"
           >
             <template v-slot:prepend>
               <q-icon name="pin" />
@@ -71,10 +70,9 @@
               label="Telefone"
               mask="+55(##)#####-####"
               :rules="[
-    (val:string) => (val && val.length > 0) || 'Telefone Obrigatório',
-    (val: string) => (val && val.replace(/\D/g, '').length === 13) || 'Telefone inválido'
-
-  ]"
+              (val:string) => (val && val.length > 0) || 'Telefone Obrigatório',
+              (val: string) => (val && val.replace(/\D/g, '').length === 13) || 'Telefone inválido'
+            ]"
             >
               <template v-slot:prepend>
                 <q-icon name="phone" />
@@ -131,7 +129,7 @@
             </template>
           </q-select>
 
-          <div class="row q-gutter-md btn-container">
+          <div class="row q-gutter-md">
             <q-btn
               class="col-md-2 col-sm-2 col-xs-12"
               label="Cadastrar"
@@ -147,15 +145,6 @@
               color="indigo-14"
               @click="voltar"
             ></q-btn>
-            <div class="spacer"></div>
-            <q-btn
-              class="col-md-2 col-sm-2 col-xs-12"
-              label="Colaboradores"
-              type="button"
-              rounded
-              color="indigo-14"
-              @click="irParaLocatario"
-            ></q-btn>
           </div>
         </q-form>
       </div>
@@ -164,16 +153,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { ref, onBeforeUnmount } from 'vue';
 import { useStore } from '../../stores/example-store';
 import { useQuasar } from 'quasar';
-import { createCondomino } from '../../services/condonimoApi';
+import { createLocatario } from '../../services/locatarioApi'; // Importe a função correta
 import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'; // Importar o useRouter
 
-const router = useRouter();
-const store = useStore();
 const $q = useQuasar();
+const store = useStore();
+const router = useRouter(); // Instanciar o router
 
 let timer: NodeJS.Timeout | null = null;
 onBeforeUnmount(() => {
@@ -182,9 +171,6 @@ onBeforeUnmount(() => {
     $q.loading.hide();
   }
 });
-const irParaLocatario = () => {
-  router.push({ name: 'LocatarioForm' });
-};
 
 const showLoading = () => {
   $q.loading.show();
@@ -193,6 +179,7 @@ const hideLoading = () => {
   $q.loading.hide();
 };
 
+// Definição do formulário e dos campos
 const form = ref({
   conjunto: '',
   nome: '',
@@ -203,16 +190,31 @@ const form = ref({
   proprietario: '',
 });
 
-const voltar = () => {
-  store.resetFormularioAtual();
-};
-const titulo = computed(() => {
-  const tipoEncomenda = store.formularioAtual;
-  if (tipoEncomenda) {
-    return tipoEncomenda.charAt(0).toUpperCase() + tipoEncomenda.slice(1);
+// Referência para o formulário
+const formRef = ref<any>(null);
+
+const resetForm = () => {
+  if (formRef.value) {
+    // Resetar o estado do formulário
+    form.value = {
+      conjunto: '',
+      nome: '',
+      cpfrg: '',
+      telefone: '',
+      interfone: '',
+      especialidade: '',
+      proprietario: '',
+    };
+    // Se o formRef for um formulário Quasar, tentar limpar a validação
+    formRef.value.$refs.form.resetValidation();
   }
-  return 'Erro';
-});
+};
+
+// Função para resetar o formulário e voltar
+const voltar = () => {
+  resetForm();
+  router.push('/usuario/Pessoas'); // Navegar para a rota desejada
+};
 
 const cadastrar = async () => {
   const dados = {
@@ -227,29 +229,23 @@ const cadastrar = async () => {
 
   try {
     showLoading();
-
-    const novoCondomino = {
-      ...dados,
-      locatario: [form.value.nome],
-      encomendas: [],
-      visitantes: [],
-    };
-
-    const response = await createCondomino(novoCondomino);
+    const response = await createLocatario(dados);
 
     if (response) {
       $q.notify({
         color: 'green-4',
         textColor: 'white',
         icon: 'cloud_done',
-        message: 'Condomino cadastrado com sucesso',
+        message: 'Locatário cadastrado com sucesso',
         timeout: Math.random() * 1000 + 1000,
       });
-    } else {
-      throw new Error('Erro ao cadastrar Condomino');
-    }
 
-    store.resetFormularioAtual();
+      // Resetar o formulário e voltar para a página
+      resetForm();
+      router.push('/usuario/Pessoas'); // Navegar para a rota desejada
+    } else {
+      throw new Error('Erro ao cadastrar Locatário');
+    }
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error('Erro de resposta:', error.response?.data);
@@ -259,7 +255,7 @@ const cadastrar = async () => {
         icon: 'warning',
         message:
           'Erro ao cadastrar: ' +
-          (error.response?.data.message || error.message),
+          JSON.stringify(error.response?.data.errors || error.message),
         position: 'center',
         timeout: Math.random() * 1000 + 1000,
       });
@@ -287,14 +283,6 @@ const cadastrar = async () => {
   select {
     font-size: 14px;
   }
-}
-.btn-container {
-  display: flex;
-  justify-content: space-between;
-}
-
-.btn-container .spacer {
-  flex: 1;
 }
 .border {
   border: 1px solid #000 !important;

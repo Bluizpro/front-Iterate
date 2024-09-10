@@ -1,61 +1,62 @@
 <template>
   <q-page>
     <h1 style="font-size: 1.5em; text-align: center">
-      Cadastro de {{ titulo }}
+      Cadastro de Colaboradores
     </h1>
-    <div class="row items-center justify-evenly">
-      <q-form
-        @submit.prevent="cadastrar"
-        class="q-gutter-md col-md-10 col-sm-10 col-xs-12"
-      >
-        <q-input
-          required
-          name="conjunto"
-          outlined
-          clearable
-          clear-icon="close"
-          v-model="form.conjunto"
-          color="indigo-13"
-          label="Número do conjunto"
-          :rules="[(val:string) => (val && val.length > 0) || 'Digite o numero']"
-        >
-          <template v-slot:prepend>
-            <q-icon name="pin" />
-          </template>
-        </q-input>
-
-        <q-input
-          required
-          name="nome"
-          outlined
-          clearable
-          clear-icon="close"
-          v-model="form.nome"
-          color="indigo-13"
-          label="Nome Completo"
-          :rules="[(val:string) => (val && val.length > 0) || 'Digite Seu Nome']"
-        >
-          <template v-slot:prepend>
-            <q-icon name="person" />
-          </template>
-        </q-input>
-        <div class="row">
+    <div class="border">
+      <div class="form-wrapper">
+        <q-form @submit.prevent="cadastrar" class="form-container">
           <q-input
             required
-            name="Setor"
+            name="conjunto"
+            outlined
+            clearable
+            clear-icon="close"
+            v-model="form.conjunto"
+            color="indigo-13"
+            label="Número do conjunto"
+            :rules="[(val) => (val && val.length > 0) || 'Digite o número']"
+            class="input-field"
+          >
+            <template v-slot:prepend>
+              <q-icon name="pin" />
+            </template>
+          </q-input>
+
+          <q-input
+            required
+            name="nome"
+            outlined
+            clearable
+            clear-icon="close"
+            v-model="form.nome"
+            color="indigo-13"
+            label="Nome Completo"
+            :rules="[(val) => (val && val.length > 0) || 'Digite seu nome']"
+            class="input-field"
+          >
+            <template v-slot:prepend>
+              <q-icon name="person" />
+            </template>
+          </q-input>
+
+          <q-input
+            required
+            name="setor"
             outlined
             clearable
             clear-icon="close"
             v-model="form.setor"
             color="indigo-13"
             label="Setor"
-            :rules="[(val:string) => (val && val.length > 0) || 'Digite o Setor']"
+            :rules="[(val) => (val && val.length > 0) || 'Digite o setor']"
             class="input-field"
           >
             <template v-slot:prepend>
               <q-icon name="home" />
             </template>
           </q-input>
+
           <q-input
             required
             name="telefone"
@@ -64,50 +65,52 @@
             clear-icon="close"
             v-model="form.telefone"
             label="Telefone"
-            mask="+55(##)#####-####"
+            mask="(##)#####-####"
             :rules="[
-            (val:string) => (val && val.length > 0) || 'Telefone Obrigatório',
-            (val: string) => (val && val.replace(/\D/g, '').length === 13) || 'Telefone inválido'
-          ]"
+              (val) => (val && val.length > 0) || 'Telefone obrigatório',
+              (val) =>
+                (val && val.replace(/\D/g, '').length === 11) ||
+                'Telefone inválido',
+            ]"
             class="input-field"
           >
             <template v-slot:prepend>
               <q-icon name="phone" />
             </template>
           </q-input>
-        </div>
 
-        <!-- botoes -->
-        <div class="row q-gutter-md">
-          <q-btn
-            class="col-md-2 col-sm-2 col-xs-12"
-            label="Cadastrar"
-            type="submit"
-            color="indigo-14"
-            rounded
-          ></q-btn>
-          <q-btn
-            class="col-md-2 col-sm-2 col-xs-12"
-            label="Voltar"
-            type="button"
-            rounded
-            color="indigo-14"
-            @click="voltar"
-          ></q-btn>
-        </div>
-      </q-form>
+          <!-- Botões -->
+          <div class="q-gutter-md button-container">
+            <q-btn
+              label="Cadastrar"
+              type="submit"
+              color="indigo-14"
+              rounded
+              class="custom-btn"
+            ></q-btn>
+            <q-btn
+              label="Voltar"
+              type="button"
+              rounded
+              color="indigo-14"
+              @click="voltar"
+              class="custom-btn"
+            ></q-btn>
+          </div>
+        </q-form>
+      </div>
     </div>
   </q-page>
 </template>
-<script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue';
-import { useStore } from '../../stores/example-store';
+
+<script setup>
+import { onBeforeUnmount, ref } from 'vue';
 import { useQuasar } from 'quasar';
-import { useFuncionariosStore } from '../../stores/funcionarioStore'; // Importe o funcionarioStore
+import { useStore } from '../../stores/example-store';
+import * as FuncionarioServices from '../../services/funcionarioApi';
 
 const store = useStore();
 const $q = useQuasar();
-const funcionariosStore = useFuncionariosStore(); // Use o funcionarioStore
 
 const form = ref({
   conjunto: '',
@@ -119,15 +122,8 @@ const form = ref({
 const voltar = () => {
   store.resetFormularioAtual();
 };
-const titulo = computed(() => {
-  const tipoEncomenda = store.formularioAtual;
-  if (tipoEncomenda) {
-    return tipoEncomenda.charAt(0).toUpperCase() + tipoEncomenda.slice(1);
-  }
-  return 'Erro';
-});
 
-let timer: NodeJS.Timeout | null = null;
+let timer = null;
 onBeforeUnmount(() => {
   if (timer !== null) {
     clearTimeout(timer);
@@ -138,13 +134,14 @@ onBeforeUnmount(() => {
 const showLoading = () => {
   $q.loading.show();
 };
+
 const hideLoading = () => {
   $q.loading.hide();
 };
 
-function formatarDataHora(data: Date) {
+function formatarDataHora(data) {
   const dia = data.getDate().toString().padStart(2, '0');
-  const mes = (data.getMonth() + 1).toString().padStart(2, '0'); // Adiciona 1 porque os meses começam do 0
+  const mes = (data.getMonth() + 1).toString().padStart(2, '0');
   const ano = data.getFullYear();
   const horas = data.getHours().toString().padStart(2, '0');
   const minutos = data.getMinutes().toString().padStart(2, '0');
@@ -161,26 +158,73 @@ const cadastrar = async () => {
     telefone: form.value.telefone,
     setor: form.value.setor,
     dataCadastro: formatarDataHora(agora),
-    encomendas: [], // Adicione esta linha
+    encomendas: [], // Adicione esta linha se for necessário
   };
+
   showLoading();
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  funcionariosStore.adicionarFuncionario(funcionario); // Adicione o funcionario ao funcionarioStore
-  hideLoading();
-  $q.notify({
-    color: 'green-4',
-    textColor: 'white',
-    icon: 'cloud_done',
-    message: 'cadastrado com sucesso',
-    timeout: Math.random() * 1000 + 1000,
-  });
-  store.resetFormularioAtual();
+
+  try {
+    const result = await FuncionarioServices.createFuncionario(funcionario);
+    console.log('Resultado da criação do funcionário:', result);
+    $q.notify({
+      color: 'green-4',
+      textColor: 'white',
+      icon: 'cloud_done',
+      message: 'Funcionário cadastrado com sucesso',
+      timeout: Math.random() * 1000 + 1000,
+    });
+    store.resetFormularioAtual();
+  } catch (error) {
+    console.error('Erro ao cadastrar funcionário:', error);
+    $q.notify({
+      color: 'red-4',
+      textColor: 'white',
+      icon: 'error',
+      message: 'Erro ao cadastrar funcionário',
+      timeout: Math.random() * 1000 + 1000,
+    });
+  } finally {
+    hideLoading();
+  }
 };
 </script>
+
 <style scoped>
+.form-wrapper {
+  display: flex;
+  justify-content: center; /* Centraliza o formulário horizontalmente */
+  padding: 2rem; /* Adiciona espaço ao redor da borda */
+}
+
+.form-container {
+  max-width: 35rem; /* Ajusta a largura máxima do formulário */
+  padding: 5rem; /* Adiciona um padding ao redor do formulário */
+  border: 8px solid #ddd; /* Adiciona uma borda maior ao redor do formulário */
+  border-radius: 8px; /* Arredonda os cantos da borda */
+  background-color: #fff; /* Define a cor de fundo do formulário */
+}
+
 .input-field {
-  width: 30%; /* Diminua a largura */
-  margin-right: 5%; /* Adicione uma margem à direita */
+  width: 100%; /* Faz os campos ocupar toda a largura disponível */
+  margin-bottom: 1em; /* Adiciona espaço inferior entre os campos */
+  height: 5rem; /* Define uma altura fixa para os campos de entrada */
+}
+
+.button-container {
+  display: flex; /* Usa flexbox para alinhar os botões */
+  gap: 1rem; /* Adiciona um espaçamento entre os botões */
+  justify-content: center; /* Centraliza os botões horizontalmente */
+}
+
+.custom-btn {
+  width: 150px; /* Define uma largura fixa para os botões */
+}
+.border {
+  border: 1px solid #000 !important;
+  margin-left: 4rem;
+  margin-top: 2rem;
+  margin-right: 5rem;
+  padding: 5rem;
+  background-color: rgb(235 208 208 / 20%);
 }
 </style>
-../../stores/funcionarioStore

@@ -1,10 +1,14 @@
 import { defineStore } from 'pinia';
-import { Delivery } from 'src/components/Imodels';
-import { watch } from 'vue';
-import { useEncomendasStore } from '../stores/encomendaStore';
+import { Delivery } from '../stores/Imodels';
+import {
+  createCondomino,
+  getCondominos,
+  updateCondomino,
+} from '../services/condonimoApi';
 
 export interface Condomino {
   conjunto: string;
+  nome: string;
   especialidade: string;
   locatario: string[];
   proprietario: string;
@@ -12,11 +16,6 @@ export interface Condomino {
   telefone: string;
   visitantes: string[];
   encomendas: Delivery[];
-}
-export interface EncomendaConsulta {
-  conjunto: string;
-  destinatario: string;
-  conteudo: string;
 }
 
 interface CondominosState {
@@ -28,43 +27,55 @@ export const useCondominosStore = defineStore('condominosStore', {
     condominos: [],
   }),
   actions: {
-    init() {
-      const savedState = localStorage.getItem('condominosStore');
-      if (savedState) {
-        this.condominos = JSON.parse(savedState);
+    async init() {
+      try {
+        const data = await getCondominos();
+        this.condominos = data;
+      } catch (error) {
+        console.error('Erro ao buscar dados de condomínios:', error);
       }
-
-      watch(
-        () => this.condominos,
-        (newState) => {
-          localStorage.setItem('condominosStore', JSON.stringify(newState));
-        },
-        { deep: true }
-      );
     },
-    adicionarConjunto(novoConjunto: Condomino) {
-      // Verifica se o conjunto já existe
-      const conjuntoExistente = this.condominos.find(
-        (condomino) => condomino.conjunto === novoConjunto.conjunto
-      );
-
-      if (!conjuntoExistente) {
-        this.condominos.push(novoConjunto);
+    async adicionarConjunto(novoConjunto: Condomino) {
+      try {
+        const addedCondomino = await createCondomino(novoConjunto);
+        this.condominos.push(addedCondomino); // Atualiza a lista local
         return true;
-      } else {
-        console.error('Este conjunto já existe.');
+      } catch (error) {
+        console.error('Erro ao adicionar condomínio:', error);
         return false;
       }
     },
-    adicionarLocatarioACondomino(numeroConjunto: string, locatario: string) {
+    async atualizarCondomino(condomino: Condomino) {
+      try {
+        const updatedCondomino = await updateCondomino(condomino);
+        const index = this.condominos.findIndex(
+          (c: { conjunto: any }) => c.conjunto === updatedCondomino.conjunto
+        );
+        if (index !== -1) {
+          this.condominos.splice(index, 1, updatedCondomino); // Força reatividade
+        } else {
+          console.error('Condomínio não encontrado na lista.');
+        }
+        return true;
+      } catch (error) {
+        console.error('Erro ao atualizar condomínio:', error);
+        return false;
+      }
+    },
+
+    async adicionarLocatarioACondomino(
+      numeroConjunto: string,
+      locatario: string
+    ) {
       const condomino = this.condominos.find(
-        (condomino) => condomino.conjunto === numeroConjunto
+        (condomino: { conjunto: string }) =>
+          condomino.conjunto === numeroConjunto
       );
 
       if (condomino) {
-        // Verifica se o locatário já existe
         if (!condomino.locatario.includes(locatario)) {
           condomino.locatario.push(locatario);
+          await this.atualizarCondomino(condomino); // Atualiza no backend
           return true;
         } else {
           console.error('Este locatário já existe para o condomínio.');
@@ -75,23 +86,28 @@ export const useCondominosStore = defineStore('condominosStore', {
         return false;
       }
     },
-    adicionarEncomendaACondomino(numeroConjunto: string, encomenda: Delivery) {
+
+    async adicionarEncomendaACondomino(
+      numeroConjunto: string,
+      encomenda: Delivery
+    ) {
       const condomino = this.condominos.find(
-        (condomino) => condomino.conjunto === numeroConjunto
+        (condomino: { conjunto: string }) =>
+          condomino.conjunto === numeroConjunto
       );
 
       if (condomino) {
         condomino.encomendas.push(encomenda);
-        // Adiciona a encomenda à store de encomendas
-        const encomendasStore = useEncomendasStore();
-        encomendasStore.adicionarEncomenda(encomenda);
-
+        await this.atualizarCondomino(condomino); // Atualiza no backend
         return true;
       } else {
+        console.error('Condomínio não encontrado.');
         return false;
       }
     },
   },
 });
+
+// Inicializa o store
 const condominosStore = useCondominosStore();
 condominosStore.init();

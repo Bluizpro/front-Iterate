@@ -3,43 +3,50 @@ import { defineStore } from 'pinia';
 
 interface Chave {
   conjunto: string;
+  chaveSelecionada: string;
   data: string;
   hora: string;
   usuario: string;
   assinatura: string;
-  disponivel: boolean; // Adicione este campo
+  disponivel: boolean;
 }
 
 export const useRetiradaChaveStore = defineStore({
   id: 'retiradaChave',
   state: () => ({
-    estadoChaves: [] as Chave[], // renomeado de 'chaves' para 'estadoChaves'
+    estadoChaves: [] as Chave[],
   }),
-  // Em retirada-chave.ts
   getters: {
     isKeyAvailable: (state) => (key: string) => {
-      const chave = state.estadoChaves.find((c) => c.conjunto === key);
-      // Se a chave existir e estiver marcada como não disponível, retorne false
-      if (chave && !chave.disponivel) {
-        return false;
-      }
-      // Caso contrário, retorne true
-      return true;
+      const chave = state.estadoChaves.find(
+        (c: { conjunto: string }) => c.conjunto === key
+      );
+      return chave ? chave.disponivel : true; // Retorna true se a chave não for encontrada
     },
   },
-
   actions: {
     addChave(chave: Chave) {
-      this.estadoChaves.push(chave);
+      if (
+        !this.estadoChaves.find(
+          (c: { conjunto: string }) => c.conjunto === chave.conjunto
+        )
+      ) {
+        this.estadoChaves = [...this.estadoChaves, chave];
+      } else {
+        console.error(`Chave ${chave.conjunto} já existe`);
+      }
     },
-
     retirarChave(chave: Chave) {
       const index = this.estadoChaves.findIndex(
-        (c) => c.conjunto === chave.conjunto
+        (c: { conjunto: string }) => c.conjunto === chave.conjunto
       );
       if (index !== -1) {
-        this.estadoChaves[index].disponivel = false;
+        this.estadoChaves = this.estadoChaves.map((c: any, i: any) =>
+          i === index ? { ...c, disponivel: false } : c
+        );
         console.log(`Chave ${chave.conjunto} retirada`);
+      } else {
+        console.error(`Chave ${chave.conjunto} não encontrada`);
       }
     },
   },

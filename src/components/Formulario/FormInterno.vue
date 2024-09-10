@@ -1,6 +1,5 @@
 <template>
   <q-page>
-    <!-- <h1 class="q-heading text-h5 text-weight-medium text-center"> -->
     <h1 style="font-size: 1.5em; text-align: center">
       Cadastro de encomenda {{ store.formularioAtual }}
     </h1>
@@ -9,6 +8,7 @@
         @submit.prevent="cadastrar"
         class="q-gutter-md col-md-10 col-sm-10 col-xs-12"
       >
+        <!-- Campos do formulário -->
         <q-input
           required
           name="conjunto"
@@ -18,7 +18,7 @@
           v-model="encomenda.conjunto"
           color="indigo-13"
           label="Número do conjunto"
-          :rules="[(val:string) => (val && val.length > 0) || 'Digite o numero']"
+          :rules="[(val) => (val && val.length > 0) || 'Digite o número']"
         >
           <template v-slot:prepend>
             <q-icon name="pin" />
@@ -33,8 +33,8 @@
           clear-icon="close"
           v-model="encomenda.destinatario"
           color="indigo-13"
-          label="Nome do Destinatario"
-          :rules="[(val:string) => (val && val.length > 0) || 'Digite nome']"
+          label="Nome do Destinatário"
+          :rules="[(val) => (val && val.length > 0) || 'Digite o nome']"
         >
           <template v-slot:prepend>
             <q-icon name="person" />
@@ -50,7 +50,7 @@
           v-model="encomenda.remetente"
           color="indigo-13"
           label="Remetente"
-          :rules="[(val:string) => (val && val.length > 0) || 'Digite o remetente']"
+          :rules="[(val) => (val && val.length > 0) || 'Digite o remetente']"
         >
           <template v-slot:prepend>
             <q-icon name="person" />
@@ -65,8 +65,8 @@
           clear-icon="close"
           v-model="encomenda.conteudo"
           color="indigo-13"
-          label="conteúdo"
-          :rules="[(val:string) => (val && val.length > 0) || 'Digite o conteúdo']"
+          label="Conteúdo"
+          :rules="[(val) => (val && val.length > 0) || 'Digite o conteúdo']"
         >
           <template v-slot:prepend>
             <q-icon name="edit_square" />
@@ -82,14 +82,14 @@
           v-model="encomenda.empresa"
           color="indigo-13"
           label="Empresa"
-          :rules="[(val:string) => (val && val.length > 0) || 'Digite a empresa']"
+          :rules="[(val) => (val && val.length > 0) || 'Digite a empresa']"
         >
           <template v-slot:prepend>
             <q-icon name="store" />
           </template>
         </q-input>
 
-        <!-- Botoes -->
+        <!-- Botões -->
         <div class="row q-gutter-md">
           <q-btn
             class="col-md-2 col-sm-2 col-xs-12"
@@ -112,54 +112,21 @@
   </q-page>
 </template>
 
-<script setup lang="ts">
-import { onBeforeUnmount, ref } from 'vue';
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useStore } from '../../stores/example-store';
 import { useCondominosStore } from '../../stores/condominosStore';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
-import { Delivery } from '../Imodels';
-import { onMounted } from 'vue';
-import axios from 'axios';
 import { useFuncionariosStore } from '../../stores/funcionarioStore';
+import { createCorrespondenciaInterno } from '../../services/encomenInterAPI';
+import { enviarMensagemWhatsApp } from '../../services/whatsappAPI'; // Importando o novo serviço
 
 const store = useStore();
 const $q = useQuasar();
-const condominoStore = useCondominosStore();
-
 const $router = useRouter();
+const condominoStore = useCondominosStore();
 const funcionarioStore = useFuncionariosStore();
-
-onMounted(() => {
-  const agora = new Date();
-  const optionsData: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  };
-  const optionsHora: Intl.DateTimeFormatOptions = {
-    hour: '2-digit',
-    minute: '2-digit',
-  };
-  encomenda.value.data = agora.toLocaleDateString('pt-BR', optionsData);
-  encomenda.value.hora = agora.toLocaleTimeString('pt-BR', optionsHora);
-});
-
-const gerarNovoIdEncomenda = (): number => {
-  let novoId: number;
-  do {
-    novoId = Math.floor(Math.random() * 1000); // Gera um ID aleatório entre 0 e 999
-  } while (
-    condominoStore.condominos.some((condomino) =>
-      condomino.encomendas.some((encomenda) => encomenda.id === novoId)
-    ) ||
-    funcionarioStore.funcionarios.some((funcionario) =>
-      funcionario.encomendas.some((encomenda) => encomenda.id === novoId)
-    )
-  );
-
-  return novoId;
-};
 
 const encomenda = ref({
   data: '',
@@ -171,28 +138,13 @@ const encomenda = ref({
   empresa: '',
 });
 
-const voltar = () => {
-  $router.push('/usuario/Lista-de-Encomendas');
-};
+onMounted(() => {
+  const agora = new Date();
+  encomenda.value.data = agora.toLocaleDateString('pt-BR');
+  encomenda.value.hora = agora.toLocaleTimeString('pt-BR');
+});
 
-const gerarNovaEncomenda = (): Delivery => {
-  const novoId = gerarNovoIdEncomenda();
-  const novaEncomenda: Delivery = {
-    id: novoId,
-    data: encomenda.value.data,
-    hora: encomenda.value.hora,
-    conjunto: encomenda.value.conjunto,
-    destinatario: encomenda.value.destinatario,
-    remetente: encomenda.value.remetente,
-    conteudo: encomenda.value.conteudo,
-    tipo: 'interno',
-    empresa: encomenda.value.empresa,
-  };
-
-  return novaEncomenda;
-};
-
-let timer: NodeJS.Timeout | null = null;
+let timer = null;
 onBeforeUnmount(() => {
   if (timer !== null) {
     clearTimeout(timer);
@@ -203,89 +155,101 @@ onBeforeUnmount(() => {
 const showLoading = () => {
   $q.loading.show();
 };
+
 const hideLoading = () => {
   $q.loading.hide();
 };
 
-const cadastrar = async () => {
-  showLoading();
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  const novaEncomenda = gerarNovaEncomenda();
-
-  const conjunto = encomenda.value.conjunto;
-  const adicionadaSucessoCondominio =
-    await condominoStore.adicionarEncomendaACondomino(conjunto, novaEncomenda);
-  const adicionadaSucessoFuncionario =
-    await funcionarioStore.adicionarEncomendaAFuncionario(
-      conjunto,
-      novaEncomenda
-    );
-
-  hideLoading();
-  function enviarMensagem(telefone: string, mensagem: string) {
-    axios
-      .post('http://localhost:3000/send-whatsapp/encomenda', {
-        message: mensagem,
-        telefone: telefone,
-      })
-      .catch((error) => {
-        console.error('Erro ao enviar a mensagem de WhatsApp:', error);
-      });
-  }
-
-  if (adicionadaSucessoCondominio || adicionadaSucessoFuncionario) {
-    let destinatarioMensagem = encomenda.value.destinatario;
-    let mensagem = '';
-    let telefone = '';
-
-    if (adicionadaSucessoCondominio) {
-      const condomino = condominoStore.condominos.find(
-        (condomino) => condomino.conjunto === conjunto
-      );
-      if (condomino && condomino.telefone) {
-        mensagem = `Olá ${destinatarioMensagem}, sua encomenda foi entregue à portaria.`;
-        telefone = condomino.telefone;
-      } else {
-        console.error('Condomínio não encontrado ou sem número de telefone.');
-      }
-    }
-
-    if (adicionadaSucessoFuncionario) {
-      const funcionario = funcionarioStore.funcionarios.find(
-        (funcionario) => funcionario.conjunto === conjunto
-      );
-      if (funcionario && funcionario.telefone) {
-        mensagem = `Olá ${destinatarioMensagem}, sua encomenda foi entregue ao funcionário.`;
-        telefone = funcionario.telefone;
-      } else {
-        console.error('Funcionário não encontrado ou sem número de telefone.');
-      }
-    }
-
-    if (mensagem && telefone) {
-      enviarMensagem(telefone, mensagem);
-    }
-
-    $q.notify({
-      color: 'green-4',
-      textColor: 'white',
-      icon: 'cloud_done',
-      message: 'Cadastrado com sucesso',
-      timeout: Math.random() * 1000 + 1000,
-    });
-    store.resetFormularioAtual();
-    $router.push('/usuario/Cards-Encomendas');
-  } else {
-    $q.notify({
-      color: 'red-5',
-      textColor: 'white',
-      icon: 'warning',
-      message: 'Conjunto não existe',
-      position: 'center',
-      timeout: Math.random() * 1000 + 1000,
-    });
+const enviarMensagem = async (telefone, mensagem) => {
+  try {
+    await enviarMensagemWhatsApp(telefone, mensagem);
+  } catch (error) {
+    console.error(`Erro ao enviar mensagem para ${telefone}:`, error);
   }
 };
+
+const enviarMensagemParaCondomino = (novaEncomenda, mensagem) => {
+  if (condominoStore.condominos) {
+    const condomino = condominoStore.condominos.find(
+      (c) => c.conjunto === novaEncomenda.conjunto
+    );
+    if (condomino && condomino.telefone) {
+      console.log(`Enviando mensagem para condomínio: ${condomino.telefone}`);
+      return enviarMensagem(condomino.telefone, mensagem);
+    }
+  }
+  return Promise.resolve(); // Resolve a Promise para evitar falhas na Promise.all
+};
+
+const enviarMensagemParaFuncionario = (novaEncomenda, mensagem) => {
+  if (funcionarioStore.funcionarios) {
+    const funcionario = funcionarioStore.funcionarios.find(
+      (f) => f.conjunto === novaEncomenda.conjunto
+    );
+    if (funcionario && funcionario.telefone) {
+      console.log(
+        `Enviando mensagem para funcionário: ${funcionario.telefone}`
+      );
+      return enviarMensagem(funcionario.telefone, mensagem);
+    }
+  }
+  return Promise.resolve(); // Resolve a Promise para evitar falhas na Promise.all
+};
+
+const cadastrar = async () => {
+  showLoading();
+
+  const novaEncomenda = {
+    data: encomenda.value.data,
+    hora: encomenda.value.hora,
+    conjunto: encomenda.value.conjunto,
+    destinatario: encomenda.value.destinatario,
+    remetente: encomenda.value.remetente,
+    conteudo: encomenda.value.conteudo,
+    tipo: 'interno',
+    empresa: encomenda.value.empresa,
+  };
+
+  try {
+    const response = await createCorrespondenciaInterno(novaEncomenda);
+
+    if (response) {
+      const mensagem = `Uma nova encomenda foi adicionada com sucesso no conjunto ${
+        novaEncomenda.conjunto
+      }. Detalhes: ${JSON.stringify(novaEncomenda)}`;
+
+      const promises = [
+        enviarMensagemParaCondomino(novaEncomenda, mensagem),
+        enviarMensagemParaFuncionario(novaEncomenda, mensagem),
+      ];
+
+      // Esperar por todas as promessas
+      await Promise.all(promises);
+
+      $q.notify({
+        type: 'positive',
+        message: 'Encomenda cadastrada com sucesso',
+      });
+
+      $router.push('/usuario/Cards-Encomendas');
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: 'Falha ao cadastrar encomenda',
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao cadastrar a encomenda:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao cadastrar encomenda',
+    });
+  } finally {
+    hideLoading();
+  }
+};
+
+const voltar = () => {
+  $router.push('/usuario/Lista-de-Encomendas');
+};
 </script>
-../../stores/condominosStore src/stores/funcionarioStore

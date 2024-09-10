@@ -72,15 +72,15 @@
           label="Registrar"
           rounded
           color="indigo-14"
-          v-on:click="gerarAssinatura"
+          @click="gerarAssinatura"
         />
-        <q-btn label="Volta" rounded color="indigo-14" v-on:click="voltar" />
+        <q-btn label="Voltar" rounded color="indigo-14" @click="voltar" />
       </q-form>
     </div>
   </q-page>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router'; // Importe o useRoute
 import { useRetiradaChaveStore } from '../../stores/retirada-chave';
@@ -97,7 +97,7 @@ const chave = ref({
   hora: new Date().toLocaleTimeString(),
   usuario: '',
   assinatura: '',
-  disponivel: true, // Adicione este campo
+  disponivel: true,
 });
 const exibirModalAssinatura = ref(false);
 
@@ -108,7 +108,8 @@ const voltar = () => {
 const gerarAssinatura = () => {
   exibirModalAssinatura.value = true;
 };
-const salvarAssinatura = (assinatura: unknown) => {
+
+const salvarAssinatura = (assinatura) => {
   if (typeof assinatura === 'string') {
     chave.value.assinatura = assinatura;
 
@@ -121,7 +122,10 @@ const salvarAssinatura = (assinatura: unknown) => {
     localStorage.setItem('chavesRetiradas', JSON.stringify(chavesRetiradas));
 
     chave.value.disponivel = false;
-    store.retirarChave({ ...chave.value }); // Desembrulhe o valor da referência aqui
+    store.retirarChave({
+      ...chave.value,
+      chaveSelecionada: '',
+    });
   } else {
     voltar();
   }
@@ -131,16 +135,4 @@ const salvarAssinatura = (assinatura: unknown) => {
   chavesRetiradas.push(chave.value);
   localStorage.setItem('chavesRetiradas', JSON.stringify(chavesRetiradas));
 };
-
-onMounted(() => {
-  let keyNumber = localStorage.getItem('keyNumber');
-  if (keyNumber !== null) {
-    chave.value.conjunto = keyNumber; // Não converta para um número
-  }
-
-  let keyRetirada = localStorage.getItem('keyRetirada');
-  if (keyRetirada !== null) {
-    chave.value = JSON.parse(keyRetirada);
-  }
-});
 </script>

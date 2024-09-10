@@ -77,7 +77,7 @@ const linksList = ref([
     link: 'listaCorrespondencia',
   },
   {
-    title: 'Lista de Funcionarios',
+    title: 'Lista de Colaboradores',
     icon: 'format_list_bulleted',
     link: 'listaFuncionario',
   },
