@@ -2,7 +2,7 @@
   <q-page>
     <FormExterno v-if="formStore.formularioAtual == 'externo'" />
     <FormInterno v-if="formStore.formularioAtual == 'interno'" />
-    <FormSedex v-if="formStore.formularioAtual == 'sedex'" />
+    <FormSedex v-if="formStore.formularioAtual == 'correio'" />
   </q-page>
 </template>
 <script setup lang="ts">

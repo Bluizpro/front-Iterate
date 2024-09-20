@@ -126,5 +126,12 @@ export const useEncomendasStore = defineStore('encomendasStore', {
     getTotalEncomendasSedex(state): number {
       return state.encomendasSedex.length;
     },
+    allEncomendas(state): Delivery[] {
+      return [
+        ...state.encomendasInternas,
+        ...state.encomendasExternas,
+        ...state.encomendasSedex,
+      ];
+    },
   },
 });

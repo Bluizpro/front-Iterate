@@ -51,7 +51,7 @@ export default {
               ...condomino.encomendas
                 .filter(
                   (encomenda) =>
-                    encomenda.tipo === 'interno' || encomenda.tipo === 'sedex'
+                    encomenda.tipo === 'interno' || encomenda.tipo === 'correio'
                 )
                 .map((encomenda) => ({
                   conjunto: encomenda.conjunto,
@@ -73,7 +73,7 @@ export default {
               ...funcionario.encomendas
                 .filter(
                   (encomenda) =>
-                    encomenda.tipo === 'interno' || encomenda.tipo === 'sedex'
+                    encomenda.tipo === 'interno' || encomenda.tipo === 'correio'
                 )
                 .map((encomenda) => ({
                   conjunto: encomenda.conjunto,

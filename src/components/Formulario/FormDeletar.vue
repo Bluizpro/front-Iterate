@@ -4,11 +4,11 @@
       <q-card-section class="row items-center">
         <q-avatar
           class="q-mr-md"
-          :text="encomenda?.destinatario.charAt(0).toUpperCase()"
+          :text="encomenda?.nome.charAt(0).toUpperCase()"
           color="secondary"
         />
         <div>
-          <div class="text-h6">{{ encomenda?.destinatario }}</div>
+          <div class="text-h6">{{ encomenda?.nome }}</div>
           <div class="text-subtitle1">Encomenda: {{ encomenda?.conteudo }}</div>
         </div>
       </q-card-section>
@@ -33,13 +33,23 @@ const $q = useQuasar();
 const encomendasStore = useEncomendasStore();
 
 const encomendaId = Number(router.currentRoute.value.params.id);
-const encomenda = encomendasStore.encomendas.find(
+const encomenda = encomendasStore.allEncomendas.find(
   (e: { id: number }) => e.id === encomendaId
 );
 
 const deletarEncomenda = () => {
   if (encomenda) {
-    encomendasStore.deletarEncomenda(encomenda.id);
+    switch (encomenda.tipo) {
+      case 'interno':
+        encomendasStore.deletarEncomendaInterna(encomenda.id);
+        break;
+      case 'externo':
+        encomendasStore.deletarEncomendaExterna(encomenda.id);
+        break;
+      case 'sedex':
+        encomendasStore.deletarEncomendaSedex(encomenda.id);
+        break;
+    }
     $q.notify({
       type: 'positive',
       message: 'Encomenda deletada com sucesso',

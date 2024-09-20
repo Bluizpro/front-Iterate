@@ -14,7 +14,7 @@
           />
 
           <q-input
-            v-if="encomenda.tipo === 'sedex'"
+            v-if="encomenda.tipo === 'correio'"
             v-model="form.notaFiscal"
             label="Nota Fiscal"
             lazy

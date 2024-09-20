@@ -48,7 +48,7 @@ const mostrarListaDeEncomendas = (encomenda: string): void => {
   if (
     encomenda == 'interno' ||
     encomenda == 'externo' ||
-    encomenda == 'sedex'
+    encomenda == 'correio'
   ) {
     $router.push('/usuario/Lista-de-Encomendas');
   } else if (

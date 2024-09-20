@@ -16,10 +16,10 @@
       <BotoesCadastrarEBaixa />
     </ListaDeEncomendas>
     <ListaDeEncomendas
-      v-if="storeForm.formularioAtual === 'sedex'"
+      v-if="storeForm.formularioAtual === 'correio'"
       tipo="sedex"
     >
-      <h1 style="font-size: 1.5em; text-align: center">Encomendas Sedex</h1>
+      <h1 style="font-size: 1.5em; text-align: center">Encomendas Correio</h1>
       <BotoesCadastrarEBaixa />
     </ListaDeEncomendas>
   </q-page>

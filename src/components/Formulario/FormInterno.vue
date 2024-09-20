@@ -27,11 +27,11 @@
 
         <q-input
           required
-          name="destinatario"
+          name="Nome"
           outlined
           clearable
           clear-icon="close"
-          v-model="encomenda.destinatario"
+          v-model="encomenda.nome"
           color="indigo-13"
           label="Nome do Destinatário"
           :rules="[(val) => (val && val.length > 0) || 'Digite o nome']"
@@ -115,24 +115,25 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useStore } from '../../stores/example-store';
-import { useCondominosStore } from '../../stores/condominosStore';
+
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
-import { useFuncionariosStore } from '../../stores/funcionarioStore';
+
 import { createCorrespondenciaInterno } from '../../services/encomenInterAPI';
-import { enviarMensagemWhatsApp } from '../../services/whatsappAPI'; // Importando o novo serviço
+import { enviarMensagemWhatsApp } from '../../services/whatsappAPI';
+import { getLocatariosByConjunto } from '../../services/locatarioApi';
+import { getCondominos } from '../../services/condonimoApi';
+import { getFuncionario } from '../../services/funcionarioApi';
 
 const store = useStore();
 const $q = useQuasar();
 const $router = useRouter();
-const condominoStore = useCondominosStore();
-const funcionarioStore = useFuncionariosStore();
 
 const encomenda = ref({
   data: '',
   hora: '',
   conjunto: '',
-  destinatario: '',
+  nome: '',
   remetente: '',
   conteudo: '',
   empresa: '',
@@ -160,40 +161,67 @@ const hideLoading = () => {
   $q.loading.hide();
 };
 
-const enviarMensagem = async (telefone, mensagem) => {
+const voltar = () => {
+  $router.push('/usuario/Cards-Encomendas'); // Ajuste conforme sua rota
+};
+
+// Função para buscar o telefone da pessoa
+const buscarTelefonePorNome = async (conjunto, nome) => {
+  console.log('Buscando telefone para:', conjunto, nome);
+
+  // Converte conjunto para string
+  const conjuntoStr = String(conjunto).trim().toLowerCase();
+  const nomeStr = nome.trim().toLowerCase();
+
+  // Busca no condomínio
   try {
-    await enviarMensagemWhatsApp(telefone, mensagem);
+    const condominos = await getCondominos();
+    const condomino = condominos.find(
+      (c) =>
+        String(c.conjunto).trim().toLowerCase() === conjuntoStr &&
+        c.nome.trim().toLowerCase() === nomeStr
+    );
+    if (condomino) {
+      /*  console.log('Telefone encontrado no condomínio:', condomino.telefone); */
+      return condomino.telefone;
+    }
   } catch (error) {
-    console.error(`Erro ao enviar mensagem para ${telefone}:`, error);
+    console.error('Erro ao buscar condomínios:', error);
   }
-};
 
-const enviarMensagemParaCondomino = (novaEncomenda, mensagem) => {
-  if (condominoStore.condominos) {
-    const condomino = condominoStore.condominos.find(
-      (c) => c.conjunto === novaEncomenda.conjunto
+  // Busca no funcionário
+  try {
+    const funcionarios = await getFuncionario();
+    const funcionario = funcionarios.find(
+      (f) =>
+        String(f.conjunto).trim().toLowerCase() === conjuntoStr &&
+        f.nome.trim().toLowerCase() === nomeStr
     );
-    if (condomino && condomino.telefone) {
-      console.log(`Enviando mensagem para condomínio: ${condomino.telefone}`);
-      return enviarMensagem(condomino.telefone, mensagem);
+    if (funcionario) {
+      /*  console.log('Telefone encontrado no funcionário:', funcionario.telefone); */
+      return funcionario.telefone;
     }
+  } catch (error) {
+    console.error('Erro ao buscar funcionários:', error);
   }
-  return Promise.resolve(); // Resolve a Promise para evitar falhas na Promise.all
-};
 
-const enviarMensagemParaFuncionario = (novaEncomenda, mensagem) => {
-  if (funcionarioStore.funcionarios) {
-    const funcionario = funcionarioStore.funcionarios.find(
-      (f) => f.conjunto === novaEncomenda.conjunto
+  // Busca no locatário (se não encontrado nos stores)
+  try {
+    const locatarios = await getLocatariosByConjunto(conjuntoStr);
+    const locatario = locatarios.find(
+      (l) => l.nome.trim().toLowerCase() === nomeStr
     );
-    if (funcionario && funcionario.telefone) {
-      console.log(
-        `Enviando mensagem para funcionário: ${funcionario.telefone}`
-      );
-      return enviarMensagem(funcionario.telefone, mensagem);
+    if (locatario) {
+      /* console.log('Telefone encontrado no Colaborador:', locatario.telefone); */
+      return locatario.telefone;
     }
+  } catch (error) {
+    console.error('Erro ao buscar locatários da API:', error);
   }
-  return Promise.resolve(); // Resolve a Promise para evitar falhas na Promise.all
+
+  // Se não encontrar, retorna null
+  console.warn('Telefone não encontrado para:', nome);
+  return null;
 };
 
 const cadastrar = async () => {
@@ -203,39 +231,61 @@ const cadastrar = async () => {
     data: encomenda.value.data,
     hora: encomenda.value.hora,
     conjunto: encomenda.value.conjunto,
-    destinatario: encomenda.value.destinatario,
+    nome: encomenda.value.nome,
     remetente: encomenda.value.remetente,
     conteudo: encomenda.value.conteudo,
-    tipo: 'interno',
+    tipo: 'Interno',
     empresa: encomenda.value.empresa,
   };
 
   try {
-    const response = await createCorrespondenciaInterno(novaEncomenda);
+    // Primeiro, buscar o telefone para verificar se a encomenda pode ser cadastrada
+    const telefone = await buscarTelefonePorNome(
+      novaEncomenda.conjunto,
+      novaEncomenda.nome
+    );
 
-    if (response) {
-      const mensagem = `Uma nova encomenda foi adicionada com sucesso no conjunto ${
-        novaEncomenda.conjunto
-      }. Detalhes: ${JSON.stringify(novaEncomenda)}`;
+    if (telefone) {
+      // Se o telefone for encontrado, cria a encomenda
+      const response = await createCorrespondenciaInterno(novaEncomenda);
 
-      const promises = [
-        enviarMensagemParaCondomino(novaEncomenda, mensagem),
-        enviarMensagemParaFuncionario(novaEncomenda, mensagem),
-      ];
+      if (response) {
+        // Ajusta a mensagem para mostrar apenas o nome e a informação básica
+        const mensagem = `Olá ${novaEncomenda.nome}, Tipo ${novaEncomenda.tipo} sua encomenda foi entregue à portaria. `;
 
-      // Esperar por todas as promessas
-      await Promise.all(promises);
+        try {
+          await enviarMensagemWhatsApp(telefone, mensagem);
+          console.log(
+            `Mensagem enviada com sucesso para: ${novaEncomenda.nome}`
+          );
+        } catch (err) {
+          console.error('Erro ao enviar mensagem via WhatsApp:', err);
+          $q.notify({
+            type: 'warning',
+            message:
+              'Encomenda cadastrada, mas ocorreu um erro ao enviar a mensagem.',
+          });
+        }
 
-      $q.notify({
-        type: 'positive',
-        message: 'Encomenda cadastrada com sucesso',
-      });
-
-      $router.push('/usuario/Cards-Encomendas');
+        store.resetFormularioAtual();
+        $q.notify({
+          type: 'positive',
+          message: 'Encomenda cadastrada com sucesso',
+        });
+        $router.push('/usuario/Cards-Encomendas');
+      } else {
+        $q.notify({
+          type: 'negative',
+          message: 'Falha ao cadastrar encomenda',
+        });
+      }
     } else {
+      // Se o telefone não for encontrado, não cria a encomenda
+      console.warn('Telefone não encontrado para:', novaEncomenda.nome);
       $q.notify({
-        type: 'negative',
-        message: 'Falha ao cadastrar encomenda',
+        type: 'warning',
+        message:
+          'Encomenda não cadastrada. O telefone do destinatário não foi encontrado.',
       });
     }
   } catch (error) {
@@ -247,9 +297,5 @@ const cadastrar = async () => {
   } finally {
     hideLoading();
   }
-};
-
-const voltar = () => {
-  $router.push('/usuario/Lista-de-Encomendas');
 };
 </script>

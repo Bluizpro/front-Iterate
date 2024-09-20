@@ -65,11 +65,11 @@
             clear-icon="close"
             v-model="form.telefone"
             label="Telefone"
-            mask="(##)#####-####"
+            mask="+55(##)#####-####"
             :rules="[
-              (val) => (val && val.length > 0) || 'Telefone obrigatório',
+              (val) => (val && val.length > 0) || 'Telefone Obrigatório',
               (val) =>
-                (val && val.replace(/\D/g, '').length === 11) ||
+                (val && val.replace(/\D/g, '').length === 13) ||
                 'Telefone inválido',
             ]"
             class="input-field"

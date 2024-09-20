@@ -9,7 +9,7 @@
       >
     </q-chip>
     <q-chip dense :class="getChipClass(quantidadeEncomendasSedex)">
-      <span class="centered-text">Sedex:</span>
+      <span class="centered-text">Correio:</span>
       <q-badge
         :class="getBadgeClass(quantidadeEncomendasSedex)"
         class="text-subtitle2"
@@ -63,7 +63,7 @@ const atualizarQuantidades = async () => {
     // Inicializa a variável quantidades
     const quantidades = {
       interno: 0,
-      sedex: 0,
+      correio: 0,
       externo: 0,
     };
 
@@ -74,8 +74,8 @@ const atualizarQuantidades = async () => {
         case 'interno':
           quantidades.interno++;
           break;
-        case 'sedex':
-          quantidades.sedex++;
+        case 'correio':
+          quantidades.correio++;
           break;
         case 'externo':
           quantidades.externo++;
@@ -97,14 +97,14 @@ const atualizarQuantidades = async () => {
     // Atualiza quantidades de encomendas sedex
     const encomendasSedex = await getCorrespondenciasSedex();
     encomendasSedex.forEach((encomenda) => {
-      if (encomenda.tipo === 'sedex') {
-        quantidades.sedex++;
+      if (encomenda.tipo === 'correio') {
+        quantidades.correio++;
       }
     });
 
     // Atualiza o estado com as quantidades finais
     quantidadeEncomendasInterno.value = quantidades.interno;
-    quantidadeEncomendasSedex.value = quantidades.sedex;
+    quantidadeEncomendasSedex.value = quantidades.correio;
     quantidadeEncomendasExterno.value = quantidades.externo;
 
     console.log('Quantidades atualizadas:', quantidades);

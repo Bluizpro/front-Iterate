@@ -65,7 +65,7 @@ const carregarCorrespondencias = async (tipo) => {
     let dados;
     if (tipo === 'interno') {
       dados = await getCorrespondenciasInternas();
-    } else if (tipo === 'sedex') {
+    } else if (tipo === 'correio') {
       dados = await getCorrespondenciasSedex();
     } else if (tipo === 'externo') {
       dados = await getCorrespondenciasExterno();
@@ -92,17 +92,17 @@ const colunasPorTipo = {
     'data',
     'hora',
     'conjunto',
-    'destinatario',
+    'nome',
     'remetente',
     'conteudo',
     'empresa',
   ],
-  sedex: ['data', 'hora', 'conjunto', 'destinatario', 'conteudo', 'notaFiscal'],
+  correio: ['data', 'hora', 'conjunto', 'nome', 'conteudo', 'notaFiscal'],
   externo: [
     'data',
     'hora',
     'conjunto',
-    'destinatario',
+    'nome',
     'recebedor',
     'conteudo',
     'local',

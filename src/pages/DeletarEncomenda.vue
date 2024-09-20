@@ -7,11 +7,11 @@
       <q-card-section class="row items-center">
         <q-avatar
           class="q-mr-md"
-          :text="encomenda?.destinatario.charAt(0).toUpperCase()"
+          :text="encomenda?.nome.charAt(0).toUpperCase()"
           color="secondary"
         />
         <div>
-          <div class="text-h6">{{ encomenda?.destinatario }}</div>
+          <div class="text-h6">{{ encomenda?.nome }}</div>
           <div class="text-subtitle1">conteúdo: {{ encomenda?.conteudo }}</div>
           <div class="text-subtitle1">encomenda: {{ encomenda?.tipo }}</div>
           <div class="text-subtitle1">Conjunto: {{ encomenda?.conjunto }}</div>
@@ -107,7 +107,7 @@ const fetchEncomenda = async () => {
       encomenda.value = await getCorrespondenciaInternaById(encomendaId);
     } else if (tipoEncomenda === 'externo') {
       encomenda.value = await getCorrespondenciaExternoById(encomendaId);
-    } else if (tipoEncomenda === 'sedex') {
+    } else if (tipoEncomenda === 'correio') {
       encomenda.value = await getCorrespondenciaSedexById(encomendaId);
     } else {
       throw new Error('Tipo de encomenda inválido');
@@ -139,7 +139,7 @@ const deletarEncomenda = async () => {
   try {
     if (tipoEncomenda === 'interno') {
       await deleteCorrespondenciaInterno(encomendaId);
-    } else if (tipoEncomenda === 'sedex') {
+    } else if (tipoEncomenda === 'correio') {
       await deleteCorrespondenciaSedex(encomendaId);
     } else if (tipoEncomenda === 'externo') {
       await deleteCorrespondenciaExterno(encomendaId);

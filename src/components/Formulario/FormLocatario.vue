@@ -236,7 +236,7 @@ const cadastrar = async () => {
         color: 'green-4',
         textColor: 'white',
         icon: 'cloud_done',
-        message: 'Locatário cadastrado com sucesso',
+        message: 'Colaborador cadastrado com sucesso',
         timeout: Math.random() * 1000 + 1000,
       });
 
