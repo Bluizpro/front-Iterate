@@ -120,7 +120,7 @@ import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 
 import { createCorrespondenciaInterno } from '../../services/encomenInterAPI';
-import { enviarMensagemWhatsApp } from '../../services/whatsappAPI';
+// import { enviarMensagemWhatsApp } from '../../services/whatsappAPI'; // Comentado, pois não será mais usado
 import { getLocatariosByConjunto } from '../../services/locatarioApi';
 import { getCondominos } from '../../services/condonimoApi';
 import { getFuncionario } from '../../services/funcionarioApi';
@@ -234,7 +234,7 @@ const cadastrar = async () => {
     nome: encomenda.value.nome,
     remetente: encomenda.value.remetente,
     conteudo: encomenda.value.conteudo,
-    tipo: 'Interno',
+    tipo: 'interno',
     empresa: encomenda.value.empresa,
   };
 
@@ -250,8 +250,9 @@ const cadastrar = async () => {
       const response = await createCorrespondenciaInterno(novaEncomenda);
 
       if (response) {
-        // Ajusta a mensagem para mostrar apenas o nome e a informação básica
-        const mensagem = `Olá ${novaEncomenda.nome}, Tipo ${novaEncomenda.tipo} sua encomenda foi entregue à portaria. `;
+        // Comentando o envio da mensagem de WhatsApp
+        /*
+        const mensagem = `Olá ${novaEncomenda.nome}, sua encomenda foi entregue à portaria. `;
 
         try {
           await enviarMensagemWhatsApp(telefone, mensagem);
@@ -266,6 +267,7 @@ const cadastrar = async () => {
               'Encomenda cadastrada, mas ocorreu um erro ao enviar a mensagem.',
           });
         }
+        */
 
         store.resetFormularioAtual();
         $q.notify({

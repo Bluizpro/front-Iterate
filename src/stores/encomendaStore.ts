@@ -1,62 +1,42 @@
-// src/stores/encomendaStore.ts
-
-import { defineStore } from 'pinia';
-import { watch } from 'vue';
+/* import { defineStore } from 'pinia';
 import {
   createCorrespondenciaInterno,
   getCorrespondenciasInternas,
-  updateCorrespondenciaInterno,
   deleteCorrespondenciaInterno,
 } from '../services/encomenInterAPI';
 
 import {
   createCorrespondenciaExterno,
   getCorrespondenciasExterno,
-  updateCorrespondenciaExterno,
   deleteCorrespondenciaExterno,
 } from '../services/encomenExternoAPI';
 
 import {
-  getCorrespondenciaSedexById,
+  getCorrespondenciasSedex,
   deleteCorrespondenciaSedex,
 } from '../services/encomenSedexAPI';
 
 export interface Delivery {
   id: number;
   tipo: string; // 'interno', 'externo', 'sedex'
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface EncomendasState {
   encomendasInternas: Delivery[];
   encomendasExternas: Delivery[];
-  encomendasSedex: Delivery[];
+  encomendasCorreio: Delivery[];
 }
 
 export const useEncomendasStore = defineStore('encomendasStore', {
   state: (): EncomendasState => ({
     encomendasInternas: [],
     encomendasExternas: [],
-    encomendasSedex: [],
+    encomendasCorreio: [],
   }),
 
   actions: {
-    init() {
-      const savedState = localStorage.getItem('encomendasStore');
-      if (savedState) {
-        const parsedState = JSON.parse(savedState);
-        this.$patch(parsedState);
-      }
-
-      watch(
-        () => this.$state,
-        (newState) => {
-          localStorage.setItem('encomendasStore', JSON.stringify(newState));
-        },
-        { deep: true }
-      );
-    },
-
+    // Funções para buscar encomendas das APIs diretamente
     async fetchEncomendasInternas() {
       this.encomendasInternas = await getCorrespondenciasInternas();
     },
@@ -65,11 +45,12 @@ export const useEncomendasStore = defineStore('encomendasStore', {
       this.encomendasExternas = await getCorrespondenciasExterno();
     },
 
-    async fetchEncomendasSedex(id: number) {
-      const encomenda = await getCorrespondenciaSedexById(id);
-      this.encomendasSedex.push(encomenda);
+    async fetchEncomendasSedex() {
+      const encomenda = await getCorrespondenciasSedex();
+      this.encomendasCorreio.push(encomenda);
     },
 
+    // Funções para adicionar encomendas
     async adicionarEncomendaInterna(encomenda: Delivery) {
       const novaEncomenda = await createCorrespondenciaInterno(encomenda);
       this.encomendasInternas.push(novaEncomenda);
@@ -80,22 +61,7 @@ export const useEncomendasStore = defineStore('encomendasStore', {
       this.encomendasExternas.push(novaEncomenda);
     },
 
-    async atualizarEncomendaInterna(id: number, encomendaEditada: Delivery) {
-      await updateCorrespondenciaInterno(id, encomendaEditada);
-      const index = this.encomendasInternas.findIndex((e) => e.id === id);
-      if (index !== -1) {
-        this.encomendasInternas[index] = encomendaEditada;
-      }
-    },
-
-    async atualizarEncomendaExterna(id: number, encomendaEditada: Delivery) {
-      await updateCorrespondenciaExterno(id, encomendaEditada);
-      const index = this.encomendasExternas.findIndex((e) => e.id === id);
-      if (index !== -1) {
-        this.encomendasExternas[index] = encomendaEditada;
-      }
-    },
-
+    // Funções para deletar encomendas
     async deletarEncomendaInterna(id: number) {
       await deleteCorrespondenciaInterno(id);
       this.encomendasInternas = this.encomendasInternas.filter(
@@ -112,11 +78,14 @@ export const useEncomendasStore = defineStore('encomendasStore', {
 
     async deletarEncomendaSedex(id: number) {
       await deleteCorrespondenciaSedex(id);
-      this.encomendasSedex = this.encomendasSedex.filter((e) => e.id !== id);
+      this.encomendasCorreio = this.encomendasCorreio.filter(
+        (e) => e.id !== id
+      );
     },
   },
 
   getters: {
+    // Getters para obter o total de encomendas
     getTotalEncomendasInternas(state): number {
       return state.encomendasInternas.length;
     },
@@ -124,14 +93,17 @@ export const useEncomendasStore = defineStore('encomendasStore', {
       return state.encomendasExternas.length;
     },
     getTotalEncomendasSedex(state): number {
-      return state.encomendasSedex.length;
+      return state.encomendasCorreio.length;
     },
+
+    // Getter para combinar todas as encomendas
     allEncomendas(state): Delivery[] {
       return [
         ...state.encomendasInternas,
         ...state.encomendasExternas,
-        ...state.encomendasSedex,
+        ...state.encomendasCorreio,
       ];
     },
   },
 });
+ */

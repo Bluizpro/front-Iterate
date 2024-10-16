@@ -31,9 +31,9 @@ export async function getVisitantes() {
   }
 }
 
-export async function deleteVisitante(cpf) {
+export async function deleteVisitante(id) {
   try {
-    await apiClient.delete(`/${cpf}`);
+    await apiClient.delete(`/${id}`);
   } catch (error) {
     console.error(
       'Erro ao remover visitante:',

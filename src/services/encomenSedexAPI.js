@@ -49,13 +49,19 @@ export async function getCorrespondenciaSedexById(id) {
 }
 
 // Atualiza uma correspondência Sedex existente
-export async function updateCorrespondenciaSedex(id, correspondenciaSedex) {
+export async function updateCorrespondenciaSedexRetirada(
+  id,
+  nomePessoaRetiraSedex
+) {
   try {
-    const response = await apiClient.put(`/${id}`, correspondenciaSedex);
+    const response = await apiClient.put(
+      `/${id}/Retirada`, // Usando o endpoint correto
+      nomePessoaRetiraSedex // O nome da pessoa deve ser passado como corpo
+    );
     return response.data;
   } catch (error) {
     console.error(
-      'Erro ao atualizar CorrespondenciaSedex:',
+      'Erro ao atualizar Correspondencia Sedex como retirada:',
       error.response?.data || error.message
     );
     throw error;

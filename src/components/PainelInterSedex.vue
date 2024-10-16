@@ -38,7 +38,7 @@ const quantidadeEncomendasSedex = ref(0);
 const quantidadeEncomendasExterno = ref(0);
 
 const getChipClass = (quantidade) => {
-  if (quantidade < 10) {
+  if (quantidade < 18) {
     return 'chip-blue';
   } else if (quantidade < 25) {
     return 'chip-orange';
@@ -48,7 +48,7 @@ const getChipClass = (quantidade) => {
 };
 
 const getBadgeClass = (quantidade) => {
-  if (quantidade < 10) {
+  if (quantidade < 18) {
     return 'badge-blue';
   } else if (quantidade < 25) {
     return 'badge-orange';
@@ -123,6 +123,27 @@ onMounted(() => {
   display: flex;
   align-items: center;
   margin-right: 8px;
+}
+.chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 14px; /* Ajuste o tamanho da fonte */
+  max-width: 100px; /* Limita o tamanho para evitar que aumente demais */
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; /* Tamanho fixo para o badge */
+  height: 32px;
+  border-radius: 50%;
+  font-size: 14px; /* Tamanho fixo da fonte */
+  background-color: #0905e6 !important; /* Cor de fundo fixa */
+  color: white;
 }
 
 .chip-blue {

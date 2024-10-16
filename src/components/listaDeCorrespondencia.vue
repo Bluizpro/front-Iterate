@@ -30,134 +30,105 @@
   </q-page>
 </template>
 
-<script>
-import { ref, computed, watchEffect } from 'vue';
-import { useCondominosStore } from '../stores/condominosStore';
-import { useFuncionariosStore } from '../stores/funcionarioStore';
-import { EncomendaConsulta } from '../stores/Imodels';
-// Certifique-se de que esta importação está correta
+<script setup>
+import { ref, computed, onMounted } from 'vue';
+import { getCorrespondenciasInternas } from '../services/encomenInterAPI';
+import { getCorrespondenciasSedex } from '../services/encomenSedexAPI';
+import { getCorrespondenciasExterno } from '../services/encomenExternoAPI';
 
-export default {
-  setup() {
-    const useCondominos = useCondominosStore();
-    const search = ref('');
-    const useFuncionario = useFuncionariosStore();
+const search = ref('');
+const encomendas = ref([]); // Lista para armazenar as encomendas
 
-    function getEncomendasInternasESedex() {
-      let encomendasCondominos = useCondominos.condominos.reduce(
-        (acc, condomino) => {
-          if (condomino.encomendas) {
-            acc.push(
-              ...condomino.encomendas
-                .filter(
-                  (encomenda) =>
-                    encomenda.tipo === 'interno' || encomenda.tipo === 'correio'
-                )
-                .map((encomenda) => ({
-                  conjunto: encomenda.conjunto,
-                  destinatario: encomenda.destinatario,
-                  conteudo: encomenda.conteudo,
-                  tipo: encomenda.tipo,
-                }))
-            );
-          }
-          return acc;
-        },
-        []
-      );
+// Função para buscar as encomendas internas e Sedex de condominos e funcionários
+const getEncomendasInternasESedex = async () => {
+  try {
+    // Chamadas às APIs para buscar encomendas internas e Sedex
+    const [internas, sedex /* externas */] = await Promise.all([
+      getCorrespondenciasInternas(),
+      getCorrespondenciasSedex(),
+      getCorrespondenciasExterno(),
+    ]);
 
-      let encomendasFuncionarios = useFuncionario.funcionarios.reduce(
-        (acc, funcionario) => {
-          if (funcionario.encomendas) {
-            acc.push(
-              ...funcionario.encomendas
-                .filter(
-                  (encomenda) =>
-                    encomenda.tipo === 'interno' || encomenda.tipo === 'correio'
-                )
-                .map((encomenda) => ({
-                  conjunto: encomenda.conjunto,
-                  destinatario: encomenda.destinatario,
-                  conteudo: encomenda.conteudo,
-                  tipo: encomenda.tipo,
-                }))
-            );
-          }
-          return acc;
-        },
-        []
-      );
-
-      return [...encomendasCondominos, ...encomendasFuncionarios];
-    }
-
-    // Computed properties
-    const encomendasConsulta = computed(() => getEncomendasInternasESedex());
-
-    const filteredEncomendas = computed(() => {
-      const searchValue = search.value.toLowerCase().trim();
-      return encomendasConsulta.value.filter(
-        (encomenda) =>
-          encomenda.conjunto.toLowerCase().includes(searchValue) ||
-          encomenda.destinatario.toLowerCase().includes(searchValue)
-      );
-    });
-
-    const noEncomendasMessage = computed(() => {
-      return filteredEncomendas.value.length === 0 ? 'Não há encomendas.' : '';
-    });
-
-    const computedColumns = computed(() => {
-      return [
-        {
-          name: 'conjunto',
-          label: 'Conjunto',
-          align: 'left',
-          required: true,
-          field: 'conjunto',
-          sortable: true,
-        },
-        {
-          name: 'destinatario',
-          label: 'Destinatário',
-          align: 'left',
-          required: true,
-          field: 'destinatario',
-          sortable: true,
-        },
-        {
-          name: 'conteudo',
-          label: 'Conteúdo',
-          align: 'left',
-          required: true,
-          field: 'conteudo',
-          sortable: true,
-        },
-        {
-          name: 'tipo',
-          label: 'Tipo',
-          align: 'left',
-          required: true,
-          field: 'tipo',
-          sortable: true,
-        },
-      ];
-    });
-
-    // Initialize data on mount
-    watchEffect(() => {
-      useCondominos.init(); // Certifique-se de que há um método init() em useCondominos
-      useFuncionario.init(); // Certifique-se de que há um método init() em useFuncionario
-    });
-
-    return {
-      search,
-      filteredEncomendas,
-      noEncomendasMessage,
-      computedColumns,
-    };
-  },
+    encomendas.value = [
+      ...internas.map((encomenda) => ({
+        conjunto: encomenda.conjunto,
+        nome: encomenda.nome,
+        conteudo: encomenda.conteudo,
+        tipo: 'interno',
+      })),
+      ...sedex.map((encomenda) => ({
+        conjunto: encomenda.conjunto,
+        nome: encomenda.nome,
+        conteudo: encomenda.conteudo,
+        tipo: 'correio',
+      })),
+      /*    ...externas.map((encomenda) => ({
+        conjunto: encomenda.conjunto,
+        nome: encomenda.nome,
+        conteudo: encomenda.conteudo,
+        tipo: 'externo',
+      })), */
+    ];
+  } catch (error) {
+    console.error('Erro ao carregar as encomendas:', error);
+  }
 };
+
+// Computed properties para as encomendas filtradas
+const filteredEncomendas = computed(() => {
+  const searchValue = search.value.toLowerCase().trim();
+  return encomendas.value.filter(
+    (encomenda) =>
+      String(encomenda.conjunto).toLowerCase().includes(searchValue) ||
+      String(encomenda.destinatario).toLowerCase().includes(searchValue)
+  );
+});
+
+const noEncomendasMessage = computed(() => {
+  return filteredEncomendas.value.length === 0 ? 'Não há encomendas.' : '';
+});
+
+const computedColumns = computed(() => {
+  return [
+    {
+      name: 'conjunto',
+      label: 'Conjunto',
+      align: 'left',
+      required: true,
+      field: 'conjunto',
+      sortable: true,
+    },
+    {
+      name: 'nome',
+      label: 'Destinatário',
+      align: 'left',
+      required: true,
+      field: 'nome',
+      sortable: true,
+    },
+    {
+      name: 'conteudo',
+      label: 'Conteúdo',
+      align: 'left',
+      required: true,
+      field: 'conteudo',
+      sortable: true,
+    },
+    {
+      name: 'tipo',
+      label: 'Tipo',
+      align: 'left',
+      required: true,
+      field: 'tipo',
+      sortable: true,
+    },
+  ];
+});
+
+// Inicializar os dados ao montar o componente
+onMounted(async () => {
+  await getEncomendasInternasESedex();
+});
 </script>
 
 <style scoped lang="scss">

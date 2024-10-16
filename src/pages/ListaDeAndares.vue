@@ -100,7 +100,7 @@
           :key="conjunto"
           class="locatario-table"
         >
-          <h3>Funcionários do Conjunto {{ conjunto }}</h3>
+          <h3>Colaboradores do Conjunto {{ conjunto }}</h3>
           <q-table
             flat
             bordered

@@ -1,21 +1,19 @@
 import { defineStore } from 'pinia';
+import {
+  getVisitantes,
+  createVisitante,
+  deleteVisitante,
+} from '../services/visitanteApi'; // Certifique-se de que o caminho está correto
 
-export interface Visitante {
+interface Visitante {
+  id: string; // Adiciona o ID ao tipo Visitante
   conjunto: string;
   nome: string;
   cpf: string;
   empresa: string;
   autorizacao: string;
+  dataHora: string;
 }
-
-interface VisitantesState {
-  visitantes: Visitante[];
-}
-import {
-  getVisitantes,
-  createVisitante,
-  deleteVisitante,
-} from '../services/visitanteApi'; // Ajuste o caminho para o serviço
 
 interface VisitantesState {
   visitantes: Visitante[];
@@ -28,37 +26,25 @@ export const useVisitantesStore = defineStore('visitantesStore', {
   actions: {
     async init() {
       try {
-        const visitantes = await getVisitantes(); // Buscar visitantes da API
+        const visitantes = await getVisitantes();
         this.visitantes = visitantes;
-        localStorage.setItem(
-          'visitantesStore',
-          JSON.stringify(this.visitantes)
-        );
       } catch (error) {
         console.error('Erro ao carregar visitantes:', error);
       }
     },
     async adicionarVisitante(novoVisitante: Visitante) {
       try {
-        const visitanteCriado = await createVisitante(novoVisitante); // Adicionar visitante via API
+        const visitanteCriado = await createVisitante(novoVisitante);
         this.visitantes.push(visitanteCriado);
-        localStorage.setItem(
-          'visitantesStore',
-          JSON.stringify(this.visitantes)
-        );
       } catch (error) {
         console.error('Erro ao adicionar visitante:', error);
       }
     },
-    async removerVisitante(cpf: string) {
+    async removerVisitante(id: string) {
       try {
-        await deleteVisitante(cpf); // Remover visitante via API
+        await deleteVisitante(id); // Remover visitante via API usando ID
         this.visitantes = this.visitantes.filter(
-          (visitante) => visitante.cpf !== cpf
-        );
-        localStorage.setItem(
-          'visitantesStore',
-          JSON.stringify(this.visitantes)
+          (visitante) => visitante.id !== id
         );
       } catch (error) {
         console.error('Erro ao remover visitante:', error);

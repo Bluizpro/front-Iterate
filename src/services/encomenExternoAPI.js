@@ -49,14 +49,20 @@ export async function getCorrespondenciaExternoById(id) {
   }
 }
 
-// Atualiza uma correspondência externa existente
-export async function updateCorrespondenciaExterno(id, correspondenciaExterno) {
+// Atualiza uma correspondência externa como retirada
+export async function updateCorrespondenciaExternoRetirada(
+  id,
+  nomePessoaRetiraExterno
+) {
   try {
-    const response = await apiClient.put(`/${id}`, correspondenciaExterno);
+    const response = await apiClient.put(
+      `/${id}/Retirada`, // Este é o endpoint correto para dar baixa
+      nomePessoaRetiraExterno // Passando o nome da pessoa
+    );
     return response.data;
   } catch (error) {
     console.error(
-      'Erro ao atualizar CorrespondenciaExterno:',
+      'Erro ao atualizar Correspondencia Externa como retirada:',
       error.response?.data || error.message
     );
     throw error;

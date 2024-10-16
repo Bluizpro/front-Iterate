@@ -4,24 +4,19 @@
       <q-table
         flat
         bordered
-        title="Lista de Colaboradores"
-        :rows="
-          funcionariosStore.funcionarios.length > 0
-            ? funcionariosStore.funcionarios
-            : [{}]
-        "
+        title="Lista de Funcionários"
+        :rows="funcionarios.length > 0 ? funcionarios : [{}]"
         :columns="columns"
         row-key="conjunto"
         binary-state-sort
       >
         <template v-slot:body="props">
           <q-tr :props="props">
-            <!-- Verifica se há dados no row -->
             <q-td key="dataHora" :props="props">
               <span v-if="props.row.dataHora">
                 {{ formatarData(props.row.dataHora) }}
               </span>
-              <span v-else> Nenhum colaborador encontrado. </span>
+              <span v-else> Nenhum Funcionário encontrado. </span>
             </q-td>
             <q-td key="conjunto" :props="props">
               <span v-if="props.row.conjunto">
@@ -51,9 +46,10 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
-import { useFuncionariosStore } from '../stores/funcionarioStore';
+import { ref, onMounted } from 'vue';
 import { getFuncionario } from '../services/funcionarioApi';
+
+const funcionarios = ref([]); // Armazena a lista de funcionários
 
 const columns = [
   {
@@ -92,12 +88,9 @@ const columns = [
   },
 ];
 
-const funcionariosStore = useFuncionariosStore();
-
 onMounted(async () => {
   try {
-    const funcionarios = await getFuncionario();
-    funcionariosStore.funcionarios = funcionarios;
+    funcionarios.value = await getFuncionario(); // Obter funcionários da API
   } catch (error) {
     console.error('Erro ao carregar funcionários:', error);
   }

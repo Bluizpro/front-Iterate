@@ -49,10 +49,10 @@ export const useCondominosStore = defineStore('condominosStore', {
       try {
         const updatedCondomino = await updateCondomino(condomino);
         const index = this.condominos.findIndex(
-          (c: { conjunto: any }) => c.conjunto === updatedCondomino.conjunto
+          (c) => c.conjunto === updatedCondomino.conjunto
         );
         if (index !== -1) {
-          this.condominos.splice(index, 1, updatedCondomino); // Força reatividade
+          this.condominos[index] = updatedCondomino; // Atualiza diretamente
         } else {
           console.error('Condomínio não encontrado na lista.');
         }
@@ -68,8 +68,7 @@ export const useCondominosStore = defineStore('condominosStore', {
       locatario: string
     ) {
       const condomino = this.condominos.find(
-        (condomino: { conjunto: string }) =>
-          condomino.conjunto === numeroConjunto
+        (c) => c.conjunto === numeroConjunto
       );
 
       if (condomino) {
@@ -92,8 +91,7 @@ export const useCondominosStore = defineStore('condominosStore', {
       encomenda: Delivery
     ) {
       const condomino = this.condominos.find(
-        (condomino: { conjunto: string }) =>
-          condomino.conjunto === numeroConjunto
+        (c) => c.conjunto === numeroConjunto
       );
 
       if (condomino) {
@@ -107,6 +105,9 @@ export const useCondominosStore = defineStore('condominosStore', {
     },
   },
 });
+
+// Mova a inicialização do store para o componente onde ele será usado
+// Exemplo: dentro do setup() de um componente
 
 // Inicializa o store
 const condominosStore = useCondominosStore();

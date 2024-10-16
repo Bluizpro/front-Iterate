@@ -49,14 +49,19 @@ export async function getCorrespondenciaInternaById(id) {
   }
 }
 
-// Atualiza uma correspondência interna existente
-export async function updateCorrespondenciaInterno(id, correspondenciaInterno) {
+export async function updateCorrespondenciaInternaRetirada(
+  id,
+  nomePessoaRetiraInterno
+) {
   try {
-    const response = await apiClient.put(`/${id}`, correspondenciaInterno);
+    const response = await apiClient.put(
+      `/${id}/devolver`, // A URL do endpoint deve estar correta
+      nomePessoaRetiraInterno // O nome da pessoa deve ser passado como corpo
+    );
     return response.data;
   } catch (error) {
     console.error(
-      'Erro ao atualizar CorrespondenciaInterno:',
+      'Erro ao atualizar Correspondencia Interna como retirada:',
       error.response?.data || error.message
     );
     throw error;
