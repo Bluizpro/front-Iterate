@@ -33,25 +33,33 @@
 <script setup>
 import { defineProps, defineEmits, ref } from 'vue';
 import { VueSignaturePad } from 'vue-signature-pad';
-import { useAssinaturaStore } from '../stores/assinatura';
+import { uploadSignature, saveAssinatura } from '../services/assinaturaApi'; // Importa o serviço de upload
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps(['exibirModal']);
 const emit = defineEmits(['update:exibirModal', 'salvarAssinatura']);
 const signaturePad = ref(null);
-const store = useAssinaturaStore();
 
 const updateExibirModal = (value) => {
   emit('update:exibirModal', value);
 };
 
 const salvarAssinatura = async () => {
-  // Adicione a palavra-chave async
   const { isEmpty, data } = signaturePad.value.saveSignature();
   if (!isEmpty) {
-    // Armazena a assinatura na loja Pinia
-    await store.salvarAssinatura(data); // Adicione a palavra-chave await
-    console.log('URL da assinatura:', store.url);
+    try {
+      const response = await uploadSignature(data); // Chama o serviço de upload
+      const assinaturaUrl = response.url; // Obtém a URL da assinatura
+      console.log('URL da assinatura:', assinaturaUrl); // Exibe a URL da assinatura
+
+      // Chama o serviço de salvar a assinatura no backend
+      const assinatura = {
+        url: assinaturaUrl, // Adiciona a URL da assinatura
+        // Adicione outros campos necessários aqui, se houver
+      };
+      await saveAssinatura(assinatura); // Envia a URL ao backend
+    } catch (error) {
+      console.error('Erro ao salvar a assinatura:', error);
+    }
   }
   emit('salvarAssinatura');
 };
@@ -59,8 +67,8 @@ const salvarAssinatura = async () => {
 
 <style scoped lang="scss">
 .assinatura-container {
-  width: 100%; /* Ajuste a largura para 100% */
-  height: 100%; /* Ajuste a altura para 100% */
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -68,7 +76,7 @@ const salvarAssinatura = async () => {
 }
 
 .dialog-button {
-  margin: 0 2px; /* Adicione margem aos botões */
+  margin: 0 2px;
   border-radius: 2rem;
 }
 </style>

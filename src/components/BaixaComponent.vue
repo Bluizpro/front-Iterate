@@ -193,21 +193,21 @@ const darBaixa = async () => {
       console.log(`Dando baixa na encomenda ID: ${encomenda.id}`);
 
       if (encomenda.tipo === 'interno') {
-        const nomePessoa = 'Teste Nome'; // Nome fixo para teste
+        const nomePessoa = 'Tekoha'; // Nome fixo para teste
         const resposta = await updateCorrespondenciaInternaRetirada(
           encomenda.id,
           nomePessoa
         );
         console.log('Resposta da API:', resposta);
       } else if (encomenda.tipo === 'correio') {
-        const nomePessoa = 'Teste Nome';
+        const nomePessoa = 'Tekoha';
         const resposta = await updateCorrespondenciaSedexRetirada(
           encomenda.id,
           nomePessoa
         );
         console.log('Resposta da API:', resposta);
       } else if (encomenda.tipo === 'externo') {
-        const nomePessoa = 'Teste Nome';
+        const nomePessoa = 'Tekoha';
         const resposta = await updateCorrespondenciaExternoRetirada(
           encomenda.id,
           nomePessoa
