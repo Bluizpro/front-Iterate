@@ -38,6 +38,7 @@ import { uploadSignature, saveAssinatura } from '../services/assinaturaApi'; // 
 const props = defineProps(['exibirModal']);
 const emit = defineEmits(['update:exibirModal', 'salvarAssinatura']);
 const signaturePad = ref(null);
+const assinaturaUrl = ref(null); // Crie uma ref para armazenar a URL da assinatura
 
 const updateExibirModal = (value) => {
   emit('update:exibirModal', value);
@@ -48,20 +49,18 @@ const salvarAssinatura = async () => {
   if (!isEmpty) {
     try {
       const response = await uploadSignature(data); // Chama o serviço de upload
-      const assinaturaUrl = response.url; // Obtém a URL da assinatura
-      console.log('URL da assinatura:', assinaturaUrl); // Exibe a URL da assinatura
+      assinaturaUrl.value = response.url; // Armazena a URL da assinatura
 
       // Chama o serviço de salvar a assinatura no backend
       const assinatura = {
-        url: assinaturaUrl, // Adiciona a URL da assinatura
-        // Adicione outros campos necessários aqui, se houver
+        url: assinaturaUrl.value, // Adiciona a URL da assinatura
       };
       await saveAssinatura(assinatura); // Envia a URL ao backend
     } catch (error) {
       console.error('Erro ao salvar a assinatura:', error);
     }
   }
-  emit('salvarAssinatura');
+  emit('salvarAssinatura', assinaturaUrl.value); // Emite a URL da assinatura ao fechar o modal
 };
 </script>
 

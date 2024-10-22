@@ -17,10 +17,19 @@
           <i class="material-icons search-icon" v-if="!search">search</i>
         </div>
       </div>
+
       <div class="cards-container">
         <div v-if="message">{{ message }}</div>
       </div>
-      <div class="ro items-wcenter justify-evenly">
+
+      <!-- Verifica se não há chaves cadastradas -->
+      <div v-if="!chavesRetiradas.length" class="no-chaves-message">
+        <p style="text-align: center; font-size: 1.2em">
+          Nenhuma chave cadastrada.
+        </p>
+      </div>
+
+      <div class="row items-wcenter justify-evenly">
         <div class="q-gutter-md col-md-10 col-sm-10 col-xs-12">
           <!-- Main Container -->
           <div class="main-container">
@@ -34,12 +43,12 @@
                   :class="{ selected: chave.selected }"
                   @click="handleClick(chave)"
                 >
-                  <q-card-section>
+                  <q-card-section class="card-section">
                     <div>Conjunto: {{ chave.conjunto }}</div>
                     <div>Data: {{ chave.data }}</div>
                     <div>Hora: {{ chave.hora }}</div>
                     <div>Usuário: {{ chave.usuario }}</div>
-                    <!--  <img :src="chave.assinatura" alt="Assinatura do usuário" /> -->
+                    <img :src="chave.assinatura" alt="Assinatura do usuário" />
                   </q-card-section>
                 </q-card>
               </div>
@@ -196,5 +205,12 @@ watch(search, () => {
 
 .my-card.disabled {
   background-color: red;
+}
+.card-section img {
+  max-width: 100%; /* A imagem não pode ser maior que o contêiner */
+  max-height: 150px; /* Limite a altura da imagem conforme necessário */
+  object-fit: contain; /* Mantém a proporção da imagem */
+  display: block; /* Remove espaço em branco abaixo da imagem */
+  margin-top: 10px; /* Adiciona um espaço acima da imagem, se necessário */
 }
 </style>

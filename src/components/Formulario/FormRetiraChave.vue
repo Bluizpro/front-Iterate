@@ -113,26 +113,34 @@ const salvarAssinatura = (assinatura) => {
   if (typeof assinatura === 'string') {
     chave.value.assinatura = assinatura;
 
-    // Mova a lógica de salvar as informações para aqui
-    console.log('salvou aqui');
+    // Mover a lógica de salvar as informações para uma única vez
     let item = localStorage.getItem('chavesRetiradas');
-
     let chavesRetiradas = item ? JSON.parse(item) : [];
-    chavesRetiradas.push(chave.value);
-    localStorage.setItem('chavesRetiradas', JSON.stringify(chavesRetiradas));
 
-    chave.value.disponivel = false;
-    store.retirarChave({
-      ...chave.value,
-      chaveSelecionada: '',
-    });
+    // Verificar se a chave já está registrada
+    const isAlreadyRegistered = chavesRetiradas.some(
+      (chaveRetirada) => chaveRetirada.conjunto === chave.value.conjunto
+    );
+
+    if (!isAlreadyRegistered) {
+      chavesRetiradas.push(chave.value);
+      localStorage.setItem('chavesRetiradas', JSON.stringify(chavesRetiradas));
+
+      chave.value.disponivel = false;
+      store.retirarChave({
+        ...chave.value,
+        chaveSelecionada: '',
+      });
+
+      // Atualizar o Craviculario após o salvamento
+      router.push('/usuario/Craviculario');
+    } else {
+      console.log('Essa chave já foi retirada.');
+    }
   } else {
     voltar();
   }
+
   exibirModalAssinatura.value = false;
-  let item = localStorage.getItem('chavesRetiradas');
-  let chavesRetiradas = item ? JSON.parse(item) : [];
-  chavesRetiradas.push(chave.value);
-  localStorage.setItem('chavesRetiradas', JSON.stringify(chavesRetiradas));
 };
 </script>

@@ -1,4 +1,3 @@
-// retirada-chave.ts
 import { defineStore } from 'pinia';
 
 interface Chave {
@@ -26,27 +25,49 @@ export const useRetiradaChaveStore = defineStore({
   },
   actions: {
     addChave(chave: Chave) {
-      if (
-        !this.estadoChaves.find(
-          (c: { conjunto: string }) => c.conjunto === chave.conjunto
-        )
-      ) {
+      const existingChave = this.estadoChaves.find(
+        (c: { conjunto: string }) => c.conjunto === chave.conjunto
+      );
+      if (!existingChave) {
         this.estadoChaves = [...this.estadoChaves, chave];
+
+        // Atualizar o localStorage também
+        const chavesRetiradas = JSON.parse(
+          localStorage.getItem('chavesRetiradas') || '[]'
+        );
+        chavesRetiradas.push(chave);
+        localStorage.setItem(
+          'chavesRetiradas',
+          JSON.stringify(chavesRetiradas)
+        );
+
+        console.log(`Chave ${chave.conjunto} adicionada`);
       } else {
         console.error(`Chave ${chave.conjunto} já existe`);
       }
     },
+
     retirarChave(chave: Chave) {
       const index = this.estadoChaves.findIndex(
         (c: { conjunto: string }) => c.conjunto === chave.conjunto
       );
       if (index !== -1) {
+        // Atualizar o estado interno
         this.estadoChaves = this.estadoChaves.map((c: any, i: any) =>
           i === index ? { ...c, disponivel: false } : c
         );
-        console.log(`Chave ${chave.conjunto} retirada`);
-      } else {
-        console.error(`Chave ${chave.conjunto} não encontrada`);
+
+        // Atualizar o localStorage
+        let chavesRetiradas = JSON.parse(
+          localStorage.getItem('chavesRetiradas') || '[]'
+        );
+        chavesRetiradas = chavesRetiradas.map((c: any) =>
+          c.conjunto === chave.conjunto ? { ...c, disponivel: false } : c
+        );
+        localStorage.setItem(
+          'chavesRetiradas',
+          JSON.stringify(chavesRetiradas)
+        );
       }
     },
   },

@@ -181,7 +181,7 @@ const encomendasPaginadas = computed(() => {
 });
 
 // Função para dar baixa nas encomendas
-const darBaixa = async () => {
+const darBaixa = async (assinaturaUrl) => {
   const encomendasSelecionadas = encomendasFiltradas.value.filter(
     (encomenda) => encomenda.selecionado
   );
@@ -192,28 +192,27 @@ const darBaixa = async () => {
     try {
       console.log(`Dando baixa na encomenda ID: ${encomenda.id}`);
 
+      const nomePessoa = 'Tekoha'; // Nome fixo para teste
+
+      let resposta;
       if (encomenda.tipo === 'interno') {
-        const nomePessoa = 'Tekoha'; // Nome fixo para teste
-        const resposta = await updateCorrespondenciaInternaRetirada(
-          encomenda.id,
-          nomePessoa
-        );
-        console.log('Resposta da API:', resposta);
+        resposta = await updateCorrespondenciaInternaRetirada(encomenda.id, {
+          nomePessoaRetiraInterno: nomePessoa,
+          assinaturaUrl,
+        });
       } else if (encomenda.tipo === 'correio') {
-        const nomePessoa = 'Tekoha';
-        const resposta = await updateCorrespondenciaSedexRetirada(
-          encomenda.id,
-          nomePessoa
-        );
-        console.log('Resposta da API:', resposta);
+        resposta = await updateCorrespondenciaSedexRetirada(encomenda.id, {
+          nomePessoaRetiraInterno: nomePessoa,
+          assinaturaUrl,
+        });
       } else if (encomenda.tipo === 'externo') {
-        const nomePessoa = 'Tekoha';
-        const resposta = await updateCorrespondenciaExternoRetirada(
-          encomenda.id,
-          nomePessoa
-        );
-        console.log('Resposta da API:', resposta);
+        resposta = await updateCorrespondenciaExternoRetirada(encomenda.id, {
+          nomePessoaRetiraInterno: nomePessoa,
+          assinaturaUrl,
+        });
       }
+
+      console.log('Resposta da API:', resposta);
     } catch (error) {
       console.error('Erro ao dar baixa:', error);
       $q.notify({

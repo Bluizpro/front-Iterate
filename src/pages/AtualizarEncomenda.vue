@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <q-page v-if="encomenda" padding>
     <h1 style="font-size: 1.5em; text-align: center">Atualizar encomenda</h1>
     <q-card>
@@ -39,7 +39,7 @@
             lazy
           />
         </q-form>
-        <!-- Adicione mais campos conforme necessário -->
+
       </q-card-section>
 
       <q-card-actions align="right">
@@ -63,7 +63,7 @@
   <q-page v-else>
     <div>Encomenda não encontrada</div>
   </q-page>
-</template>
+</template> -->
 
 <!-- <script setup lang="ts">
 import { useRouter } from 'vue-router';
@@ -165,7 +165,7 @@ const salvarEncomenda = async () => {
 };
 </script>
  -->
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { useEncomendasStore } from '../stores/encomendaStore';
 import { useQuasar } from 'quasar';
@@ -267,3 +267,4 @@ const salvarEncomenda = async () => {
   hideLoading();
 };
 </script>
+ -->

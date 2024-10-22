@@ -20,9 +20,9 @@ const store = useStore();
 
 const pessoas = ref<listData>({
   imagem: [
-    '/imagem/visitantes.png',
-    '/imagem/condominio.png',
-    '/imagem/funcionario.png',
+    '/imagem/visitantes.svg',
+    '/imagem/condonimos.svg',
+    '/imagem/funcionario.svg',
   ],
 
   tipo: ['visitante', 'condômino', 'funcionario'],
