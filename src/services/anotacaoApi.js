@@ -20,7 +20,12 @@ export async function archiveAnnotation(id) {
   return response.data;
 }
 
-export async function getArchivedAnnotations() {
-  const response = await apiClient.get('/arquivado');
-  return response.data;
-}
+export const getArchivedAnnotations = async () => {
+  try {
+    const response = await apiClient.get('/arquivado'); // Use `apiClient` aqui
+    return response.data; // Retorna a lista de anotações arquivadas
+  } catch (error) {
+    console.error('Erro ao buscar anotações arquivadas:', error);
+    throw error; // Lança o erro para que possa ser tratado
+  }
+};

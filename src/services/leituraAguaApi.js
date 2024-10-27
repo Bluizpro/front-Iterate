@@ -24,25 +24,11 @@ export const createLeituraAgua = async (leituraAgua) => {
   }
 };
 
-// Função para buscar todas as leituras de água e retornar os consumos e datas
 export const getLeiturasAgua = async () => {
-  try {
-    const response = await apiClient.get('/');
-
-    // Mapeando os consumos e as datas de cada leitura
-    const leituras = response.data.map((item) => ({
-      consumo: item.consumo, // Ajuste "consumo" se necessário
-      dataInicial: item.dataInicial, // Ajuste "dataInicial" para o nome correto da propriedade de data
-    }));
-
-    return leituras;
-  } catch (error) {
-    console.error(
-      'Erro ao buscar leituras de água:',
-      error.response ? error.response.data : error.message
-    );
-    throw error;
-  }
+  // Requisição para obter todas as leituras de água do endpoint
+  const response = await apiClient.get('/'); // Ajuste aqui se necessário
+  // Retorna os dados exatamente como estão no backend
+  return response.data;
 };
 
 // Função para buscar leituras de água por data

@@ -3,7 +3,9 @@
     <FormVisitante v-if="store.formularioAtual == 'visitante'" />
     <FormCondomino v-if="store.formularioAtual == 'condômino'" />
     <FormFuncionario v-if="store.formularioAtual == 'funcionario'" />
-    <CardButao :lista-de-dados="pessoas" v-if="store.formularioAtual == ''" />
+    <div class="card-container" v-if="store.formularioAtual == ''">
+      <CardButao :lista-de-dados="pessoas" />
+    </div>
   </q-page>
 </template>
 
@@ -24,10 +26,10 @@ const pessoas = ref<listData>({
     '/imagem/condonimos.svg',
     '/imagem/funcionario.svg',
   ],
-
   tipo: ['visitante', 'condômino', 'funcionario'],
 });
 </script>
+
 <style scoped lang="scss">
 .card-container {
   display: grid;
@@ -38,9 +40,16 @@ const pessoas = ref<listData>({
 .card-item {
   position: relative;
   width: 100%;
-  height: 0;
-  padding-bottom: 100%;
+  height: 200px; /* Altura fixa para os cards */
   overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transição suave para hover */
+  background-color: white; /* Fundo do card */
+  border-radius: 8px; /* Bordas arredondadas */
+}
+
+.card-item:hover {
+  transform: translateY(-5px); /* Move o card para cima ao passar o mouse */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Sombra mais intensa ao passar o mouse */
 }
 
 .card-image-wrapper {
@@ -69,6 +78,7 @@ const pessoas = ref<listData>({
   color: white;
   padding: 0.5rem;
   text-align: center;
+  border-radius: 0 0 8px 8px; /* Arredondando os cantos do texto */
 }
 
 @media (min-width: 768px) {

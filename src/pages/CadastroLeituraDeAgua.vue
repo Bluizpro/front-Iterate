@@ -3,20 +3,38 @@
     Formulário de Controle de Água
   </h1>
   <div class="border">
-    <div class="select-container">
-      <label for="select-day">Selecionar Dia:</label>
-      <select id="select-day" v-model="selectedDay" @change="filterDataByDay">
-        <option v-for="day in uniqueDays" :key="day" :value="day">
-          {{ day }}
-        </option>
-      </select>
+    <div class="controls-container">
+      <div class="select-container">
+        <label for="select-day">Selecionar Dia:</label>
+        <select
+          id="select-day"
+          v-model="selectedDay"
+          @change="filterDataByDay"
+          class="custom-select"
+        >
+          <option v-for="day in uniqueDays" :key="day" :value="day">
+            {{ day }}
+          </option>
+        </select>
+      </div>
+      <button @click="fetchDailyData">Dados Gerais do Mês</button>
+      <button @click="fetchMonthlySum">Somatório do Mês</button>
     </div>
+
     <div class="charts-container">
+      <div v-if="loading">Carregando...</div>
+      <!-- Estado de carregamento -->
       <LineChart
         class="small-chart"
         :key="chartData.labels.join('-')"
         :data="chartData"
-        v-if="chartData.labels.length > 0"
+        v-if="!loading && chartData.labels.length > 0"
+      />
+      <PieChart
+        class="small-chart"
+        :key="pieChartData.labels.join('-')"
+        :data="pieChartData"
+        v-if="!loading && pieChartData.labels.length > 0"
       />
     </div>
   </div>
@@ -28,7 +46,7 @@
 <script setup>
 import FormularioAgua from 'src/components/FormularioAgua.vue';
 import { ref, onMounted } from 'vue';
-import { Line as LineChart } from 'vue-chartjs';
+import { Line as LineChart, Pie as PieChart } from 'vue-chartjs';
 import {
   Chart as ChartJS,
   Title,
@@ -42,7 +60,7 @@ import {
 } from 'chart.js';
 import { getLeiturasAgua } from '../services/leituraAguaApi';
 
-// Registrando os componentes do Chart.js
+// Registro dos componentes do Chart.js
 ChartJS.register(
   Title,
   Tooltip,
@@ -53,6 +71,8 @@ ChartJS.register(
   LinearScale,
   ArcElement
 );
+
+// Dados do gráfico
 const chartData = ref({
   labels: [],
   datasets: [
@@ -66,9 +86,28 @@ const chartData = ref({
   ],
 });
 
+const pieChartData = ref({
+  labels: [],
+  datasets: [
+    {
+      label: 'Consumo Mensal',
+      data: [],
+      backgroundColor: [
+        '#FF6384',
+        '#36A2EB',
+        '#FFCE56',
+        '#4BC0C0',
+        '#9966FF',
+        '#FF9F40',
+      ],
+    },
+  ],
+});
+
 const leiturasAgua = ref([]);
 const uniqueDays = ref([]);
 const selectedDay = ref('');
+const loading = ref(true); // Estado de carregamento
 
 // Função para buscar e formatar os dados
 const fetchData = async () => {
@@ -76,44 +115,41 @@ const fetchData = async () => {
     const leituras = await getLeiturasAgua();
     leiturasAgua.value = leituras;
 
-    // Extraindo dias únicos para o select
     uniqueDays.value = [
       ...new Set(leituras.map((leitura) => leitura.dataInicial)),
     ];
 
-    // Definir o dia selecionado como o primeiro disponível
-    selectedDay.value = uniqueDays.value[0];
-
-    filterDataByDay(); // Filtrar os dados para o primeiro dia
+    if (uniqueDays.value.length > 0) {
+      selectedDay.value = uniqueDays.value[0];
+      filterDataByDay();
+    }
   } catch (error) {
     console.error('Erro ao buscar os dados da API:', error);
+  } finally {
+    loading.value = false; // Define loading como false após a busca
   }
 };
 
-// Função para filtrar os dados por dia selecionado
+// Filtragem por dia
 const filterDataByDay = () => {
   const selectedDayFormatted = new Date(selectedDay.value).toLocaleDateString(
     'pt-BR'
   );
-  console.log('Dia selecionado formatado:', selectedDayFormatted);
-
   const filteredLeituras = leiturasAgua.value.filter((leitura) => {
     const leituraDateFormatted = new Date(
       leitura.dataInicial
     ).toLocaleDateString('pt-BR');
-    console.log('Data da leitura formatada:', leituraDateFormatted);
     return leituraDateFormatted === selectedDayFormatted;
   });
-
-  console.log('Leituras filtradas:', filteredLeituras);
 
   const consumos = filteredLeituras.map((leitura) => {
     const formattedLeitura = leitura.consumo
       .replace(/\s/g, '')
       .replace(',', '.')
       .replace('m³!', '');
-    const consumoNum = parseFloat(formattedLeitura);
-    return !isNaN(consumoNum) ? consumoNum : 0;
+    return !isNaN(parseFloat(formattedLeitura))
+      ? parseFloat(formattedLeitura)
+      : 0;
   });
 
   chartData.value.labels = filteredLeituras.map(
@@ -122,6 +158,107 @@ const filterDataByDay = () => {
   chartData.value.datasets[0].data = consumos;
 };
 
+// Funções para buscar dados mensais
+const fetchDailyData = async () => {
+  loading.value = true; // Inicia o carregamento
+  try {
+    const leituras = await getLeiturasAgua();
+    const monthlyReadings = [];
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    leituras.forEach((leitura) => {
+      const leituraDate = new Date(leitura.dataInicial);
+      if (
+        leituraDate.getMonth() === currentMonth &&
+        leituraDate.getFullYear() === currentYear
+      ) {
+        monthlyReadings.push(leitura);
+      }
+    });
+
+    // Verifique se há leituras
+    if (monthlyReadings.length === 0) {
+      chartData.value.labels = [];
+      chartData.value.datasets[0].data = [];
+      pieChartData.value.labels = [];
+      pieChartData.value.datasets[0].data = [];
+      return; // Retorna se não houver leituras
+    }
+
+    chartData.value.labels = monthlyReadings.map(
+      (leitura, index) => `${leitura.dataInicial} - Leitura ${index + 1}`
+    );
+    chartData.value.datasets[0].data = monthlyReadings.map((leitura) => {
+      const formattedLeitura = leitura.consumo
+        .replace(/\s/g, '')
+        .replace(',', '.')
+        .replace('m³!', '');
+      return !isNaN(parseFloat(formattedLeitura))
+        ? parseFloat(formattedLeitura)
+        : 0;
+    });
+
+    // Atualiza gráfico de pizza se necessário
+    pieChartData.value.labels = chartData.value.labels;
+    pieChartData.value.datasets[0].data = chartData.value.datasets[0].data;
+  } catch (error) {
+    console.error('Erro ao buscar os dados do mês:', error);
+  } finally {
+    loading.value = false; // Define loading como false após a busca
+  }
+};
+
+const fetchMonthlySum = async () => {
+  loading.value = true; // Inicia o carregamento
+  try {
+    const leituras = await getLeiturasAgua(); // Obter todas as leituras
+    const monthlyData = {};
+
+    // Agrupar as leituras por mês
+    leituras.forEach((leitura) => {
+      const leituraDate = new Date(leitura.dataInicial);
+      const monthKey = `${leituraDate.getFullYear()}-${
+        leituraDate.getMonth() + 1
+      }`; // Formato: YYYY-MM
+
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = []; // Inicializa o mês se não existir
+      }
+      monthlyData[monthKey].push(leitura);
+    });
+
+    // Processar dados mensais para o gráfico
+    const monthLabels = Object.keys(monthlyData);
+    const consumos = monthLabels.map((month) => {
+      const monthReadings = monthlyData[month];
+      return monthReadings.reduce((total, leitura) => {
+        const formattedLeitura = leitura.consumo
+          .replace(/\s/g, '')
+          .replace(',', '.')
+          .replace('m³!', '');
+        return (
+          total +
+          (!isNaN(parseFloat(formattedLeitura))
+            ? parseFloat(formattedLeitura)
+            : 0)
+        );
+      }, 0); // Soma os consumos do mês
+    });
+
+    pieChartData.value.labels = monthLabels;
+    pieChartData.value.datasets[0].data = consumos;
+
+    chartData.value.labels = monthLabels; // Atualiza labels do gráfico de linha também
+    chartData.value.datasets[0].data = consumos; // Atualiza dados do gráfico de linha também
+  } catch (error) {
+    console.error('Erro ao buscar somatório mensal:', error);
+  } finally {
+    loading.value = false; // Define loading como false após a busca
+  }
+};
+
+// Carregar os dados quando o componente é montado
 onMounted(() => {
   fetchData();
 });
@@ -135,44 +272,68 @@ onMounted(() => {
 }
 
 .small-chart {
-  width: 60% !important;
-  height: 400px !important; /* Ajuste a altura fixa */
+  width: 25% !important; /* Ajuste a largura do gráfico de pizza */
+  height: 270px !important; /* Ajuste a altura do gráfico de pizza */
 }
+
 .border {
   border: 1px solid #000 !important;
   margin-left: 4rem;
   margin-top: 2rem;
   margin-right: 5rem;
-  padding: 5rem;
+  padding: 2rem; /* Ajuste o padding para melhor espaçamento */
   background-color: rgb(235 208 208 / 20%);
 }
 
+.controls-container {
+  display: flex; /* Alinha os elementos na mesma linha */
+  align-items: center; /* Centraliza verticalmente */
+  margin-bottom: 20px; /* Espaço entre os controles e os gráficos */
+}
+
 .select-container {
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
+  margin-right: 20px; /* Espaço entre o select e os botões */
 }
 
-.select-container label {
-  margin-right: 10px;
-  font-weight: bold;
+button {
+  margin-left: 10px; /* Espaço entre os botões */
+  padding: 10px 15px; /* Adiciona um pouco de espaçamento interno */
+  font-size: 1em; /* Tamanho da fonte */
+  color: #fff; /* Cor do texto */
+  background-color: #007bff; /* Cor de fundo */
+  border: none; /* Remove borda padrão */
+  border-radius: 5px; /* Bordas arredondadas */
+  cursor: pointer; /* Muda o cursor ao passar sobre o botão */
+  transition: background-color 0.3s, transform 0.2s; /* Transição suave */
 }
 
-.select-container select {
-  padding: 8px 12px;
-  border: 2px solid #ccc;
-  border-radius: 20px; /* Ajuste do arredondamento */
-  background-color: #f9f9f9;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.3s ease;
+/* Efeito de hover para os botões */
+button:hover {
+  background-color: #0056b3; /* Cor de fundo ao passar o mouse */
+  transform: translateY(-2px); /* Levanta o botão levemente */
 }
 
-.select-container select:focus {
-  border-color: #1e90ff; /* Cor da borda ao focar */
+/* Efeito de foco para acessibilidade */
+button:focus {
+  outline: none; /* Remove a borda de foco padrão */
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5); /* Sombra ao focar */
 }
+.custom-select {
+  padding: 10px; /* Adiciona espaçamento interno */
+  font-size: 1em; /* Ajusta o tamanho da fonte */
+  border: 1px solid #007bff; /* Cor da borda */
+  border-radius: 5px; /* Bordas arredondadas */
+  background-color: #fff; /* Cor de fundo */
+  color: #333; /* Cor do texto */
+  appearance: none; /* Remove o estilo padrão do select */
+  cursor: pointer; /* Muda o cursor ao passar sobre o select */
+  transition: border-color 0.3s; /* Transição suave para a cor da borda */
 
-.select-container select:hover {
-  border-color: #4682b4; /* Cor da borda ao passar o mouse */
+  /* Efeito de foco */
+  &:focus {
+    outline: none; /* Remove a borda de foco padrão */
+    border-color: #0056b3; /* Cor da borda ao focar */
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5); /* Sombra ao focar */
+  }
 }
 </style>

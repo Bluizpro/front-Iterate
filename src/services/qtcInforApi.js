@@ -19,7 +19,16 @@ export async function archiveQtcInfo(id) {
   return response.data;
 }
 
-export async function getArchivedQtcInfos() {
-  const response = await apiClient.get('/arquivar-qtc');
+/* export async function getArchivedQtcInfos() {
+  const response = await apiClient.get('/arquivar');
   return response.data;
-}
+} */
+export const getArchivedQtcInfos = async () => {
+  try {
+    const response = await apiClient.get('/arquivado'); // Use `apiClient` aqui
+    return response.data; // Retorna a lista de anotações arquivadas
+  } catch (error) {
+    console.error('Erro ao buscar anotações arquivadas:', error);
+    throw error; // Lança o erro para que possa ser tratado
+  }
+};
