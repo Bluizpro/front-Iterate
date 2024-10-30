@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:5120/api/Funcionario',
+  baseURL: 'https://gestor-encomenda.onrender.com/api/Funcionario',
 });
 
 export async function createFuncionario(funcionario) {

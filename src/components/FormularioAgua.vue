@@ -410,6 +410,7 @@ import { ref } from 'vue';
 import { useQuasar } from 'quasar';
 import { enviarMensagemWhatsAppAgua } from '../services/whatsappAPI'; // Importe o serviço de mensagem
 import { createLeituraAgua } from '../services/leituraAguaApi'; // Importe a função para salvar no backend
+import dayjs from 'dayjs'; // Importar dayjs
 
 const $q = useQuasar();
 
@@ -417,17 +418,17 @@ let tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
 
 let leituraAgua = ref({
-  dataInicial: new Date().toLocaleDateString(),
-  hora: new Date().toLocaleTimeString(),
+  dataInicial: new Date().toISOString().split('T')[0], // Formato ISO
+  hora: new Date().toLocaleTimeString('pt-BR', { hour12: false }),
   leituraInicial: '',
   vistoInicial: '',
-  dataParcial: new Date().toLocaleDateString(),
+  dataParcial: new Date().toISOString().split('T')[0],
   Parcial: '11:00',
   leituraParcial: '',
-  dataMeio: new Date().toLocaleDateString(),
+  dataMeio: new Date().toISOString().split('T')[0],
   horaParcial2: '23:00',
   leituraParcial2: '',
-  dataFinal: tomorrow.toLocaleDateString(),
+  dataFinal: tomorrow.toISOString().split('T')[0],
   horaFinal: '06:00',
   leituraFinal: '',
   vistoFinal: '',
@@ -435,6 +436,22 @@ let leituraAgua = ref({
 });
 
 async function calcular() {
+  // Verifique se as leituras estão preenchidas
+  if (
+    !leituraAgua.value.leituraInicial ||
+    !leituraAgua.value.leituraParcial ||
+    !leituraAgua.value.leituraFinal
+  ) {
+    $q.notify({
+      color: 'red-5',
+      textColor: 'white',
+      icon: 'warning',
+      message: 'Por favor, preencha todas as leituras antes de calcular!',
+    });
+    return; // Impede a execução se os campos estiverem vazios
+  }
+
+  // Resto do cálculo
   let leituraInicial = parseInt(leituraAgua.value.leituraInicial.slice(3));
   let leituraParcial = parseInt(leituraAgua.value.leituraParcial.slice(3));
   let leituraParcial2 = parseInt(leituraAgua.value.leituraParcial2.slice(3));
@@ -445,6 +462,7 @@ async function calcular() {
 
   consumoFinal = Number(consumoFinal.toFixed(2));
 
+  // Exibição de aviso e envio de mensagem caso o consumo ultrapasse 6000m³
   if (consumoFinal > 6000 && !isNaN(consumo)) {
     $q.notify({
       color: 'red-5',
@@ -454,7 +472,6 @@ async function calcular() {
     });
 
     try {
-      // Utilize o serviço de mensagem em vez da chamada direta
       await enviarMensagemWhatsAppAgua(
         `O consumo ultrapassou 6000m³. Consumo atual: ${consumoFinal} m³!`
       );
@@ -468,10 +485,32 @@ async function calcular() {
 
   // Salvar leitura de água no back-end
   try {
+    // Certifique-se de que a data e hora estejam no formato correto
+    leituraAgua.value.dataInicial = dayjs(leituraAgua.value.dataInicial).format(
+      'YYYY-MM-DD'
+    );
+    leituraAgua.value.hora = dayjs(leituraAgua.value.hora, 'HH:mm:ss').format(
+      'HH:mm:ss'
+    );
+
+    // Formatar as outras datas conforme necessário
+    leituraAgua.value.dataParcial = dayjs(leituraAgua.value.dataParcial).format(
+      'YYYY-MM-DD'
+    );
+    leituraAgua.value.dataMeio = dayjs(leituraAgua.value.dataMeio).format(
+      'YYYY-MM-DD'
+    );
+    leituraAgua.value.dataFinal = dayjs(leituraAgua.value.dataFinal).format(
+      'YYYY-MM-DD'
+    );
+
     await createLeituraAgua(leituraAgua.value);
     console.log('Leitura de água salva com sucesso!');
   } catch (error) {
-    console.error('Erro ao salvar leitura de água:', error);
+    console.error(
+      'Erro ao salvar leitura de água:',
+      error.response ? error.response.data : error.message
+    );
   }
 }
 </script>

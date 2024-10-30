@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:5120/api/CorrespondenciaInterno',
+  baseURL: 'https://gestor-encomenda.onrender.com/api/CorrespondenciaInterno',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -76,6 +76,19 @@ export async function deleteCorrespondenciaInterno(id) {
   } catch (error) {
     console.error(
       'Erro ao deletar CorrespondenciaInterna:',
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+// Função para buscar correspondências internas retiradas
+export async function getCorrespondenciasInternasRetiradas() {
+  try {
+    const response = await apiClient.get('encomenda/retirada');
+    return response.data;
+  } catch (error) {
+    console.error(
+      'Erro ao obter Correspondencias Internas retiradas:',
       error.response?.data || error.message
     );
     throw error;

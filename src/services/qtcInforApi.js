@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:5120/api/QtcInfor',
+  baseURL: 'https://gestor-encomenda.onrender.com/api/QtcInfor',
 });
 export async function createQtcInfos(qtcInfo) {
   const response = await apiClient.post('/', qtcInfo);

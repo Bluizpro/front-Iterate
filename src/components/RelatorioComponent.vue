@@ -135,6 +135,9 @@ import { ref } from 'vue';
 import { getArchivedAnnotations } from '../services/anotacaoApi';
 import { getArchivedQtcInfos } from '../services/qtcInforApi';
 import { getLeiturasAgua } from '../services/leituraAguaApi';
+import { getCorrespondenciasSedexRetiradas } from '../services/encomenSedexAPI';
+import { getCorrespondenciasInternasRetiradas } from '../services/encomenInterAPI';
+import { getCorrespondenciasExternasRetiradas } from '../services/encomenExternoAPI';
 
 const anotacoes = ref([]); // Array para incluir anotações no relatório
 const qtcInfors = ref([]);
@@ -155,21 +158,55 @@ const gerarPDF = async (tipo) => {
       return;
     }
 
+    // Define a fonte como negrito para o título
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(
+      'Anotações Arquivadas:',
+      pdf.internal.pageSize.getWidth() / 2,
+      10,
+      { align: 'center' }
+    ); // Centraliza o texto
+
+    // Define a fonte como normal para as anotações
+    pdf.setFont('helvetica', 'normal');
+    let yPos = 30; // Posição vertical inicial para as anotações
+
     if (anotacoes.value.length > 0) {
-      pdf.setFontSize(12);
-      pdf.text('Anotações Arquivadas:', 10, 10);
-      anotacoes.value.forEach((nota, index) => {
+      anotacoes.value.forEach((nota) => {
         pdf.setFontSize(8);
-        pdf.text(`Conjunto: ${nota.conjunto}`, 10, 20 + index * 30);
-        pdf.text(`Usuário: ${nota.usuario}`, 10, 25 + index * 30);
-        pdf.text(`Paciente: ${nota.paciente}`, 10, 30 + index * 30);
-        pdf.text(`Info: ${nota.info}`, 10, 35 + index * 30);
-        pdf.text(`Data: ${nota.data}`, 10, 40 + index * 30);
-        pdf.text(`Hora: ${nota.hora}`, 10, 45 + index * 30);
+
+        // Inserindo cada campo em uma posição vertical específica
+        pdf.text(`Conjunto: ${nota.conjunto}`, 10, yPos);
+        pdf.text(`Usuário: ${nota.usuario}`, 10, yPos + 5);
+        pdf.text(`Paciente: ${nota.paciente}`, 10, yPos + 10);
+        pdf.text(`Info: ${nota.info}`, 10, yPos + 15);
+        pdf.text(`Data: ${nota.data}`, 10, yPos + 20);
+        pdf.text(`Hora: ${nota.hora}`, 10, yPos + 25);
+
+        // Adiciona uma linha na parte inferior do bloco de anotações
+        pdf.line(10, yPos + 30, 200, yPos + 30); // Linha horizontal
+
+        // Atualiza a posição vertical para o próximo bloco
+        yPos += 40; // Ajuste o espaçamento entre os blocos
+
+        // Se a posição ultrapassar o limite da página, cria uma nova página
+        if (yPos > pdf.internal.pageSize.getHeight() - 20) {
+          pdf.addPage();
+          yPos = 10; // Reinicia a posição vertical na nova página
+          pdf.setFont('helvetica', 'bold'); // Define a fonte como negrito para o título na nova página
+          pdf.text(
+            'Anotações Arquivadas:',
+            pdf.internal.pageSize.getWidth() / 2,
+            10,
+            { align: 'center' }
+          );
+          pdf.setFont('helvetica', 'normal'); // Define a fonte como normal novamente
+        }
       });
     } else {
       pdf.text('Nenhuma anotação arquivada', 10, 20);
     }
+
     pdf.save('Relatorio_Anotacoes.pdf');
     return;
   }
@@ -190,7 +227,16 @@ const gerarPDF = async (tipo) => {
         if (index % 4 === 0 && index !== 0) {
           pdf.addPage(); // Adiciona uma nova página após 4 chaves
         }
+        pdf.setFont('helvetica', 'bold'); // Define a fonte como negrito
+        pdf.text(
+          'Chaves Devolvidas:',
+          pdf.internal.pageSize.getWidth() / 2,
+          10,
+          { align: 'center' }
+        ); // Centraliza o texto
         pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'normal');
+
         pdf.text(`Chave ${index + 1}:`, 10, basePosition);
         pdf.text(`Conjunto: ${chave.conjunto}`, 10, basePosition + 10);
         pdf.text(`Data: ${chave.data}`, 10, basePosition + 20);
@@ -219,57 +265,123 @@ const gerarPDF = async (tipo) => {
 
   // -------------------- Encomendas --------------------
   if (tipo === 'encomendas') {
-    const encomendasBaixadasFromStorage =
-      localStorage.getItem('encomendasBaixadas');
-    let encomendasBaixadas = encomendasBaixadasFromStorage
-      ? JSON.parse(encomendasBaixadasFromStorage)
-      : [];
+    // Funções para obter os dados das encomendas retiradas
+    const fetchEncomendasRetiradas = async () => {
+      try {
+        const [sedex, internas, externas] = await Promise.all([
+          getCorrespondenciasSedexRetiradas(),
+          getCorrespondenciasInternasRetiradas(),
+          getCorrespondenciasExternasRetiradas(),
+        ]);
+        return [...sedex, ...internas, ...externas]; // Combina todos os dados em um único array
+      } catch (error) {
+        console.error('Erro ao buscar encomendas retiradas:', error);
+        return []; // Retorna um array vazio em caso de erro
+      }
+    };
+
+    const encomendasBaixadas = await fetchEncomendasRetiradas();
+    pdf.setFont('helvetica', 'bold'); // Define a fonte como negrito
+    pdf.setFontSize(12); // Tamanho da fonte para o título
+    pdf.text(
+      'Encomendas Retiradas:',
+      pdf.internal.pageSize.getWidth() / 2,
+      10,
+      { align: 'center' }
+    );
 
     if (encomendasBaixadas.length === 0) {
+      pdf.setFontSize(10); // Tamanho da fonte para texto normal
       pdf.text('Nenhuma encomenda retirada', 10, 20);
     } else {
       encomendasBaixadas.forEach((encomenda, index) => {
-        let basePosition = 30 + (index % 4) * 70;
+        let basePosition = 30 + (index % 4) * 80; // Aumentar espaço entre as encomendas
         if (index % 4 === 0 && index !== 0) {
           pdf.addPage(); // Adiciona uma nova página após 4 encomendas
         }
-        pdf.setFontSize(8);
+
+        // Centraliza o texto
+        pdf.setFontSize(10); // Tamanho para o texto normal
+        pdf.setFont('helvetica', 'bold'); // Define a fonte como negrito
         pdf.text(`Encomenda ${index + 1}:`, 10, basePosition);
-        pdf.text(`Data: ${encomenda.data}`, 10, basePosition + 10);
-        pdf.text(`Hora: ${encomenda.hora}`, 10, basePosition + 20);
-        ('');
+
+        // Adicionando o tipo de encomenda
+        let tipoEncomenda;
+        pdf.setFontSize(8); // Tamanho do texto do tipo de encomenda
+        pdf.setFont('helvetica', 'normal'); // Retorna à fonte normal para as anotações
+        if (encomenda.nomePessoaRetiraInterno) {
+          tipoEncomenda = 'Interna';
+        } else if (encomenda.nomePessoaRetiraExterno) {
+          tipoEncomenda = 'Externa';
+        } else if (encomenda.nomePessoaRetiraSedex) {
+          tipoEncomenda = 'Sedex';
+        }
+
+        pdf.text(`Tipo: ${tipoEncomenda}`, 10, basePosition + 10); // Exibe o tipo da encomenda
+
+        pdf.text(`Data: ${encomenda.data}`, 10, basePosition + 20);
+        pdf.text(`Hora: ${encomenda.hora}`, 10, basePosition + 30);
         pdf.text(
-          `Data Baixa: ${new Date(encomenda.dataBaixa).toLocaleString(
+          `Data Baixa: ${new Date(encomenda.dataRetirada).toLocaleString(
             'pt-BR'
           )}`,
-          10,
-          basePosition + 30
-        );
-        pdf.text(
-          `Destinatário: ${encomenda.destinatario}`,
           10,
           basePosition + 40
         );
         pdf.text(`Conteúdo: ${encomenda.conteudo}`, 10, basePosition + 50);
-        pdf.text(`Tipo: ${encomenda.tipo}`, 10, basePosition + 60);
-        pdf.text(`Assinatura: ${encomenda.assinatura}`, 10, basePosition + 80);
+
+        // Exibe as informações específicas de cada tipo de encomenda
+        if (encomenda.nomePessoaRetiraInterno) {
+          pdf.text(`Destinatário: ${encomenda.nome}`, 10, basePosition + 60); // Interno
+          pdf.text(
+            `Assinatura: ${encomenda.nomePessoaRetiraInterno}`,
+            10,
+            basePosition + 70
+          );
+        } else if (encomenda.nomePessoaRetiraExterno) {
+          pdf.text(
+            `Destinatário: ${encomenda.recebedor}`,
+            10,
+            basePosition + 60
+          ); // Externo
+          pdf.text(
+            `Assinatura: ${encomenda.nomePessoaRetiraExterno}`,
+            10,
+            basePosition + 70
+          );
+        } else if (encomenda.nomePessoaRetiraSedex) {
+          pdf.text(`Destinatário: ${encomenda.nome}`, 10, basePosition + 60); // Sedex
+          pdf.text(
+            `Assinatura: ${encomenda.nomePessoaRetiraSedex}`,
+            10,
+            basePosition + 70
+          );
+        }
+
+        // Adicionando um espaço adicional após a assinatura para evitar sobreposição
+        pdf.text('', 10, basePosition + 80); // Adiciona espaço extra para separar as encomendas
       });
     }
     pdf.save('Relatorio_Encomendas.pdf'); // Salva o PDF
   }
+
   // -------------------- Leituras de Água --------------------
   if (tipo === 'leiturasAgua') {
+    pdf.setFont('helvetica', 'bold'); // Define a fonte como negrito
+    pdf.text(
+      'Relatório de Leituras de Água:',
+      pdf.internal.pageSize.getWidth() / 2,
+      10,
+      { align: 'center' }
+    ); // Centraliza o texto
     const leiturasAgua = await getLeiturasAgua();
-
     if (!leiturasAgua || leiturasAgua.length === 0) {
       pdf.text('Nenhuma leitura de água registrada', 10, 20);
     } else {
       // Adiciona um título ao PDF
-      pdf.setFontSize(12);
-      pdf.text('Relatório de Leituras de Água', 10, 20);
-      pdf.setFontSize(10);
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
       pdf.setDrawColor(0, 0, 0); // Define a cor da borda
-
       leiturasAgua.forEach((leitura, index) => {
         // Se não for a primeira leitura, adiciona uma nova página
         if (index !== 0) {
@@ -284,8 +396,10 @@ const gerarPDF = async (tipo) => {
 
         // Define o tamanho da fonte para os rótulos
         pdf.setFontSize(10);
-        pdf.text(`Leitura ${index + 1}:`, 10, basePosition);
+        pdf.setFont('helvetica', 'bold'); // Mantenha a fonte como negrito para "Leitura"
+        pdf.text(`Leitura ${index + 1}:`, 10, basePosition); // Texto em negrito
 
+        pdf.setFont('helvetica', 'normal'); // Altera a fonte de volta para normal para os dados
         // Adiciona as informações da leitura com um espaçamento adequado
         pdf.text(`Data Inicial: ${leitura.dataInicial}`, 10, basePosition + 10);
         pdf.text(`Hora: ${leitura.hora}`, 10, basePosition + 20);
@@ -331,17 +445,25 @@ const gerarPDF = async (tipo) => {
     try {
       qtcInfors.value = await getArchivedQtcInfos();
     } catch (error) {
-      console.error('error ao obter QTC arquivado', error);
+      console.error('error ao obter QTC arquivada', error);
       pdf.text('Erro ao buscar QTC arquivadas', 10, 20);
       pdf.save('Relatorio_QTC.pdf');
       return;
     }
-    if (qtcInfors.value.length > 0) {
-      pdf.setFontSize(12);
-      pdf.text('Anotações Arquivadas:', 10, 10);
 
+    // Define a fonte como negrito e o tamanho para o título
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(12); // Tamanho da fonte para o título
+    pdf.text('Qtc:', pdf.internal.pageSize.getWidth() / 2, 10, {
+      align: 'center',
+    }); // Centraliza o texto
+
+    // Define a fonte como normal para as informações
+    pdf.setFont('helvetica', 'normal');
+
+    if (qtcInfors.value.length > 0) {
       qtcInfors.value.forEach((qtc, index) => {
-        pdf.setFontSize(8);
+        pdf.setFontSize(10);
         // Definindo a posição vertical inicial para cada bloco de informações
         const yPos = 20 + index * 50; // Ajusta o espaçamento entre blocos de informações
         // Inserindo cada campo em uma posição vertical específica
@@ -356,6 +478,9 @@ const gerarPDF = async (tipo) => {
           180
         );
         pdf.text(informacaoTexto, 10, yPos + 25); // Exibe o texto ajustado em múltiplas linhas, se necessário
+
+        // Adiciona uma linha na parte inferior do bloco
+        pdf.line(10, yPos + 30, 200, yPos + 30); // Linha horizontal
       });
     } else {
       pdf.text('Nenhuma anotação arquivada', 10, 20);
@@ -369,6 +494,14 @@ const gerarPDF = async (tipo) => {
 const gerarExcel = async (tipo) => {
   let data = [];
 
+  // Define o estilo de borda
+  const borderStyle = {
+    top: { style: 'thin', color: { rgb: '000000' } },
+    bottom: { style: 'thin', color: { rgb: '000000' } },
+    left: { style: 'thin', color: { rgb: '000000' } },
+    right: { style: 'thin', color: { rgb: '000000' } },
+  };
+
   // -------------------- Anotações --------------------
   if (tipo === 'anotacoes') {
     try {
@@ -381,6 +514,9 @@ const gerarExcel = async (tipo) => {
     if (anotacoes.value.length === 0) {
       data.push({ Anotações: 'Nenhuma anotação arquivada' });
     } else {
+      // Adiciona um título
+      data.push({ Anotações: 'Relatório de Anotações Arquivadas' });
+
       anotacoes.value.forEach((nota) => {
         data.push({
           Conjunto: nota.conjunto,
@@ -413,26 +549,58 @@ const gerarExcel = async (tipo) => {
       'Usuário Devolução': chave.usuarioDevolucao,
       Assinatura: chave.assinatura,
     }));
+    // Adiciona um título
+    data.unshift({ Chave: 'Relatório de Chaves Devolvidas' });
   }
 
   // -------------------- Encomendas --------------------
   if (tipo === 'encomendas') {
-    const encomendasBaixadasFromStorage =
-      localStorage.getItem('encomendasBaixadas');
-    let encomendasBaixadas = encomendasBaixadasFromStorage
-      ? JSON.parse(encomendasBaixadasFromStorage)
-      : [];
+    const fetchEncomendasRetiradas = async () => {
+      try {
+        const [sedex, internas, externas] = await Promise.all([
+          getCorrespondenciasSedexRetiradas(),
+          getCorrespondenciasInternasRetiradas(),
+          getCorrespondenciasExternasRetiradas(),
+        ]);
+        return [...sedex, ...internas, ...externas]; // Combina todos os dados em um único array
+      } catch (error) {
+        console.error('Erro ao buscar encomendas retiradas:', error);
+        return []; // Retorna um array vazio em caso de erro
+      }
+    };
 
-    data = encomendasBaixadas.map((encomenda, index) => ({
-      Encomenda: `Encomenda ${index + 1}`,
-      Data: encomenda.data,
-      Hora: encomenda.hora,
-      'Data Baixa': new Date(encomenda.dataBaixa).toLocaleString('pt-BR'),
-      Destinatário: encomenda.destinatario,
-      Conteúdo: encomenda.conteudo,
-      Tipo: encomenda.tipo,
-      Assinatura: encomenda.assinatura,
-    }));
+    const encomendasBaixadas = await fetchEncomendasRetiradas();
+
+    if (encomendasBaixadas.length === 0) {
+      data.push({ Encomendas: 'Nenhuma encomenda retirada' });
+    } else {
+      // Adiciona um título
+      data.push({ Encomendas: 'Relatório de Encomendas Retiradas' });
+
+      encomendasBaixadas.forEach((encomenda) => {
+        let tipoEncomenda = '';
+        if (encomenda.nomePessoaRetiraInterno) {
+          tipoEncomenda = 'Interna';
+        } else if (encomenda.nomePessoaRetiraExterno) {
+          tipoEncomenda = 'Externa';
+        } else if (encomenda.nomePessoaRetiraSedex) {
+          tipoEncomenda = 'Sedex';
+        }
+
+        data.push({
+          Tipo: tipoEncomenda,
+          Destinatário: encomenda.nome || encomenda.recebedor,
+          Conteúdo: encomenda.conteudo,
+          Data: encomenda.data,
+          Hora: encomenda.hora,
+          DataBaixa: new Date(encomenda.dataRetirada).toLocaleString('pt-BR'),
+          Assinatura:
+            encomenda.nomePessoaRetiraInterno ||
+            encomenda.nomePessoaRetiraExterno ||
+            encomenda.nomePessoaRetiraSedex,
+        });
+      });
+    }
   }
 
   // -------------------- Leituras de Água --------------------
@@ -446,6 +614,9 @@ const gerarExcel = async (tipo) => {
     if (leiturasAguas.value.length === 0) {
       data.push({ LeiturasAguas: 'Nenhuma leitura de aguas' });
     } else {
+      // Adiciona um título
+      data.push({ LeiturasAguas: 'Relatório de Leituras de Água' });
+
       leiturasAguas.value.forEach((leitu) => {
         data.push({
           DadaInicial: leitu.dataInicial,
@@ -467,6 +638,7 @@ const gerarExcel = async (tipo) => {
       });
     }
   }
+
   // -------------------- Qtc --------------------
   if (tipo === 'qtc') {
     try {
@@ -478,6 +650,9 @@ const gerarExcel = async (tipo) => {
     if (qtcInfors.value.length === 0) {
       data.push({ QTCS: 'Nenhum QTC arquivada' });
     } else {
+      // Adiciona um título
+      data.push({ QTCS: 'Relatório de QTCs Arquivadas' });
+
       qtcInfors.value.forEach((qtc) => {
         data.push({
           Conjunto: qtc.conjunto,
@@ -492,6 +667,18 @@ const gerarExcel = async (tipo) => {
   }
 
   const worksheet = utils.json_to_sheet(data);
+
+  // Aplica bordas e centraliza o texto
+  for (let cell in worksheet) {
+    if (worksheet[cell].v) {
+      // Verifica se a célula tem um valor
+      worksheet[cell].s = {
+        border: borderStyle,
+        alignment: { horizontal: 'center', vertical: 'center' }, // Centraliza o texto
+      };
+    }
+  }
+
   const workbook = utils.book_new();
   utils.book_append_sheet(workbook, worksheet, 'Relatório');
 

@@ -1,4 +1,4 @@
-import axios from 'axios';
+/* import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'http://localhost:5120/api/Chave', // URL do seu backend
@@ -15,3 +15,4 @@ export const salvarChave = async (chave) => {
     throw error; // Lança o erro para que possa ser tratado no componente
   }
 };
+ */

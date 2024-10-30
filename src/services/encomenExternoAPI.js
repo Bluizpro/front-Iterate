@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:5120/api/CorrespondenciaExterna', // Verifique se este URL está correto
+  baseURL: 'https://gestor-encomenda.onrender.com/api/CorrespondenciaExterna', // Verifique se este URL está correto
   headers: {
     'Content-Type': 'application/json',
   },
@@ -77,6 +77,19 @@ export async function deleteCorrespondenciaExterno(id) {
   } catch (error) {
     console.error(
       'Erro ao deletar CorrespondenciaExterno:',
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+// Função para buscar correspondências externas retiradas
+export async function getCorrespondenciasExternasRetiradas() {
+  try {
+    const response = await apiClient.get('encomenda/retirada');
+    return response.data;
+  } catch (error) {
+    console.error(
+      'Erro ao obter Correspondencias Externas retiradas:',
       error.response?.data || error.message
     );
     throw error;

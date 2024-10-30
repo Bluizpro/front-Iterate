@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:5120/api/Condomino',
+  baseURL: 'https://gestor-encomenda.onrender.com/api/Anotacao',
   headers: {
     'Content-Type': 'application/json',
   },

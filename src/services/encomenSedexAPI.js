@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:5120/api/CorrespondenciaSedex',
+  baseURL: 'https://gestor-encomenda.onrender.com/api/CorrespondenciaSedex',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -76,6 +76,19 @@ export async function deleteCorrespondenciaSedex(id) {
   } catch (error) {
     console.error(
       'Erro ao deletar CorrespondenciaSedex:',
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+}
+// Adiciona a função para buscar as encomendas retiradas
+export async function getCorrespondenciasSedexRetiradas() {
+  try {
+    const response = await apiClient.get('encomenda/retirada');
+    return response.data;
+  } catch (error) {
+    console.error(
+      'Erro ao obter Correspondencias Sedex retiradas:',
       error.response?.data || error.message
     );
     throw error;

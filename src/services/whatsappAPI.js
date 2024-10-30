@@ -4,7 +4,7 @@ import axios from 'axios';
 export const enviarMensagemWhatsApp = async (telefone, mensagem) => {
   try {
     const response = await axios.post(
-      'http://localhost:3000/send-whatsapp/encomenda',
+      'https://disparrro-back.onrender.com/send-whatsapp/encomenda',
       {
         telefone, // telefone do destinatário
         message: mensagem, // mensagem a ser enviada
@@ -20,7 +20,7 @@ export const enviarMensagemWhatsApp = async (telefone, mensagem) => {
 export const enviarMensagemWhatsAppAgua = async (mensagem) => {
   try {
     const response = await axios.post(
-      'http://localhost:3000/send-whatsapp', // URL do endpoint
+      'https://disparrro-back.onrender.com/send-whatsapp', // URL do endpoint
       {
         message: mensagem, // mensagem a ser enviada
       }

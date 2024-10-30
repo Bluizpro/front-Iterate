@@ -109,8 +109,17 @@ import * as QtcInforService from '../services/qtcInforApi';
 const $q = useQuasar();
 const formsPerPage = 7;
 const currentPage = ref(1);
-
 const forms = ref([]);
+
+const emptyForm = {
+  data: dayjs().format('DD/MM/YYYY'),
+  hora: dayjs().format('HH:mm:ss'),
+  usuario: localStorage.getItem('usuarioLogado') || '',
+  conjunto: '',
+  prestador: '',
+  informacao: '',
+  salvo: false,
+};
 
 const maxPages = computed(() => Math.ceil(forms.value.length / formsPerPage));
 const paginatedForms = computed(() => {
@@ -131,7 +140,6 @@ onMounted(async () => {
         form.informacao === ''
       ) {
         forms.value[index].hora = dayjs().format('HH:mm:ss');
-        localStorage.setItem('emptyForm', JSON.stringify(forms.value[index]));
       }
     });
   }, 1000);
@@ -139,21 +147,10 @@ onMounted(async () => {
     const loadedQtcs = await QtcInforService.getQtcInfos();
     forms.value = loadedQtcs;
 
-    const emptyForm = JSON.parse(localStorage.getItem('emptyForm') || '{}');
-    if (Object.keys(emptyForm).length === 0) {
-      const newEmptyForm = {
-        data: dayjs().format('DD/MM/YYYY'),
-        hora: dayjs().format('HH:mm:ss'),
-        usuario: localStorage.getItem('usuarioLogado') || '',
-        conjunto: '',
-        prestador: '',
-        informacao: '',
-        salvo: false,
-      };
-      localStorage.setItem('emptyForm', JSON.stringify(newEmptyForm));
-      forms.value.push(newEmptyForm);
+    if (forms.value.length === 0) {
+      forms.value.push({ ...emptyForm });
     } else {
-      forms.value.push(emptyForm);
+      forms.value.push({ ...emptyForm });
     }
   } catch (error) {
     console.error('Erro ao carregar qtc:', error);
@@ -189,26 +186,16 @@ const onSubmit = async (index) => {
   try {
     const savedForm = await QtcInforService.createQtcInfos({
       ...form,
-      data: form.data, // Certifica-se de que data está sendo passada
-      hora: form.hora, // Certifica-se de que hora está sendo passada
+      data: form.data,
+      hora: form.hora,
     });
 
-    // Atualiza o formulário salvo no array
     forms.value[index] = { ...savedForm, salvo: true };
 
-    // Adiciona um novo formulário vazio apenas se todos os existentes estiverem salvos
     const allFormsSaved = forms.value.every((form) => form.salvo);
 
     if (allFormsSaved) {
-      forms.value.push({
-        data: dayjs().format('DD/MM/YYYY'),
-        hora: dayjs().format('HH:mm:ss'),
-        usuario: localStorage.getItem('usuarioLogado') || '',
-        conjunto: '',
-        prestador: '',
-        informacao: '',
-        salvo: false,
-      });
+      forms.value.push({ ...emptyForm });
     }
     $q.notify({
       color: 'green-4',
@@ -242,17 +229,7 @@ const onReset = async (index) => {
       forms.value.length === 0 ||
       (forms.value.length === 1 && !forms.value[0].salvo)
     ) {
-      forms.value = [
-        {
-          data: dayjs().format('DD/MM/YYYY'),
-          hora: dayjs().format('HH:mm:ss'),
-          usuario: localStorage.getItem('usuarioLogado') || '',
-          conjunto: '',
-          prestador: '',
-          informacao: '',
-          salvo: false,
-        },
-      ];
+      forms.value = [{ ...emptyForm }];
     }
     $q.notify({
       color: 'green-4',
