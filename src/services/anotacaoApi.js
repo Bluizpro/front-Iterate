@@ -3,6 +3,9 @@ import axios from 'axios';
 
 const apiClient = axios.create({
   baseURL: 'https://gestor-encomenda.onrender.com/api/Anotacao',
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 export async function createAnnotation(anotacao) {

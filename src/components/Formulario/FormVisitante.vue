@@ -120,15 +120,16 @@
 
 <script setup>
 import { computed, onBeforeUnmount, ref } from 'vue';
-import { useStore } from '../../stores/example-store';
+/* import { useStore } from '../../stores/example-store'; */
 import { useQuasar } from 'quasar';
+
 // FormVisitante.vue
 import * as VisitanteServices from '../../services/visitanteApi';
 
 // O restante do seu código
 // Atualiza a importação para o serviço correto
 
-const store = useStore();
+/* const store = useStore(); */
 const $q = useQuasar();
 
 const form = ref({
