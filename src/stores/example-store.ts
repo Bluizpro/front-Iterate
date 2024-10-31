@@ -32,6 +32,10 @@ export const usuarioStore = defineStore('usuario', {
         senha: '123456',
       },
       {
+        usuario: 'admin',
+        senha: '123456',
+      },
+      {
         usuario: 'augusto',
         senha: '123456',
       },
@@ -57,7 +61,7 @@ export const usuarioStore = defineStore('usuario', {
       const senha = this.senha;
 
       const usuarioValido = this.listaDeUsuario.find(
-        (user: { usuario: string; senha: any }) =>
+        (user: { usuario: string; senha: unknown }) =>
           user.usuario.toLowerCase() === usuario && user.senha === senha
       );
 

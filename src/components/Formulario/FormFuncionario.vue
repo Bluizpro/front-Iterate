@@ -106,10 +106,10 @@
 <script setup>
 import { onBeforeUnmount, ref } from 'vue';
 import { useQuasar } from 'quasar';
-/* import { useStore } from '../../stores/example-store'; */
+import { useStore } from '../../stores/example-store';
 import * as FuncionarioServices from '../../services/funcionarioApi';
 
-/* const store = useStore(); */
+const store = useStore();
 const $q = useQuasar();
 
 const form = ref({
