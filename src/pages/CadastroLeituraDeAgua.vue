@@ -17,8 +17,8 @@
           </option>
         </select>
       </div>
-      <button @click="fetchDailyData">Dados Gerais do Mês</button>
-      <button @click="fetchMonthlySum">Somatório do Mês</button>
+      <!--  <button @click="fetchDailyData">Dados Gerais do Mês</button>
+      <button @click="fetchMonthlySum">Somatório do Mês</button> -->
     </div>
 
     <div class="charts-container">
@@ -159,7 +159,7 @@ const filterDataByDay = () => {
 };
 
 // Funções para buscar dados mensais
-const fetchDailyData = async () => {
+/* const fetchDailyData = async () => {
   loading.value = true; // Inicia o carregamento
   try {
     const leituras = await getLeiturasAgua();
@@ -175,10 +175,10 @@ const fetchDailyData = async () => {
       ) {
         monthlyReadings.push(leitura);
       }
-    });
+    }); */
 
-    // Verifique se há leituras
-    if (monthlyReadings.length === 0) {
+// Verifique se há leituras
+/*    if (monthlyReadings.length === 0) {
       chartData.value.labels = [];
       chartData.value.datasets[0].data = [];
       pieChartData.value.labels = [];
@@ -226,10 +226,10 @@ const fetchMonthlySum = async () => {
         monthlyData[monthKey] = []; // Inicializa o mês se não existir
       }
       monthlyData[monthKey].push(leitura);
-    });
+    }); */
 
-    // Processar dados mensais para o gráfico
-    const monthLabels = Object.keys(monthlyData);
+// Processar dados mensais para o gráfico
+/*   const monthLabels = Object.keys(monthlyData);
     const consumos = monthLabels.map((month) => {
       const monthReadings = monthlyData[month];
       return monthReadings.reduce((total, leitura) => {
@@ -256,7 +256,7 @@ const fetchMonthlySum = async () => {
   } finally {
     loading.value = false; // Define loading como false após a busca
   }
-};
+}; */
 
 // Carregar os dados quando o componente é montado
 onMounted(() => {
@@ -272,8 +272,8 @@ onMounted(() => {
 }
 
 .small-chart {
-  width: 25% !important; /* Ajuste a largura do gráfico de pizza */
-  height: 270px !important; /* Ajuste a altura do gráfico de pizza */
+  width: 56% !important;
+  height: 302px !important; /* Ajuste a altura do gráfico de pizza */
 }
 
 .border {
