@@ -489,9 +489,9 @@ async function calcular() {
     leituraAgua.value.dataInicial = dayjs(leituraAgua.value.dataInicial).format(
       'YYYY-MM-DD'
     );
-    leituraAgua.value.hora = dayjs(leituraAgua.value.hora, 'HH:mm:ss').format(
+    /*     leituraAgua.value.hora = dayjs(leituraAgua.value.hora, 'HH:mm:ss').format(
       'HH:mm:ss'
-    );
+    ); */
 
     // Formatar as outras datas conforme necessário
     leituraAgua.value.dataParcial = dayjs(leituraAgua.value.dataParcial).format(
