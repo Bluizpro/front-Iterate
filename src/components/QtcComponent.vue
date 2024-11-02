@@ -17,7 +17,7 @@
           v-model="qtcInfor.data"
           color="indigo-13"
           label="Data"
-          class="col-2 data"
+          class="col data-input"
         >
           <template v-slot:prepend>
             <q-icon name="date_range" />
@@ -31,7 +31,7 @@
           v-model="qtcInfor.hora"
           color="indigo-13"
           label="Hora"
-          class="col-2 hora"
+          class="col hora-input"
         >
           <template v-slot:prepend>
             <q-icon name="access_time" />
@@ -41,7 +41,7 @@
           outlined
           v-model="qtcInfor.conjunto"
           label="Conjunto"
-          class="col"
+          class="col conjunto-input"
         />
         <q-input
           disable
@@ -50,21 +50,20 @@
           v-model="qtcInfor.usuario"
           color="indigo-13"
           label="Nome do usuário"
-          class="col-1 usuario"
-        >
-        </q-input>
+          class="col usuario-input"
+        />
         <q-input
           outlined
           v-model="qtcInfor.prestador"
           label="Prestador"
           color="indigo-13"
-          class="col-2 paciente"
+          class="col prestador-input"
         />
         <q-input
           outlined
           v-model="qtcInfor.informacao"
           label="Informações"
-          class="col"
+          class="col informacao-input"
         >
           <template v-slot:append>
             <q-icon name="info">
@@ -107,7 +106,7 @@ import { useQuasar } from 'quasar';
 import * as QtcInforService from '../services/qtcInforApi';
 
 const $q = useQuasar();
-const formsPerPage = 7;
+const formsPerPage = 10;
 const currentPage = ref(1);
 const forms = ref([]);
 
@@ -192,16 +191,14 @@ const onSubmit = async (index) => {
 
     forms.value[index] = { ...savedForm, salvo: true };
 
-    const allFormsSaved = forms.value.every((form) => form.salvo);
+    // Adiciona um novo formulário vazio sem verificar se todos estão salvos
+    forms.value.push({ ...emptyForm });
 
-    if (allFormsSaved) {
-      forms.value.push({ ...emptyForm });
-    }
     $q.notify({
       color: 'green-4',
       textColor: 'white',
       icon: 'cloud_done',
-      message: 'Salvo Com Sucesso',
+      message: 'Salvo com sucesso',
     });
   } catch (error) {
     $q.notify({
@@ -255,29 +252,64 @@ const onReset = async (index) => {
   align-items: flex-start;
   justify-content: flex-start;
 }
-.q-form .q-field {
-  margin-right: 1px !important;
+
+.q-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px; // Espaçamento entre inputs
 }
+
 .note-container {
   border: 3px solid #ccc;
-  padding: 2rem;
-  width: 95%;
-  height: 100px;
+  padding: 1rem;
+  width: 60%;
+  min-height: 150px;
   align-items: flex-start;
   margin: auto;
   margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
 }
+
+.data-input {
+  flex: 1 1 15%; // Largura proporcional para preencher espaço da esquerda para a direita
+  max-width: 10rem;
+}
+.hora-input {
+  flex: 1 1 12%;
+  max-width: 8rem;
+}
+.conjunto-input {
+  flex: 1 1 20%;
+  max-width: 5rem;
+}
+.usuario-input {
+  flex: 1 1 15%;
+  max-width: 8rem;
+}
+.prestador-input {
+  flex: 1 1 20%;
+  max-width: 200px;
+}
+.informacao-input {
+  flex: 1 1 30%;
+  max-width: 40rem;
+}
+
 .button-save,
 .button-done {
-  margin-left: 3px !important;
+  margin-left: 1px !important;
   border: 1px solid #ccc;
-  padding: 5px;
+  padding: 6px 12px;
   border-radius: 4px;
+  min-width: 45px;
 }
+
 .paginação {
   margin-top: 2rem;
 }
+
 .custom-tooltip {
-  font-size: 1.5em; /* Ajuste este valor para o tamanho desejado */
+  font-size: 1.2em;
 }
 </style>

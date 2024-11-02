@@ -1,6 +1,6 @@
 <template>
   <router-view />
-  <q-page
+  <!-- <q-page
     class="row items-center justify-evenly"
     :class="{ 'dark-mode': isDarkMode }"
   >
@@ -10,17 +10,17 @@
       color="primary"
       @click="toggleDarkMode"
     />
-  </q-page>
+  </q-page> -->
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 
-const isDarkMode = ref(false);
+/* const isDarkMode = ref(false); */
 
-const toggleDarkMode = () => {
+/* const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value;
-};
+}; */
 </script>
 <style scoped>
 .dark-mode {

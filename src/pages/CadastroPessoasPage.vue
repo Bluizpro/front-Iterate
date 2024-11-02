@@ -40,16 +40,16 @@ const pessoas = ref<listData>({
 .card-item {
   position: relative;
   width: 100%;
-  height: 200px; /* Altura fixa para os cards */
+  padding-top: 100%; /* Mantém uma proporção quadrada do card */
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transição suave para hover */
-  background-color: white; /* Fundo do card */
-  border-radius: 8px; /* Bordas arredondadas */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: white;
+  border-radius: 8px;
 }
 
 .card-item:hover {
-  transform: translateY(-5px); /* Move o card para cima ao passar o mouse */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Sombra mais intensa ao passar o mouse */
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .card-image-wrapper {
@@ -64,8 +64,9 @@ const pessoas = ref<listData>({
 }
 
 .card-image {
-  max-width: 100%;
-  max-height: 100%;
+  width: 90%; /* Ajusta o SVG para 90% da largura do card */
+  height: auto; /* Mantém a proporção do SVG */
+  max-height: 90%; /* Limita a altura do SVG para evitar cortes */
   object-fit: contain;
 }
 
@@ -78,12 +79,12 @@ const pessoas = ref<listData>({
   color: white;
   padding: 0.5rem;
   text-align: center;
-  border-radius: 0 0 8px 8px; /* Arredondando os cantos do texto */
+  border-radius: 0 0 8px 8px;
 }
 
 @media (min-width: 768px) {
   .card-image {
-    max-width: 80%;
+    width: 80%; /* Ajuste adicional para telas maiores */
     max-height: 80%;
   }
 }

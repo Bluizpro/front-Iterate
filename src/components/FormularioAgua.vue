@@ -405,6 +405,104 @@
   </div>
 </template>
 
+<!-- <script setup>
+import { ref } from 'vue';
+import { useQuasar } from 'quasar';
+import { enviarMensagemWhatsAppAgua } from '../services/whatsappAPI'; // Importe o serviço de mensagem
+import { createLeituraAgua } from '../services/leituraAguaApi'; // Importe a função para salvar no backend
+
+const $q = useQuasar();
+
+let tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+
+let leituraAgua = ref({
+  dataInicial: new Date().toLocaleDateString(),
+  hora: new Date().toLocaleTimeString(),
+  leituraInicial: '',
+  vistoInicial: '',
+  dataParcial: new Date().toLocaleDateString(),
+  Parcial: '11:00',
+  leituraParcial: '',
+  dataMeio: new Date().toLocaleDateString(),
+  horaParcial2: '23:00',
+  leituraParcial2: '',
+  dataFinal: tomorrow.toLocaleDateString(),
+  horaFinal: '06:00',
+  leituraFinal: '',
+  vistoFinal: '',
+  consumo: '',
+});
+
+async function calcular() {
+  let leituraInicial = parseInt(leituraAgua.value.leituraInicial.slice(3));
+  let leituraParcial = parseInt(leituraAgua.value.leituraParcial.slice(3));
+  let leituraParcial2 = parseInt(leituraAgua.value.leituraParcial2.slice(3));
+  let leituraFinal = parseInt(leituraAgua.value.leituraFinal.slice(3));
+
+  let consumo = leituraParcial - leituraParcial2 - leituraInicial;
+  let consumoFinal = leituraFinal - leituraInicial;
+
+  consumoFinal = Number(consumoFinal.toFixed(2));
+
+  if (consumoFinal > 6000 && !isNaN(consumo)) {
+    $q.notify({
+      color: 'red-5',
+      textColor: 'white',
+      icon: 'warning',
+      message: `O consumo ultrapassou 6000m³. Consumo atual: ${consumoFinal} m³!`,
+    });
+
+    try {
+      // Utilize o serviço de mensagem em vez da chamada direta
+      await enviarMensagemWhatsAppAgua(
+        `O consumo ultrapassou 6000m³. Consumo atual: ${consumoFinal} m³!`
+      );
+      console.log('Mensagem enviada com sucesso!');
+    } catch (error) {
+      console.error('Erro ao enviar a mensagem:', error);
+    }
+  }
+
+  leituraAgua.value.consumo = `${consumoFinal} m³!`;
+
+  // Salvar leitura de água no back-end
+  try {
+    await createLeituraAgua(leituraAgua.value);
+    console.log('Leitura de água salva com sucesso!');
+  } catch (error) {
+    console.error('Erro ao salvar leitura de água:', error);
+  }
+}
+</script>
+
+<style scoped lang="scss">
+.my-card {
+  width: calc(19rem - 30px); // 25% da largura total, menos 20px de margem
+  margin-right: 50px;
+}
+
+.my-card:last-child {
+  margin-right: 0; // remove a margem do último cartão
+}
+
+.q-mb-md {
+  margin-bottom: 20px;
+}
+
+.my-custom-size {
+  width: 150px; // ou qualquer tamanho que você deseja
+}
+.border {
+  border: 1px solid #000 !important;
+  margin-left: 4rem;
+  margin-top: 2rem;
+  margin-right: 5rem;
+  padding: 5rem;
+  background-color: rgb(235 208 208 / 20%);
+}
+</style>
+ -->
 <script setup>
 import { ref } from 'vue';
 import { useQuasar } from 'quasar';
@@ -415,21 +513,24 @@ import dayjs from 'dayjs'; // Importar dayjs
 const $q = useQuasar();
 
 let tomorrow = new Date();
-tomorrow.setDate(tomorrow.getDate() + 1);
+tomorrow.setDate(tomorrow.getDate() + 1); // Define tomorrow's date
 
 let leituraAgua = ref({
-  dataInicial: new Date().toISOString().split('T')[0], // Formato ISO
-  hora: new Date().toLocaleTimeString('pt-BR', { hour12: false }),
+  dataInicial: new Date().toISOString().split('T')[0], // Formato ISO (YYYY-MM-DD)
+  hora: new Date().toLocaleTimeString('pt-BR', {
+    hour12: false,
+    timeStyle: 'short',
+  }), // Hora no formato HH:mm
   leituraInicial: '',
   vistoInicial: '',
-  dataParcial: new Date().toISOString().split('T')[0],
-  Parcial: '11:00',
+  dataParcial: new Date().toISOString().split('T')[0], // Formato ISO (YYYY-MM-DD)
+  Parcial: '11:00', // Verifique se isso deve estar em HH:mm
   leituraParcial: '',
-  dataMeio: new Date().toISOString().split('T')[0],
-  horaParcial2: '23:00',
+  dataMeio: new Date().toISOString().split('T')[0], // Formato ISO (YYYY-MM-DD)
+  horaParcial2: '23:00', // Hora no formato HH:mm
   leituraParcial2: '',
-  dataFinal: tomorrow.toISOString().split('T')[0],
-  horaFinal: '06:00',
+  dataFinal: tomorrow.toISOString().split('T')[0], // Formato ISO (YYYY-MM-DD)
+  horaFinal: '06:00', // Hora no formato HH:mm
   leituraFinal: '',
   vistoFinal: '',
   consumo: '',
@@ -489,9 +590,9 @@ async function calcular() {
     leituraAgua.value.dataInicial = dayjs(leituraAgua.value.dataInicial).format(
       'YYYY-MM-DD'
     );
-    /*     leituraAgua.value.hora = dayjs(leituraAgua.value.hora, 'HH:mm:ss').format(
-      'HH:mm:ss'
-    ); */
+    /* leituraAgua.value.hora = dayjs(leituraAgua.value.hora, 'HH:mm').format(
+      'HH:mm'
+    );  */ // Formato HH:mm
 
     // Formatar as outras datas conforme necessário
     leituraAgua.value.dataParcial = dayjs(leituraAgua.value.dataParcial).format(

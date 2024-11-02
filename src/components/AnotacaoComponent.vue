@@ -187,16 +187,15 @@ const onSubmit = async (index) => {
     });
 
     forms.value[index] = { ...savedForm, salvo: true };
-    const allFormsSaved = forms.value.every((form) => form.salvo);
-    if (allFormsSaved) {
-      forms.value.push({ ...ensureEmptyForm });
-    }
+
+    // Adiciona um formulário vazio após o salvamento
+    forms.value.push({ ...ensureEmptyForm });
 
     $q.notify({
       color: 'green-4',
       textColor: 'white',
       icon: 'cloud_done',
-      message: 'Salvo Com Sucesso',
+      message: 'Salvo com sucesso',
     });
   } catch (error) {
     $q.notify({

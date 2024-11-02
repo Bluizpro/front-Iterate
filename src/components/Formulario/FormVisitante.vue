@@ -180,7 +180,6 @@ function formatarDataHora(data) {
 const cadastrar = async () => {
   console.log('Função cadastrar chamada'); // Adicione esta linha
   const agora = new Date();
-
   const visitante = {
     conjunto: form.value.conjunto,
     nome: form.value.nome,

@@ -3,9 +3,6 @@ import axios from 'axios';
 
 const apiClient = axios.create({
   baseURL: 'https://gestor-encomenda.onrender.com/api/Funcionario',
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 export async function createFuncionario(funcionario) {

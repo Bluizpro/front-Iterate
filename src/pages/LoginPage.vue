@@ -58,12 +58,12 @@
     </q-card>
 
     <!-- Ícone de luz no canto superior direito -->
-    <q-icon
+    <!-- <q-icon
       class="absolute-top-right q-ma-md cursor-pointer"
       :name="isDarkMode ? 'light_mode' : 'dark_mode'"
       color="primary"
       @click="toggleDarkMode"
-    />
+    /> -->
   </q-page>
 </template>
 
@@ -129,9 +129,9 @@ const onSubmit = async () => {
   formSubmitted.value = true;
 };
 
-const toggleDarkMode = () => {
+/* const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value;
-};
+}; */
 
 // Recuperar o usuário logado do localStorage quando o componente é montado
 onMounted(() => {

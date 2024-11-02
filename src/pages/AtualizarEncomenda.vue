@@ -1,5 +1,5 @@
 <template>
-  <h1 style="font-size: 1.5em; text-align: center">Atualizar encomenda</h1>
+  <h1>TESTE</h1>
 </template>
 <!-- <template>
   <q-page v-if="encomenda" padding>

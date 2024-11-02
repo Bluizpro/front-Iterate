@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'https://gestor-encomenda.onrender.com/api/Visitante',
+  baseURL: 'https://gestor-encomenda.onrender.com/api/Visitante', // URL base para a API de visitantes
 });
 
 export async function createVisitante(visitante) {
