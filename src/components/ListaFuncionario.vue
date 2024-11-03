@@ -5,51 +5,45 @@
         flat
         bordered
         title="Lista de Funcionários"
-        :rows="funcionarios.length > 0 ? funcionarios : [{}]"
+        :rows="displayedFuncionarios"
         :columns="columns"
         row-key="conjunto"
         binary-state-sort
-      >
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td key="dataHora" :props="props">
-              <span v-if="props.row.dataHora">
-                {{ formatarData(props.row.dataHora) }}
-              </span>
-              <span v-else> Nenhum Funcionário encontrado. </span>
-            </q-td>
-            <q-td key="conjunto" :props="props">
-              <span v-if="props.row.conjunto">
-                {{ props.row.conjunto }}
-              </span>
-            </q-td>
-            <q-td key="nome" :props="props">
-              <span v-if="props.row.nome">
-                {{ props.row.nome }}
-              </span>
-            </q-td>
-            <q-td key="setor" :props="props">
-              <span v-if="props.row.setor">
-                {{ props.row.setor }}
-              </span>
-            </q-td>
-            <q-td key="telefone" :props="props">
-              <span v-if="props.row.telefone">
-                {{ props.row.telefone }}
-              </span>
-            </q-td>
-          </q-tr>
-        </template>
-      </q-table>
+      />
+
+      <!-- Paginação -->
+      <div class="pagination-container">
+        <q-btn
+          icon="chevron_left"
+          @click="prevPage"
+          :disable="currentPage === 1"
+          color="primary"
+          flat
+          round
+          style="margin-right: 8px"
+        />
+        <span>Página {{ currentPage }}</span>
+        <q-btn
+          icon="chevron_right"
+          @click="nextPage"
+          :disable="currentPage * itemsPerPage >= funcionarios.length"
+          color="primary"
+          flat
+          round
+          style="margin-left: 8px"
+        />
+      </div>
     </div>
   </q-page>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { getFuncionario } from '../services/funcionarioApi';
 
 const funcionarios = ref([]); // Armazena a lista de funcionários
+const itemsPerPage = 10; // Número de funcionários por página
+const currentPage = ref(1); // Página atual
 
 const columns = [
   {
@@ -88,6 +82,11 @@ const columns = [
   },
 ];
 
+const displayedFuncionarios = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return funcionarios.value.slice(start, start + itemsPerPage);
+});
+
 onMounted(async () => {
   try {
     funcionarios.value = await getFuncionario(); // Obter funcionários da API
@@ -96,7 +95,19 @@ onMounted(async () => {
   }
 });
 
-function formatarData(dataString) {
+const nextPage = () => {
+  if (currentPage.value * itemsPerPage < funcionarios.value.length) {
+    currentPage.value++;
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+/* function formatarData(dataString) {
   const data = new Date(dataString);
   const dia = data.getDate().toString().padStart(2, '0');
   const mes = (data.getMonth() + 1).toString().padStart(2, '0');
@@ -106,11 +117,18 @@ function formatarData(dataString) {
   const segundos = data.getSeconds().toString().padStart(2, '0');
 
   return `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
-}
+} */
 </script>
 
 <style scoped>
 .q-table {
   margin: 20px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
 }
 </style>

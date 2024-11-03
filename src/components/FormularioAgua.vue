@@ -29,6 +29,29 @@
                 <q-input
                   required
                   disable
+                  name="vistoInicial"
+                  outlined
+                  dense
+                  clearable
+                  clear-icon="close"
+                  v-model="leituraAgua.vistoInicial"
+                  color="indigo-13"
+                  label="Usuario"
+                  class="my-custom-size"
+                  :rules="[
+                    (val) =>
+                      (val && val.length > 0) || 'Digite a leitura final',
+                  ]"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="book" />
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-12">
+                <q-input
+                  required
+                  disable
                   name="data"
                   outlined
                   dense
@@ -307,6 +330,29 @@
                 <q-input
                   required
                   disable
+                  name="vistoFinal"
+                  outlined
+                  dense
+                  clearable
+                  clear-icon="close"
+                  v-model="leituraAgua.vistoFinal"
+                  color="indigo-13"
+                  label="Usuario"
+                  class="my-custom-size"
+                  :rules="[
+                    (val) =>
+                      (val && val.length > 0) || 'Digite a leitura final',
+                  ]"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="book" />
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-12">
+                <q-input
+                  required
+                  disable
                   name="dataFinal"
                   outlined
                   dense
@@ -504,40 +550,76 @@ async function calcular() {
 </style>
  -->
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
-import { enviarMensagemWhatsAppAgua } from '../services/whatsappAPI'; // Importe o serviço de mensagem
-import { createLeituraAgua } from '../services/leituraAguaApi'; // Importe a função para salvar no backend
-import dayjs from 'dayjs'; // Importar dayjs
+import { enviarMensagemWhatsAppAgua } from '../services/whatsappAPI';
+import { createLeituraAgua } from '../services/leituraAguaApi';
+import dayjs from 'dayjs';
 
 const $q = useQuasar();
 
+const usuarioLogado = localStorage.getItem('usuarioLogado') || '';
+
+// Função para definir a data de amanhã
 let tomorrow = new Date();
-tomorrow.setDate(tomorrow.getDate() + 1); // Define tomorrow's date
+tomorrow.setDate(tomorrow.getDate() + 1);
 
 let leituraAgua = ref({
-  dataInicial: new Date().toISOString().split('T')[0], // Formato ISO (YYYY-MM-DD)
+  dataInicial: new Date().toISOString().split('T')[0],
   hora: new Date().toLocaleTimeString('pt-BR', {
     hour12: false,
     timeStyle: 'short',
-  }), // Hora no formato HH:mm
+  }),
   leituraInicial: '',
-  vistoInicial: '',
-  dataParcial: new Date().toISOString().split('T')[0], // Formato ISO (YYYY-MM-DD)
-  Parcial: '11:00', // Verifique se isso deve estar em HH:mm
+  vistoInicial: usuarioLogado,
+  dataParcial: new Date().toISOString().split('T')[0],
+  Parcial: '11:00',
   leituraParcial: '',
-  dataMeio: new Date().toISOString().split('T')[0], // Formato ISO (YYYY-MM-DD)
-  horaParcial2: '23:00', // Hora no formato HH:mm
+  dataMeio: new Date().toISOString().split('T')[0],
+  horaParcial2: '23:00',
   leituraParcial2: '',
-  dataFinal: tomorrow.toISOString().split('T')[0], // Formato ISO (YYYY-MM-DD)
-  horaFinal: '06:00', // Hora no formato HH:mm
+  dataFinal: tomorrow.toISOString().split('T')[0],
+  horaFinal: '06:00',
   leituraFinal: '',
-  vistoFinal: '',
+  vistoFinal: usuarioLogado,
   consumo: '',
 });
 
+// Carregar leituras salvas do localStorage ao montar o componente
+onMounted(() => {
+  const savedLeituras = JSON.parse(localStorage.getItem('leituras'));
+  if (savedLeituras) {
+    leituraAgua.value = { ...leituraAgua.value, ...savedLeituras };
+  }
+
+  // Se a primeira leitura já foi salva, manter o `vistoInicial` original
+  // e atualizar apenas o `vistoFinal` com o usuário logado, se o usuário tiver mudado
+  if (leituraAgua.value.leituraInicial) {
+    leituraAgua.value.vistoFinal = usuarioLogado;
+  } else {
+    leituraAgua.value.vistoInicial = usuarioLogado;
+  }
+});
+
+// Observar mudanças em cada leitura e salvar no localStorage
+watch(
+  () => leituraAgua.value,
+  (newLeituraAgua) => {
+    // Salva apenas se houver leituras preenchidas
+    if (
+      newLeituraAgua.leituraInicial ||
+      newLeituraAgua.leituraParcial ||
+      newLeituraAgua.leituraFinal
+    ) {
+      localStorage.setItem('leituras', JSON.stringify(newLeituraAgua));
+    }
+  },
+  { deep: true }
+);
+
 async function calcular() {
-  // Verifique se as leituras estão preenchidas
+  console.log('Função calcular chamada');
+
   if (
     !leituraAgua.value.leituraInicial ||
     !leituraAgua.value.leituraParcial ||
@@ -549,10 +631,9 @@ async function calcular() {
       icon: 'warning',
       message: 'Por favor, preencha todas as leituras antes de calcular!',
     });
-    return; // Impede a execução se os campos estiverem vazios
+    return;
   }
 
-  // Resto do cálculo
   let leituraInicial = parseInt(leituraAgua.value.leituraInicial.slice(3));
   let leituraParcial = parseInt(leituraAgua.value.leituraParcial.slice(3));
   let leituraParcial2 = parseInt(leituraAgua.value.leituraParcial2.slice(3));
@@ -560,10 +641,9 @@ async function calcular() {
 
   let consumo = leituraParcial - leituraParcial2 - leituraInicial;
   let consumoFinal = leituraFinal - leituraInicial;
-
   consumoFinal = Number(consumoFinal.toFixed(2));
 
-  // Exibição de aviso e envio de mensagem caso o consumo ultrapasse 6000m³
+  // Notificação para consumo acima de 6000m³
   if (consumoFinal > 6000 && !isNaN(consumo)) {
     $q.notify({
       color: 'red-5',
@@ -580,39 +660,91 @@ async function calcular() {
     } catch (error) {
       console.error('Erro ao enviar a mensagem:', error);
     }
+  } else {
+    // Notificação de sucesso quando o cálculo for bem-sucedido
+    $q.notify({
+      color: 'green-5',
+      textColor: 'white',
+      icon: 'check',
+      message: `Cálculo realizado com sucesso! Consumo atual: ${consumoFinal} m³!`,
+    });
   }
 
   leituraAgua.value.consumo = `${consumoFinal} m³!`;
 
-  // Salvar leitura de água no back-end
   try {
-    // Certifique-se de que a data e hora estejam no formato correto
     leituraAgua.value.dataInicial = dayjs(leituraAgua.value.dataInicial).format(
-      'YYYY-MM-DD'
+      'DD-MM-YYYY'
     );
-    /* leituraAgua.value.hora = dayjs(leituraAgua.value.hora, 'HH:mm').format(
-      'HH:mm'
-    );  */ // Formato HH:mm
-
-    // Formatar as outras datas conforme necessário
     leituraAgua.value.dataParcial = dayjs(leituraAgua.value.dataParcial).format(
-      'YYYY-MM-DD'
+      'DD-MM-YYYY'
     );
     leituraAgua.value.dataMeio = dayjs(leituraAgua.value.dataMeio).format(
-      'YYYY-MM-DD'
+      'DD-MM-YYYY'
     );
     leituraAgua.value.dataFinal = dayjs(leituraAgua.value.dataFinal).format(
-      'YYYY-MM-DD'
+      'DD-MM-YYYY'
     );
 
     await createLeituraAgua(leituraAgua.value);
     console.log('Leitura de água salva com sucesso!');
+
+    // Se a leitura inicial já está preenchida, atualizar apenas `vistoFinal`
+    if (leituraAgua.value.leituraInicial) {
+      leituraAgua.value.vistoFinal = usuarioLogado;
+    } else {
+      leituraAgua.value.vistoInicial = usuarioLogado;
+    }
+
+    // Notificação de sucesso após salvar a leitura
+    $q.notify({
+      color: 'green-5',
+      textColor: 'white',
+      icon: 'check',
+      message: 'Leitura de água salva com sucesso!',
+    });
   } catch (error) {
     console.error(
       'Erro ao salvar leitura de água:',
       error.response ? error.response.data : error.message
     );
   }
+
+  // Limpar leituras do localStorage após o cálculo
+  console.log(
+    'Antes de limpar o localStorage:',
+    localStorage.getItem('leituras')
+  );
+  localStorage.removeItem('leituras');
+  console.log(
+    'Depois de limpar o localStorage:',
+    localStorage.getItem('leituras')
+  );
+
+  // Aguardar 10 segundos antes de resetar os campos
+  setTimeout(() => {
+    // Resetar todos os valores
+    leituraAgua.value = {
+      dataInicial: new Date().toISOString().split('T')[0],
+      hora: new Date().toLocaleTimeString('pt-BR', {
+        hour12: false,
+        timeStyle: 'short',
+      }),
+      leituraInicial: '',
+      vistoInicial: usuarioLogado,
+      dataParcial: new Date().toISOString().split('T')[0],
+      Parcial: '11:00',
+      leituraParcial: '',
+      dataMeio: new Date().toISOString().split('T')[0],
+      horaParcial2: '23:00',
+      leituraParcial2: '',
+      dataFinal: tomorrow.toISOString().split('T')[0],
+      horaFinal: '06:00',
+      leituraFinal: '',
+      vistoFinal: usuarioLogado,
+      consumo: '',
+    };
+  }, 10000); // 10 segundos de atraso
 }
 </script>
 

@@ -100,10 +100,11 @@ import dayjs from 'dayjs';
 import * as AnnotationService from '../services/anotacaoApi';
 
 const $q = useQuasar();
-const formsPerPage = 7;
+const formsPerPage = 10;
 const currentPage = ref(1);
-
 const forms = ref([]);
+
+// Estrutura do formulário vazio
 const ensureEmptyForm = {
   data: dayjs().format('DD/MM/YYYY'),
   hora: dayjs().format('HH:mm:ss'),
@@ -114,7 +115,10 @@ const ensureEmptyForm = {
   salvo: false,
 };
 
+// Computed para max de páginas
 const maxPages = computed(() => Math.ceil(forms.value.length / formsPerPage));
+
+// Computed para formulários paginados
 const paginatedForms = computed(() => {
   const start = (currentPage.value - 1) * formsPerPage;
   const end = start + formsPerPage;
@@ -125,14 +129,14 @@ let intervalId;
 
 onMounted(async () => {
   intervalId = setInterval(() => {
-    forms.value.forEach((form, index) => {
+    forms.value.forEach((form) => {
       if (
         !form.salvo &&
         form.conjunto === '' &&
         form.paciente === '' &&
         form.info === ''
       ) {
-        forms.value[index].hora = dayjs().format('HH:mm:ss');
+        form.hora = dayjs().format('HH:mm:ss');
       }
     });
   }, 1000);
@@ -141,18 +145,20 @@ onMounted(async () => {
     const loadedAnnotations = await AnnotationService.getAnnotations();
     forms.value = loadedAnnotations;
 
-    if (forms.value.length === 0) {
-      forms.value.push({ ...ensureEmptyForm });
-    } else {
+    // Adiciona um formulário vazio se não houver anotações
+    if (
+      forms.value.length === 0 ||
+      (forms.value.length > 0 && !forms.value[forms.value.length - 1].salvo)
+    ) {
       forms.value.push({ ...ensureEmptyForm });
     }
   } catch (error) {
-    console.error('Erro ao carregar Anotaçoes:', error);
+    console.error('Erro ao carregar Anotações:', error);
     $q.notify({
       color: 'red-5',
       textColor: 'white',
       icon: 'warning',
-      message: 'Erro ao carregar Anotaçoes:',
+      message: 'Erro ao carregar Anotações:',
     });
   }
 });
@@ -162,7 +168,7 @@ onUnmounted(() => {
 });
 
 const onSubmit = async (index) => {
-  const form = forms.value[index];
+  const form = paginatedForms.value[index];
 
   if (
     form.usuario === '' ||
@@ -186,10 +192,16 @@ const onSubmit = async (index) => {
       hora: form.hora,
     });
 
-    forms.value[index] = { ...savedForm, salvo: true };
+    // Substitui o formulário atual na lista
+    forms.value.splice((currentPage.value - 1) * formsPerPage + index, 1, {
+      ...savedForm,
+      salvo: true,
+    });
 
-    // Adiciona um formulário vazio após o salvamento
-    forms.value.push({ ...ensureEmptyForm });
+    // Verifica se já existe um formulário vazio, se não houver, adiciona um
+    if (!forms.value.some((f) => !f.salvo)) {
+      forms.value.push({ ...ensureEmptyForm });
+    }
 
     $q.notify({
       color: 'green-4',
@@ -211,19 +223,16 @@ const onReset = async (index) => {
   try {
     const form = forms.value[index];
     if (form.id) {
-      console.log('Tentando arquivar Anotaçao com ID:', form.id);
-      const response = await AnnotationService.archiveAnnotation(form.id);
-      console.log('Resposta da API:', response);
-      forms.value.splice(index, 1);
+      console.log('Tentando arquivar Anotação com ID:', form.id);
+      await AnnotationService.archiveAnnotation(form.id);
+      forms.value.splice(index, 1); // Remove o formulário arquivado
     } else {
       console.log('Formulário não salvo, não será arquivado.');
     }
 
-    if (
-      forms.value.length === 0 ||
-      (forms.value.length === 1 && !forms.value[0].salvo)
-    ) {
-      forms.value = [{ ...ensureEmptyForm }];
+    // Adiciona um formulário vazio apenas se não houver nenhum salvo
+    if (!forms.value.some((f) => !f.salvo)) {
+      forms.value.push({ ...ensureEmptyForm });
     }
 
     $q.notify({

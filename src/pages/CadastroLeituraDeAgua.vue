@@ -17,8 +17,6 @@
           </option>
         </select>
       </div>
-      <!--  <button @click="fetchDailyData">Dados Gerais do Mês</button>
-      <button @click="fetchMonthlySum">Somatório do Mês</button> -->
     </div>
 
     <div class="charts-container">
@@ -30,12 +28,6 @@
         :data="chartData"
         v-if="!loading && chartData.labels.length > 0"
       />
-      <PieChart
-        class="small-chart"
-        :key="pieChartData.labels.join('-')"
-        :data="pieChartData"
-        v-if="!loading && pieChartData.labels.length > 0"
-      />
     </div>
   </div>
   <q-page padding>
@@ -45,8 +37,8 @@
 
 <script setup>
 import FormularioAgua from 'src/components/FormularioAgua.vue';
-import { ref, onMounted } from 'vue';
-import { Line as LineChart, Pie as PieChart } from 'vue-chartjs';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { Line as LineChart } from 'vue-chartjs';
 import {
   Chart as ChartJS,
   Title,
@@ -82,24 +74,6 @@ const chartData = ref({
       backgroundColor: 'rgba(75, 192, 192, 0.2)',
       borderColor: 'rgba(75, 192, 192, 1)',
       borderWidth: 1,
-    },
-  ],
-});
-
-const pieChartData = ref({
-  labels: [],
-  datasets: [
-    {
-      label: 'Consumo Mensal',
-      data: [],
-      backgroundColor: [
-        '#FF6384',
-        '#36A2EB',
-        '#FFCE56',
-        '#4BC0C0',
-        '#9966FF',
-        '#FF9F40',
-      ],
     },
   ],
 });
@@ -158,109 +132,17 @@ const filterDataByDay = () => {
   chartData.value.datasets[0].data = consumos;
 };
 
-// Funções para buscar dados mensais
-/* const fetchDailyData = async () => {
-  loading.value = true; // Inicia o carregamento
-  try {
-    const leituras = await getLeiturasAgua();
-    const monthlyReadings = [];
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
+// Configuração do intervalo para atualização automática
+let intervalId;
 
-    leituras.forEach((leitura) => {
-      const leituraDate = new Date(leitura.dataInicial);
-      if (
-        leituraDate.getMonth() === currentMonth &&
-        leituraDate.getFullYear() === currentYear
-      ) {
-        monthlyReadings.push(leitura);
-      }
-    }); */
-
-// Verifique se há leituras
-/*    if (monthlyReadings.length === 0) {
-      chartData.value.labels = [];
-      chartData.value.datasets[0].data = [];
-      pieChartData.value.labels = [];
-      pieChartData.value.datasets[0].data = [];
-      return; // Retorna se não houver leituras
-    }
-
-    chartData.value.labels = monthlyReadings.map(
-      (leitura, index) => `${leitura.dataInicial} - Leitura ${index + 1}`
-    );
-    chartData.value.datasets[0].data = monthlyReadings.map((leitura) => {
-      const formattedLeitura = leitura.consumo
-        .replace(/\s/g, '')
-        .replace(',', '.')
-        .replace('m³!', '');
-      return !isNaN(parseFloat(formattedLeitura))
-        ? parseFloat(formattedLeitura)
-        : 0;
-    });
-
-    // Atualiza gráfico de pizza se necessário
-    pieChartData.value.labels = chartData.value.labels;
-    pieChartData.value.datasets[0].data = chartData.value.datasets[0].data;
-  } catch (error) {
-    console.error('Erro ao buscar os dados do mês:', error);
-  } finally {
-    loading.value = false; // Define loading como false após a busca
-  }
-};
-
-const fetchMonthlySum = async () => {
-  loading.value = true; // Inicia o carregamento
-  try {
-    const leituras = await getLeiturasAgua(); // Obter todas as leituras
-    const monthlyData = {};
-
-    // Agrupar as leituras por mês
-    leituras.forEach((leitura) => {
-      const leituraDate = new Date(leitura.dataInicial);
-      const monthKey = `${leituraDate.getFullYear()}-${
-        leituraDate.getMonth() + 1
-      }`; // Formato: YYYY-MM
-
-      if (!monthlyData[monthKey]) {
-        monthlyData[monthKey] = []; // Inicializa o mês se não existir
-      }
-      monthlyData[monthKey].push(leitura);
-    }); */
-
-// Processar dados mensais para o gráfico
-/*   const monthLabels = Object.keys(monthlyData);
-    const consumos = monthLabels.map((month) => {
-      const monthReadings = monthlyData[month];
-      return monthReadings.reduce((total, leitura) => {
-        const formattedLeitura = leitura.consumo
-          .replace(/\s/g, '')
-          .replace(',', '.')
-          .replace('m³!', '');
-        return (
-          total +
-          (!isNaN(parseFloat(formattedLeitura))
-            ? parseFloat(formattedLeitura)
-            : 0)
-        );
-      }, 0); // Soma os consumos do mês
-    });
-
-    pieChartData.value.labels = monthLabels;
-    pieChartData.value.datasets[0].data = consumos;
-
-    chartData.value.labels = monthLabels; // Atualiza labels do gráfico de linha também
-    chartData.value.datasets[0].data = consumos; // Atualiza dados do gráfico de linha também
-  } catch (error) {
-    console.error('Erro ao buscar somatório mensal:', error);
-  } finally {
-    loading.value = false; // Define loading como false após a busca
-  }
-}; */
-
-// Carregar os dados quando o componente é montado
 onMounted(() => {
-  fetchData();
+  fetchData(); // Chama a função inicialmente
+  intervalId = setInterval(fetchData, 5000); // Atualiza a cada 5 segundos
+});
+
+// Limpeza do intervalo quando o componente é destruído
+onBeforeUnmount(() => {
+  clearInterval(intervalId);
 });
 </script>
 
@@ -272,8 +154,8 @@ onMounted(() => {
 }
 
 .small-chart {
-  width: 56% !important;
-  height: 302px !important; /* Ajuste a altura do gráfico de pizza */
+  width: 52% !important;
+  height: 276px !important; /* Ajuste a altura do gráfico de pizza */
 }
 
 .border {

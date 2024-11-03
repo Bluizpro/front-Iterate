@@ -106,10 +106,11 @@ import { useQuasar } from 'quasar';
 import * as QtcInforService from '../services/qtcInforApi';
 
 const $q = useQuasar();
-const formsPerPage = 10;
-const currentPage = ref(1);
-const forms = ref([]);
+const formsPerPage = 10; // Número de QTCs por página
+const currentPage = ref(1); // Página atual
+const forms = ref([]); // Lista de QTCs
 
+// Estrutura do formulário vazio
 const emptyForm = {
   data: dayjs().format('DD/MM/YYYY'),
   hora: dayjs().format('HH:mm:ss'),
@@ -120,7 +121,10 @@ const emptyForm = {
   salvo: false,
 };
 
+// Computed para max de páginas
 const maxPages = computed(() => Math.ceil(forms.value.length / formsPerPage));
+
+// Computed para QTCs paginados
 const paginatedForms = computed(() => {
   const start = (currentPage.value - 1) * formsPerPage;
   const end = start + formsPerPage;
@@ -131,33 +135,36 @@ let intervalId;
 
 onMounted(async () => {
   intervalId = setInterval(() => {
-    forms.value.forEach((form, index) => {
+    forms.value.forEach((form) => {
       if (
         !form.salvo &&
         form.conjunto === '' &&
         form.prestador === '' &&
         form.informacao === ''
       ) {
-        forms.value[index].hora = dayjs().format('HH:mm:ss');
+        form.hora = dayjs().format('HH:mm:ss');
       }
     });
   }, 1000);
+
   try {
     const loadedQtcs = await QtcInforService.getQtcInfos();
     forms.value = loadedQtcs;
 
-    if (forms.value.length === 0) {
-      forms.value.push({ ...emptyForm });
-    } else {
+    // Adiciona um formulário vazio se não houver QTCs
+    if (
+      forms.value.length === 0 ||
+      (forms.value.length > 0 && !forms.value[forms.value.length - 1].salvo)
+    ) {
       forms.value.push({ ...emptyForm });
     }
   } catch (error) {
-    console.error('Erro ao carregar qtc:', error);
+    console.error('Erro ao carregar QTC:', error);
     $q.notify({
       color: 'red-5',
       textColor: 'white',
       icon: 'warning',
-      message: 'Erro ao carregar qtc:',
+      message: 'Erro ao carregar QTC:',
     });
   }
 });
@@ -167,7 +174,9 @@ onUnmounted(() => {
 });
 
 const onSubmit = async (index) => {
-  const form = forms.value[index];
+  const form = paginatedForms.value[index];
+
+  // Verifica se os campos obrigatórios estão preenchidos
   if (
     form.usuario === '' ||
     form.prestador === '' ||
@@ -182,6 +191,7 @@ const onSubmit = async (index) => {
     });
     return;
   }
+
   try {
     const savedForm = await QtcInforService.createQtcInfos({
       ...form,
@@ -189,11 +199,18 @@ const onSubmit = async (index) => {
       hora: form.hora,
     });
 
-    forms.value[index] = { ...savedForm, salvo: true };
+    // Substitui o formulário atual na lista
+    forms.value.splice((currentPage.value - 1) * formsPerPage + index, 1, {
+      ...savedForm,
+      salvo: true,
+    });
 
-    // Adiciona um novo formulário vazio sem verificar se todos estão salvos
-    forms.value.push({ ...emptyForm });
+    // Verifica se já existe um formulário vazio
+    if (!forms.value.some((f) => !f.salvo)) {
+      forms.value.push({ ...emptyForm }); // Adiciona um novo formulário vazio
+    }
 
+    // Notificação de sucesso
     $q.notify({
       color: 'green-4',
       textColor: 'white',
@@ -205,7 +222,7 @@ const onSubmit = async (index) => {
       color: 'red-5',
       textColor: 'white',
       icon: 'warning',
-      message: 'Erro ao salvar Qtc',
+      message: 'Erro ao salvar QTC',
     });
   }
 };
@@ -215,32 +232,30 @@ const onReset = async (index) => {
     const form = forms.value[index];
     if (form.id) {
       console.log('Tentando arquivar QTC com ID:', form.id);
-      const response = await QtcInforService.archiveQtcInfo(form.id);
-      console.log('Resposta da API:', response);
+      await QtcInforService.archiveQtcInfo(form.id);
+      forms.value.splice(index, 1); // Remove o formulário arquivado
 
-      forms.value.splice(index, 1);
+      // Adiciona um novo formulário vazio apenas se não houver nenhum salvo
+      if (forms.value.length === 0 || !forms.value.some((f) => !f.salvo)) {
+        forms.value.push({ ...emptyForm });
+      }
     } else {
       console.log('Formulário não salvo, não será arquivado.');
     }
-    if (
-      forms.value.length === 0 ||
-      (forms.value.length === 1 && !forms.value[0].salvo)
-    ) {
-      forms.value = [{ ...emptyForm }];
-    }
+
     $q.notify({
       color: 'green-4',
       textColor: 'white',
       icon: 'cloud_done',
-      message: 'Anotação arquivada com sucesso',
+      message: 'QTC arquivada com sucesso',
     });
   } catch (error) {
-    console.error('Erro ao arquivar anotação:', error);
+    console.error('Erro ao arquivar QTC:', error);
     $q.notify({
       color: 'red-5',
       textColor: 'white',
       icon: 'warning',
-      message: 'Erro ao arquivar anotação',
+      message: 'Erro ao arquivar QTC',
     });
   }
 };
