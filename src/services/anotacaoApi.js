@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'https://gestor-encomenda.onrender.com/api/Anotacao',
+  baseURL: 'https://gestor-encomenda-back.onrender.com/api/Anotacao',
 });
 
 export async function createAnnotation(anotacao) {

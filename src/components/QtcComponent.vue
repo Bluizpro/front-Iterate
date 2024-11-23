@@ -85,8 +85,8 @@
           @click="onSubmit(index)"
         />
         <q-btn
-          icon="done"
-          color="green"
+          icon="close"
+          color="red"
           flat
           class="button-done"
           size="10px"

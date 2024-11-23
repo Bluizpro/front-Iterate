@@ -25,6 +25,7 @@
         :columns="columns"
         row-key="conjunto"
         binary-state-sort
+        :rows-per-page-options="[0]"
       >
         <template v-slot:body="props">
           <q-tr :props="props">
@@ -112,6 +113,9 @@
             <template v-slot:body="props">
               <q-tr :props="props">
                 <q-td key="nome" :props="props">{{ props.row.nome }}</q-td>
+                <q-td key="especialidade" :props="props">{{
+                  props.row.especialidade
+                }}</q-td>
                 <q-td key="interfone" :props="props">{{
                   props.row.interfone
                 }}</q-td>
@@ -123,6 +127,13 @@
           </q-table>
         </div>
       </div>
+      <q-pagination
+        v-model="page"
+        :max="totalPages"
+        color="primary"
+        boundary-numbers
+        class="q-mt-md"
+      />
     </div>
   </q-page>
 </template>
@@ -137,6 +148,9 @@ const expandedConjuntos = ref([]);
 const locatarios = ref({});
 const search = ref(''); // Campo de pesquisa
 
+const page = ref(1); // Página atual
+const rowsPerPage = 8; // Limitar a 8 itens por página
+
 const columns = [
   {
     name: 'expand',
@@ -150,18 +164,6 @@ const columns = [
     align: 'center',
     field: 'conjunto',
     sortable: true,
-  },
-  {
-    name: 'especialidade',
-    align: 'left',
-    label: 'Especialidade',
-    field: 'especialidade',
-    sortable: true,
-  },
-  {
-    name: 'interfone',
-    label: 'Interfone',
-    field: 'interfone',
   },
   {
     name: 'proprietario',
@@ -185,6 +187,13 @@ const locatarioColumns = [
     field: 'nome',
   },
   {
+    name: 'especialidade',
+    align: 'left',
+    label: 'Especialidade',
+    field: 'especialidade',
+    sortable: true,
+  },
+  {
     name: 'interfone',
     label: 'Interfone',
     align: 'left',
@@ -201,7 +210,7 @@ const locatarioColumns = [
 // Computed property para filtrar as linhas da tabela com base na pesquisa
 const filteredRows = computed(() => {
   const lowerSearch = search.value.toLowerCase();
-  return store.condominos.filter((row) => {
+  const filtered = store.condominos.filter((row) => {
     const matchesCondomino =
       row.conjunto.toString().includes(lowerSearch) ||
       row.proprietario.toLowerCase().includes(lowerSearch);
@@ -212,16 +221,31 @@ const filteredRows = computed(() => {
 
     return matchesCondomino || matchesLocatario;
   });
+
+  // Paginação: pegar as linhas da página atual
+  const start = (page.value - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+  return filtered.slice(start, end);
+});
+
+// Computed para o total de páginas
+const totalPages = computed(() => {
+  const totalRows = store.condominos.filter((row) => {
+    const lowerSearch = search.value.toLowerCase();
+    return (
+      row.conjunto.toString().includes(lowerSearch) ||
+      row.proprietario.toLowerCase().includes(lowerSearch)
+    );
+  }).length;
+  return Math.ceil(totalRows / rowsPerPage);
 });
 
 function toggleExpand(conjunto) {
   if (expandedConjuntos.value.includes(conjunto)) {
-    // Se o conjunto já está expandido, remova-o da lista
     expandedConjuntos.value = expandedConjuntos.value.filter(
       (c) => c !== conjunto
     );
   } else {
-    // Caso contrário, adicione-o e busque os locatários
     expandedConjuntos.value.push(conjunto);
     getLocatariosByConjunto(conjunto)
       .then((data) => {
@@ -248,7 +272,6 @@ onMounted(() => {
   store.init();
 });
 
-// Função para determinar o ícone da seta baseado no estado de expansão
 function getExpandIcon(conjunto) {
   return expandedConjuntos.value.includes(conjunto)
     ? 'expand_less'
@@ -324,5 +347,9 @@ function getExpandIcon(conjunto) {
 
 .locatario-table h3 {
   margin-bottom: 1rem;
+}
+.q-pagination {
+  display: flex;
+  justify-content: center;
 }
 </style>

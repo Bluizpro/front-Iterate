@@ -10,6 +10,7 @@
         :columns="columns"
         row-key="id"
         binary-state-sort
+        :rows-per-page-options="[0]"
       >
         <template v-slot:body="props">
           <q-tr :props="props">
@@ -53,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useVisitantesStore } from '../stores/visitanteStore';
 
 const columns = [
@@ -98,7 +99,7 @@ const visitantesStore = useVisitantesStore();
 visitantesStore.init(); // Inicialize o visitantesStore para carregar os visitantes da API
 
 const paginaAtual = ref(1);
-const visitantesPorPagina = 10;
+const visitantesPorPagina = 15;
 
 // Calcula o número total de páginas com base na quantidade de visitantes
 const numeroTotalPaginas = computed(() => {

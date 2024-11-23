@@ -1,7 +1,7 @@
 // src/services/signatureService.js
 import axios from 'axios';
 
-const API_URL = 'https://disparrro-back.onrender.com'; // URL do seu servidor Node.js
+const API_URL = 'https://disparowhat.onrender.com'; // URL do seu servidor Node.js
 
 // Função para fazer o upload da assinatura
 export const uploadSignature = async (imageData) => {
@@ -17,7 +17,8 @@ export const uploadSignature = async (imageData) => {
 };
 // src/services/assinaturaService.js
 
-const API_URL_back = 'https://gestor-encomenda.onrender.com/api/Assinatura'; // URL do seu servidor backend
+const API_URL_back =
+  'https://gestor-encomenda-back.onrender.com/api/Assinatura'; // URL do seu servidor backend
 
 // Função para fazer o upload da assinatura
 export const saveAssinatura = async (assinatura) => {

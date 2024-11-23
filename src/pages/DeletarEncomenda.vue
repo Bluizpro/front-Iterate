@@ -52,8 +52,10 @@
       ]"
     />
   </q-page>
+
   <q-page v-else>
     <div>Encomenda não encontrada</div>
+    <SpinnerComponente v-if="isLoading" />
   </q-page>
 </template>
 
@@ -73,6 +75,7 @@ import {
   deleteCorrespondenciaSedex,
   getCorrespondenciaSedexById,
 } from '../services/encomenSedexAPI';
+import SpinnerComponente from 'src/components/SpinnerComponente.vue'; // Importe o componente
 
 const $router = useRouter();
 const $q = useQuasar();
@@ -80,6 +83,7 @@ const tipoEncomenda = $router.currentRoute.value.params.tipo; // Tipo da encomen
 const encomendaId = Number($router.currentRoute.value.params.id); // ID da encomenda
 const encomenda = ref(null); // Dados da encomenda
 const justificativa = ref(''); // Justificativa da deleção
+const isLoading = ref(false);
 
 let timer = null;
 
@@ -91,12 +95,12 @@ onBeforeUnmount(() => {
   }
 });
 
-// Funções para exibir/esconder o loading
 const showLoading = () => {
-  $q.loading.show();
+  isLoading.value = true; // Mostra o spinner
 };
 
 const hideLoading = () => {
+  isLoading.value = false; // Esconde o spinner
   $q.loading.hide();
 };
 

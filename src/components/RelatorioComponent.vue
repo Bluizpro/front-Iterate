@@ -263,9 +263,7 @@ const gerarPDF = async (tipo) => {
     pdf.save('Relatorio_Chaves_Devolvidas.pdf'); // Salva o PDF
   }
 
-  // -------------------- Encomendas --------------------
   if (tipo === 'encomendas') {
-    // Funções para obter os dados das encomendas retiradas
     const fetchEncomendasRetiradas = async () => {
       try {
         const [sedex, internas, externas] = await Promise.all([
@@ -273,16 +271,17 @@ const gerarPDF = async (tipo) => {
           getCorrespondenciasInternasRetiradas(),
           getCorrespondenciasExternasRetiradas(),
         ]);
-        return [...sedex, ...internas, ...externas]; // Combina todos os dados em um único array
+        return [...sedex, ...internas, ...externas];
       } catch (error) {
         console.error('Erro ao buscar encomendas retiradas:', error);
-        return []; // Retorna um array vazio em caso de erro
+        return [];
       }
     };
 
     const encomendasBaixadas = await fetchEncomendasRetiradas();
-    pdf.setFont('helvetica', 'bold'); // Define a fonte como negrito
-    pdf.setFontSize(12); // Tamanho da fonte para o título
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(12);
     pdf.text(
       'Encomendas Retiradas:',
       pdf.internal.pageSize.getWidth() / 2,
@@ -291,78 +290,103 @@ const gerarPDF = async (tipo) => {
     );
 
     if (encomendasBaixadas.length === 0) {
-      pdf.setFontSize(10); // Tamanho da fonte para texto normal
+      pdf.setFontSize(10);
       pdf.text('Nenhuma encomenda retirada', 10, 20);
     } else {
       encomendasBaixadas.forEach((encomenda, index) => {
-        let basePosition = 30 + (index % 4) * 80; // Aumentar espaço entre as encomendas
+        const marginLeft = 10;
+        const marginTop = 30 + (index % 4) * 100;
+
         if (index % 4 === 0 && index !== 0) {
-          pdf.addPage(); // Adiciona uma nova página após 4 encomendas
+          pdf.addPage();
         }
 
-        // Centraliza o texto
-        pdf.setFontSize(10); // Tamanho para o texto normal
-        pdf.setFont('helvetica', 'bold'); // Define a fonte como negrito
-        pdf.text(`Encomenda ${index + 1}:`, 10, basePosition);
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(`Encomenda ${index + 1}:`, marginLeft, marginTop);
 
-        // Adicionando o tipo de encomenda
-        let tipoEncomenda;
-        pdf.setFontSize(8); // Tamanho do texto do tipo de encomenda
-        pdf.setFont('helvetica', 'normal'); // Retorna à fonte normal para as anotações
-        if (encomenda.nomePessoaRetiraInterno) {
-          tipoEncomenda = 'Interna';
-        } else if (encomenda.nomePessoaRetiraExterno) {
-          tipoEncomenda = 'Externa';
-        } else if (encomenda.nomePessoaRetiraSedex) {
-          tipoEncomenda = 'Sedex';
-        }
+        // Tipo de encomenda
+        let tipoEncomenda = '';
+        if (encomenda.nomePessoaRetiraInterno) tipoEncomenda = 'Interna';
+        else if (encomenda.nomePessoaRetiraExterno) tipoEncomenda = 'Externa';
+        else if (encomenda.nomePessoaRetiraSedex) tipoEncomenda = 'Sedex';
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(`Tipo: ${tipoEncomenda}`, marginLeft, marginTop + 10);
 
-        pdf.text(`Tipo: ${tipoEncomenda}`, 10, basePosition + 10); // Exibe o tipo da encomenda
-
-        pdf.text(`Data: ${encomenda.data}`, 10, basePosition + 20);
-        pdf.text(`Hora: ${encomenda.hora}`, 10, basePosition + 30);
+        // Campos comuns
         pdf.text(
-          `Data Baixa: ${new Date(encomenda.dataRetirada).toLocaleString(
-            'pt-BR'
-          )}`,
-          10,
-          basePosition + 40
+          `Data: ${encomenda.data || 'N/A'}`,
+          marginLeft,
+          marginTop + 20
         );
-        pdf.text(`Conteúdo: ${encomenda.conteudo}`, 10, basePosition + 50);
+        pdf.text(
+          `Hora: ${encomenda.hora || 'N/A'}`,
+          marginLeft,
+          marginTop + 30
+        );
+        pdf.text(
+          `Data Baixa: ${
+            encomenda.dataRetirada
+              ? new Date(encomenda.dataRetirada).toLocaleString('pt-BR')
+              : 'N/A'
+          }`,
+          marginLeft,
+          marginTop + 40
+        );
+        pdf.text(
+          `Conteúdo: ${encomenda.conteudo || 'N/A'}`,
+          marginLeft,
+          marginTop + 50
+        );
 
-        // Exibe as informações específicas de cada tipo de encomenda
-        if (encomenda.nomePessoaRetiraInterno) {
-          pdf.text(`Destinatário: ${encomenda.nome}`, 10, basePosition + 60); // Interno
+        // Destinatário
+        const destinatario = encomenda.nomePessoaRetiraInterno
+          ? encomenda.nome
+          : encomenda.recebedor || encomenda.nome;
+        pdf.text(
+          `Destinatário: ${destinatario || 'N/A'}`,
+          marginLeft,
+          marginTop + 60
+        );
+
+        // Informações adicionais e assinatura
+        if (tipoEncomenda === 'Interna') {
           pdf.text(
-            `Assinatura: ${encomenda.nomePessoaRetiraInterno}`,
-            10,
-            basePosition + 70
+            `Nome Pessoa Retirada: ${
+              encomenda.nomePessoaRetiraInterno || 'N/A'
+            }`,
+            marginLeft,
+            marginTop + 70
           );
-        } else if (encomenda.nomePessoaRetiraExterno) {
           pdf.text(
-            `Destinatário: ${encomenda.recebedor}`,
-            10,
-            basePosition + 60
-          ); // Externo
-          pdf.text(
-            `Assinatura: ${encomenda.nomePessoaRetiraExterno}`,
-            10,
-            basePosition + 70
+            `Assinatura: ${encomenda.assinatura || 'N/A'}`,
+            marginLeft,
+            marginTop + 80
           );
-        } else if (encomenda.nomePessoaRetiraSedex) {
-          pdf.text(`Destinatário: ${encomenda.nome}`, 10, basePosition + 60); // Sedex
+        } else if (tipoEncomenda === 'Externa') {
           pdf.text(
-            `Assinatura: ${encomenda.nomePessoaRetiraSedex}`,
-            10,
-            basePosition + 70
+            `Nome Pessoa Retirada: ${
+              encomenda.nomePessoaRetiraExterno || 'N/A'
+            }`,
+            marginLeft,
+            marginTop + 70
+          );
+        } else if (tipoEncomenda === 'Sedex') {
+          pdf.text(
+            `Nome Pessoa Retirada: ${encomenda.nomePessoaRetiraSedex || 'N/A'}`,
+            marginLeft,
+            marginTop + 70
+          );
+          pdf.text(
+            `Assinatura: ${encomenda.assinatura || 'N/A'}`,
+            marginLeft,
+            marginTop + 80
           );
         }
-
-        // Adicionando um espaço adicional após a assinatura para evitar sobreposição
-        pdf.text('', 10, basePosition + 80); // Adiciona espaço extra para separar as encomendas
       });
     }
-    pdf.save('Relatorio_Encomendas.pdf'); // Salva o PDF
+
+    pdf.save('Relatorio_Encomendas.pdf');
   }
 
   // -------------------- Leituras de Água --------------------
@@ -408,32 +432,38 @@ const gerarPDF = async (tipo) => {
           10,
           basePosition + 30
         );
-        pdf.text(`Data Parcial: ${leitura.dataParcial}`, 10, basePosition + 40);
-        pdf.text(`Hora Parcial: ${leitura.parcial}`, 10, basePosition + 50);
+        pdf.text(
+          `Visto Inicial: ${leitura.vistoInicial}`,
+          10,
+          basePosition + 40
+        ); // Ajustado para exibir o visto inicial corretamente
+        pdf.text(`Data Parcial: ${leitura.dataParcial}`, 10, basePosition + 50);
+        pdf.text(`Hora Parcial: ${leitura.parcial}`, 10, basePosition + 60);
         pdf.text(
           `Leitura Parcial: ${leitura.leituraParcial}`,
           10,
-          basePosition + 60
+          basePosition + 70
         );
-        pdf.text(`Data Meio: ${leitura.dataMeio}`, 10, basePosition + 70);
+        pdf.text(`Data Meio: ${leitura.dataMeio}`, 10, basePosition + 80);
         pdf.text(
           `Hora Parcial 2: ${leitura.horaParcial2}`,
           10,
-          basePosition + 80
+          basePosition + 90
         );
         pdf.text(
           `Leitura Parcial 2: ${leitura.leituraParcial2}`,
           10,
-          basePosition + 90
+          basePosition + 100
         );
-        pdf.text(`Data Final: ${leitura.dataFinal}`, 10, basePosition + 100);
-        pdf.text(`Hora Final: ${leitura.horaFinal}`, 10, basePosition + 110);
+        pdf.text(`Data Final: ${leitura.dataFinal}`, 10, basePosition + 110);
+        pdf.text(`Hora Final: ${leitura.horaFinal}`, 10, basePosition + 120);
         pdf.text(
           `Leitura Final: ${leitura.leituraFinal}`,
           10,
-          basePosition + 120
+          basePosition + 130
         );
-        pdf.text(`Consumo: ${leitura.consumo}`, 10, basePosition + 130);
+        pdf.text(`Visto Final: ${leitura.vistoFinal}`, 10, basePosition + 140); // Ajustado para exibir o visto final corretamente
+        pdf.text(`Consumo: ${leitura.consumo}`, 10, basePosition + 150);
       });
     }
 
@@ -579,25 +609,40 @@ const gerarExcel = async (tipo) => {
 
       encomendasBaixadas.forEach((encomenda) => {
         let tipoEncomenda = '';
+        let nomePessoaRetirada = '';
+        let assinaturaUrl = 'N/A';
+
+        // Determina o tipo de encomenda e define o nome da pessoa que retirou
         if (encomenda.nomePessoaRetiraInterno) {
           tipoEncomenda = 'Interna';
+          nomePessoaRetirada = encomenda.nomePessoaRetiraInterno;
+          assinaturaUrl = encomenda.assinatura || 'N/A'; // Interna possui assinatura
         } else if (encomenda.nomePessoaRetiraExterno) {
           tipoEncomenda = 'Externa';
+          nomePessoaRetirada = encomenda.nomePessoaRetiraExterno;
+          assinaturaUrl = 'N/A'; // Externa não possui assinatura
         } else if (encomenda.nomePessoaRetiraSedex) {
           tipoEncomenda = 'Sedex';
+          nomePessoaRetirada = encomenda.nomePessoaRetiraSedex;
+          assinaturaUrl = encomenda.assinatura || 'N/A'; // Sedex possui assinatura
         }
 
+        // Adiciona os dados no formato necessário para exportação
         data.push({
-          Tipo: tipoEncomenda,
-          Destinatário: encomenda.nome || encomenda.recebedor,
-          Conteúdo: encomenda.conteudo,
-          Data: encomenda.data,
-          Hora: encomenda.hora,
-          DataBaixa: new Date(encomenda.dataRetirada).toLocaleString('pt-BR'),
-          Assinatura:
-            encomenda.nomePessoaRetiraInterno ||
-            encomenda.nomePessoaRetiraExterno ||
-            encomenda.nomePessoaRetiraSedex,
+          'Tipo de Encomenda': tipoEncomenda || 'N/A',
+          Destinatário: encomenda.nome || encomenda.recebedor || 'N/A',
+          Conteúdo: encomenda.conteudo || 'N/A',
+          Data: encomenda.data || 'N/A',
+          Hora: encomenda.hora || 'N/A',
+          'Data da Baixa': encomenda.dataRetirada
+            ? new Date(encomenda.dataRetirada).toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              })
+            : 'N/A',
+          'Nome da Pessoa que Retirou': nomePessoaRetirada || 'N/A',
+          'URL da Assinatura': assinaturaUrl,
         });
       });
     }

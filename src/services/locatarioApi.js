@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://gestor-encomenda.onrender.com/api/QtcInfor'; // Substitua pelo URL da sua API
+const API_URL = 'https://gestor-encomenda-back.onrender.com/api/Locatarios'; // Substitua pelo URL da sua API
 
 // Configuração do Axios com URL base
 const apiClient = axios.create({

@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'https://gestor-encomenda.onrender.com/api/CorrespondenciaInterno',
+  baseURL:
+    'https://gestor-encomenda-back.onrender.com/api/CorrespondenciaInterno',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -54,14 +55,17 @@ export async function updateCorrespondenciaInternaRetirada(
   nomePessoaRetiraInterno
 ) {
   try {
+    // Envia a requisição PUT com o nomePessoaRetiraInterno no corpo da requisição
     const response = await apiClient.put(
-      `/${id}/devolver`, // A URL do endpoint deve estar correta
-      nomePessoaRetiraInterno // O nome da pessoa deve ser passado como corpo
+      `/${id}/devolver`, // A URL do endpoint
+      nomePessoaRetiraInterno // Apenas o nomePessoaRetiraInterno como string
     );
+
+    // Retorna a resposta da API
     return response.data;
   } catch (error) {
     console.error(
-      'Erro ao atualizar Correspondencia Interna como retirada:',
+      'Erro ao atualizar Correspondência Interna como retirada:',
       error.response?.data || error.message
     );
     throw error;

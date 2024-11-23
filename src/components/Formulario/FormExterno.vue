@@ -40,7 +40,7 @@
           </template>
         </q-input>
 
-        <q-input
+      <!--   <q-input
           required
           name="recebedor"
           outlined
@@ -54,7 +54,7 @@
           <template v-slot:prepend>
             <q-icon name="person" />
           </template>
-        </q-input>
+        </q-input> -->
 
         <q-input
           required
@@ -135,7 +135,7 @@ const encomenda = ref({
   hora: '',
   conjunto: '',
   nome: '',
-  recebedor: '',
+ // recebedor: '',
   conteudo: '',
   local: '',
 });
@@ -233,7 +233,6 @@ const cadastrar = async () => {
     nome: encomenda.value.nome,
     conteudo: encomenda.value.conteudo,
     tipo: 'externo',
-    recebedor: encomenda.value.recebedor,
     local: encomenda.value.local,
   };
   try {
@@ -246,6 +245,8 @@ const cadastrar = async () => {
       const response = await createCorrespondenciaExterno(novaEncomenda);
 
       if (response) {
+        // A função de envio de WhatsApp foi comentada
+        /*
         const mensagem = `Olá ${novaEncomenda.nome}, sua encomenda foi entregue à portaria.`;
         try {
           await enviarMensagemWhatsApp(telefone, mensagem);
@@ -260,6 +261,8 @@ const cadastrar = async () => {
               'Encomenda cadastrada, mas ocorreu um erro ao enviar a mensagem.',
           });
         }
+        */
+
         store.resetFormularioAtual();
         $q.notify({
           type: 'positive',
@@ -291,4 +294,5 @@ const cadastrar = async () => {
     hideLoading();
   }
 };
+
 </script>

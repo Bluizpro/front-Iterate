@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <div>
-      <slot></slot>
+    <slot></slot>
     </div>
 
     <div class="q-pa-md">
@@ -9,10 +9,11 @@
         flat
         bordered
         title="Lista de Correspondências"
-        :rows="encomendas"
+        :rows="paginatedEncomendas"
         :columns="computedColumns"
         row-key="id"
         binary-state-sort
+        :rows-per-page-options="[0]"
       >
         <template v-slot:body="props">
           <q-tr :props="props">
@@ -39,6 +40,32 @@
           </q-tr>
         </template>
       </q-table>
+
+      <!-- Paginação customizada -->
+      <div class="custom-pagination q-mt-md">
+        <q-btn
+          flat
+          round
+          dense
+
+          :disable="page.value === 1"
+          @click="previousPage"
+        />
+        <q-pagination
+          v-model="page"
+          :max="totalPages"
+          color="primary"
+          boundary-numbers
+        />
+        <q-btn
+          flat
+          round
+          dense
+
+          :disable="page.value === totalPages"
+          @click="nextPage"
+        />
+      </div>
     </div>
   </q-page>
 </template>
@@ -46,8 +73,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStore } from '../stores/example-store';
 import { useQuasar } from 'quasar';
+import { useStore } from '../stores/example-store';
 import { getCorrespondenciasInternas } from '../services/encomenInterAPI';
 import { getCorrespondenciasSedex } from '../services/encomenSedexAPI';
 import { getCorrespondenciasExterno } from '../services/encomenExternoAPI';
@@ -56,10 +83,13 @@ const router = useRouter();
 const $q = useQuasar();
 const store = useStore();
 
-const encomendas = ref([]); // Criar uma referência para armazenar as encomendas
+const page = ref(1); // Página atual
+const rowsPerPage = ref(5); // Número de itens por página
+const encomendas = ref([]); // Lista de encomendas
 
 const tipoAtual = computed(() => store.formularioAtual);
 
+// Carregar correspondências baseado no tipo
 const carregarCorrespondencias = async (tipo) => {
   try {
     let dados;
@@ -73,10 +103,9 @@ const carregarCorrespondencias = async (tipo) => {
       throw new Error(`Tipo desconhecido: ${tipo}`);
     }
 
-    // Adiciona o tipo de encomenda a cada item
     encomendas.value = dados.map((item) => ({
       ...item,
-      tipo, // Adiciona o tipo ao item
+      tipo,
     }));
   } catch (error) {
     console.error('Erro ao carregar correspondências:', error);
@@ -84,7 +113,7 @@ const carregarCorrespondencias = async (tipo) => {
 };
 
 onMounted(async () => {
-  await carregarCorrespondencias(tipoAtual.value); // Carregar com base no tipo atual
+  await carregarCorrespondencias(tipoAtual.value);
 });
 
 const colunasPorTipo = {
@@ -109,11 +138,12 @@ const colunasPorTipo = {
   ],
 };
 
+// Colunas baseadas no tipo
 const computedColumns = computed(() => {
   const tipo = tipoAtual.value;
   const colunas = colunasPorTipo[tipo];
   if (!colunas) {
-    throw new Error(`Tipo de encomenda desconhecido: ${tipo}`);
+    throw new Error(`Tipo desconhecido: ${tipo}`);
   }
   return [
     ...colunas.map((coluna) => ({
@@ -134,6 +164,33 @@ const computedColumns = computed(() => {
     },
   ];
 });
+
+// Itens paginados
+const paginatedEncomendas = computed(() => {
+  const start = (page.value - 1) * rowsPerPage.value;
+  const end = page.value * rowsPerPage.value;
+  return encomendas.value.slice(start, end);
+});
+
+// Total de páginas
+const totalPages = computed(() => {
+  return Math.max(1, Math.ceil(encomendas.value.length / rowsPerPage.value));
+});
+
+// Navegação entre páginas
+const nextPage = () => {
+  if (page.value < totalPages.value) {
+    page.value += 1;
+  }
+};
+
+const previousPage = () => {
+  if (page.value > 1) {
+    page.value -= 1;
+  }
+};
+
+// Deletar item
 const deletarItem = (item) => {
   $q.dialog({
     title: 'Deletar',
@@ -141,8 +198,16 @@ const deletarItem = (item) => {
     cancel: true,
     persistent: true,
   }).onOk(() => {
-    // Redireciona para a página de deleção passando o id e o tipo da encomenda
     router.push(`/deletar-encomenda/${item.tipo}/${item.id}`);
   });
 };
 </script>
+
+<style scoped lang="scss">
+.custom-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+</style>

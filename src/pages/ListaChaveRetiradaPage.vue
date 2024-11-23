@@ -78,7 +78,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 const chavesRetiradas = ref([]);
 const currentPage = ref(1);
-const itemsPerPage = ref(3);
+const itemsPerPage = ref(13);
 const selectedChave = ref(null);
 let message = ref('');
 const search = ref(''); // Adiciona uma ref para a pesquisa

@@ -95,8 +95,8 @@ onMounted(() => {
   // Atualiza inicialmente as quantidades
   atualizarQuantidades();
 
-  // Configura o intervalo de atualização a cada 5 segundos
-  const intervaloAtualizacao = setInterval(atualizarQuantidades, 5000);
+  // Configura o intervalo de atualização a cada 2 segundos
+  const intervaloAtualizacao = setInterval(atualizarQuantidades, 2000);
 
   // Limpa o intervalo ao desmontar o componente
   onUnmounted(() => {

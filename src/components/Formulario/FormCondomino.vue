@@ -44,7 +44,7 @@
           </q-input>
 
           <div class="row justify-between">
-            <q-input
+            <!-- <q-input
               class="col-md-6 col-sm-6 col-xs-12"
               required
               name="CPF/RG"
@@ -59,7 +59,7 @@
               <template v-slot:prepend>
                 <q-icon name="person" />
               </template>
-            </q-input>
+            </q-input> -->
 
             <q-input
               required
@@ -81,7 +81,7 @@
               </template>
             </q-input>
           </div>
-
+          <!--
           <q-input
             class="col-md-6 col-sm-6 col-xs-12"
             required
@@ -98,7 +98,7 @@
               <q-icon name="person" />
             </template>
           </q-input>
-
+ -->
           <q-input
             required
             name="especialidade"
@@ -114,7 +114,7 @@
             </template>
           </q-input>
 
-          <q-select
+          <!--   <q-select
             required
             name="interfone"
             outlined
@@ -123,13 +123,13 @@
             v-model="form.interfone"
             color="indigo-13"
             label="Interfone"
-            :options="['sim', 'não', '2/T']"
+            :options="['sim', 'não', '2/T', 'A/S']"
             :rules="[(val:string) => (val && val.length > 0) || 'Selecione uma opção']"
           >
             <template v-slot:prepend>
               <q-icon name="phone_in_talk" />
             </template>
-          </q-select>
+          </q-select> -->
 
           <div class="row q-gutter-md btn-container">
             <q-btn
@@ -196,11 +196,11 @@ const hideLoading = () => {
 const form = ref({
   conjunto: '',
   nome: '',
-  cpfrg: '',
+  // cpfrg: '',
   telefone: '',
-  interfone: '',
+  //interfone: '',
   especialidade: '',
-  proprietario: '',
+  //proprietario: '',
 });
 
 const voltar = () => {
@@ -218,11 +218,11 @@ const cadastrar = async () => {
   const dados = {
     conjunto: form.value.conjunto,
     nome: form.value.nome,
-    cpfrg: form.value.cpfrg,
+    // cpfrg: form.value.cpfrg,
     telefone: form.value.telefone,
-    interfone: form.value.interfone,
+    //interfone: form.value.interfone,
     especialidade: form.value.especialidade,
-    proprietario: form.value.proprietario,
+    //proprietario: form.value.proprietario,
   };
 
   try {

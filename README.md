@@ -33,4 +33,28 @@ Para usar o sistema, basta acessar a interface web. É possível filtrar as enco
 
 ## Contato
 
-Se você tiver alguma dúvida ou sugestão, sinta-se à vontade para entrar em contato com a equipe de desenvolvimento por e-mail em renan.almeida.dev@hotmail.com e brunoluizperez@gmail.com
+Se você tiver alguma dúvida ou sugestão, sinta-se à vontade para entrar em contato com a equipe de desenvolvimento por e-mail em brunoluizperez@gmail.com
+
+## 📋 Sumário
+- [🚀 Começando](#-começando)
+- [📂 Estrutura do Projeto](#-estrutura-do-projeto)
+- [📜 Convenções de Commits com Emojis](#-convenções-de-commits-com-emojis)
+---
+## 📜 Convenções de Commits com Emojis
+Para manter um histórico de commits claro e organizado, utilizamos uma abordagem baseada em emojis para identificar o tipo de mudança no código. Essa prática facilita a leitura do histórico de commits, tornando o desenvolvimento mais colaborativo e intuitivo. Veja abaixo as principais convenções utilizadas no projeto:
+
+💡 :bulb: – Adiciona uma nova funcionalidade
+🐛 :bug: – Correção de bugs
+♻️ :recycle: – Refatoração de código
+📝 :memo: – Atualização da documentação
+🎨 :art: – Melhorias de layout, estilos e estrutura de código
+🚀 :rocket: – Melhorias de performance
+✅ :white_check_mark: – Testes e validação de funcionalidades
+🔥 :fire: – Remoção de arquivos ou código
+
+
+## Exemplo de commit
+```bash
+git commit -m ":bug: Corrigido problema de responsividade na página de login"
+```
+

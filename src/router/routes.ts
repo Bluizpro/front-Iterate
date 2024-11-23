@@ -6,7 +6,7 @@ const routes = [
       {
         path: '',
         name: 'home',
-        component: () => import('pages/AnotacoesPage.vue'),
+        component: () => import('pages/PainelPage.vue'),
       },
       {
         path: 'cadastro',
@@ -90,6 +90,11 @@ const routes = [
         component: () => import('pages/CravicularioPage.vue'),
       },
       {
+        path: 'Painel',
+        name: 'painelEncomenda',
+        component: () => import('pages/PainelPage.vue'),
+      },
+      {
         path: '/deletar-encomenda/:tipo/:id',
         component: () => import('pages/DeletarEncomenda.vue'),
       },
@@ -118,6 +123,24 @@ const routes = [
         path: '/locatario',
         name: 'LocatarioForm',
         component: () => import('src/components/Formulario/FormLocatario.vue'),
+      },
+      {
+        path: 'formulario-Baixa-Externo/:id', // Adicionando :id à rota
+        name: 'FormularioExternoBaixa',
+        component: () =>
+          import('src/components/Formulario/FormExternoBaixa.vue'),
+      },
+      {
+        path: 'formulario-Baixa-interno/:id', // Adicionando :id à rota
+        name: 'FormularioInternoBaixa',
+        component: () =>
+          import('src/components/Formulario/FormInternoBaixar.vue'),
+      },
+      {
+        path: 'formulario-Baixa-correio/:id', // Adicionando :id à rota
+        name: 'FormularioCorreioBaixa',
+        component: () =>
+          import('src/components/Formulario/FormSedexBaixar.vue'),
       },
     ],
   },

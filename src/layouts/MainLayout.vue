@@ -38,6 +38,8 @@
 
     <q-page-container>
       <router-view />
+      <!-- Spinner -->
+      <SpinnerComponente v-if="isLoading" />
     </q-page-container>
   </q-layout>
 </template>
@@ -51,11 +53,18 @@ import AvatarUser from 'src/components/AvatarUser.vue';
 import MenuTree from 'src/components/MenuTree.vue';
 import { onBeforeUnmount } from 'vue';
 import { useQuasar } from 'quasar';
+import SpinnerComponente from 'src/components/SpinnerComponente.vue'; // Importe o componente
 
 const $q = useQuasar();
 const router = useRouter();
 
 const linksList = ref([
+  {
+    title: 'Painel',
+    icon: 'dashboard',
+    link: 'painelEncomenda',
+  },
+
   {
     title: 'Anotacões',
     icon: 'note_add',
@@ -115,6 +124,7 @@ const linksList = ref([
 
 const essentialLinks = linksList;
 const leftDrawerOpen = ref(false);
+const isLoading = ref(false); // Controle de estado para o spinner
 
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -125,26 +135,27 @@ let timer: NodeJS.Timeout | null = null;
 onBeforeUnmount(() => {
   if (timer !== null) {
     clearTimeout(timer);
-    $q.loading.hide();
   }
 });
 
 const showLoading = () => {
-  $q.loading.show();
+  isLoading.value = true; // Mostra o spinner
 };
+
 const hideLoading = () => {
+  isLoading.value = false; // Esconde o spinner
   $q.loading.hide();
 };
 
 const logout = () => {
   router.push({ path: '/' });
 };
+
 const handleLinkClick = async (link: { link: string }) => {
   if (link.link === 'logout') {
     showLoading();
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000)); // Simula o tempo de logout
     hideLoading();
-
     logout();
   } else {
     console.log('erro');

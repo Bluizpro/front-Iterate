@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <h1 style="font-size: 1.5em; text-align: center">
-      Cadastro de Colaboradores
+      Cadastro de Locatarios
     </h1>
     <div class="border">
       <div class="row items-center justify-evenly">
@@ -43,7 +43,7 @@
           </q-input>
 
           <div class="row justify-between">
-            <q-input
+         <!--    <q-input
               class="col-md-6 col-sm-6 col-xs-12"
               required
               name="CPF/RG"
@@ -58,7 +58,7 @@
               <template v-slot:prepend>
                 <q-icon name="person" />
               </template>
-            </q-input>
+            </q-input> -->
 
             <q-input
               required
@@ -80,7 +80,7 @@
             </q-input>
           </div>
 
-          <q-input
+    <!--       <q-input
             class="col-md-6 col-sm-6 col-xs-12"
             required
             name="proprietario"
@@ -95,7 +95,7 @@
             <template v-slot:prepend>
               <q-icon name="person" />
             </template>
-          </q-input>
+          </q-input> -->
 
           <q-input
             required
@@ -121,7 +121,7 @@
             v-model="form.interfone"
             color="indigo-13"
             label="Interfone"
-            :options="['sim', 'não', '2/T']"
+            :options="['sim', 'não', '2/T','A/S']"
             :rules="[(val:string) => (val && val.length > 0) || 'Selecione uma opção']"
           >
             <template v-slot:prepend>
@@ -183,11 +183,11 @@ const hideLoading = () => {
 const form = ref({
   conjunto: '',
   nome: '',
-  cpfrg: '',
+//  cpfrg: '',
   telefone: '',
   interfone: '',
   especialidade: '',
-  proprietario: '',
+ // proprietario: '',
 });
 
 // Referência para o formulário
@@ -199,11 +199,11 @@ const resetForm = () => {
     form.value = {
       conjunto: '',
       nome: '',
-      cpfrg: '',
+     // cpfrg: '',
       telefone: '',
       interfone: '',
       especialidade: '',
-      proprietario: '',
+     // proprietario: '',
     };
     // Se o formRef for um formulário Quasar, tentar limpar a validação
     formRef.value.$refs.form.resetValidation();
@@ -220,11 +220,11 @@ const cadastrar = async () => {
   const dados = {
     conjunto: form.value.conjunto,
     nome: form.value.nome,
-    cpfrg: form.value.cpfrg,
+   // cpfrg: form.value.cpfrg,
     telefone: form.value.telefone,
     interfone: form.value.interfone,
     especialidade: form.value.especialidade,
-    proprietario: form.value.proprietario,
+   // proprietario: form.value.proprietario,
   };
 
   try {

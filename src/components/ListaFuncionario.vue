@@ -1,40 +1,39 @@
 <template>
-  <q-page>
-    <div class="q-pa-md">
-      <q-table
-        flat
-        bordered
-        title="Lista de Funcionários"
-        :rows="displayedFuncionarios"
-        :columns="columns"
-        row-key="conjunto"
-        binary-state-sort
-      />
+  <div class="q-pa-md">
+    <q-table
+      flat
+      bordered
+      title="Lista de Funcionários"
+      :rows="displayedFuncionarios"
+      :columns="columns"
+      row-key="conjunto"
+      binary-state-sort
+      :rows-per-page-options="[0]"
+    />
 
-      <!-- Paginação -->
-      <div class="pagination-container">
-        <q-btn
-          icon="chevron_left"
-          @click="prevPage"
-          :disable="currentPage === 1"
-          color="primary"
-          flat
-          round
-          style="margin-right: 8px"
-        />
-        <span>Página {{ currentPage }}</span>
-        <q-btn
-          icon="chevron_right"
-          @click="nextPage"
-          :disable="currentPage * itemsPerPage >= funcionarios.length"
-          color="primary"
-          flat
-          round
-          style="margin-left: 8px"
-        />
-      </div>
+    <!-- Paginação personalizada -->
+    <div class="pagination-container">
+      <q-btn
+        icon="chevron_left"
+        @click="prevPage"
+        :disable="currentPage === 1"
+        color="primary"
+        flat
+        round
+        style="margin-right: 8px"
+      />
+      <span>Página {{ currentPage }}</span>
+      <q-btn
+        icon="chevron_right"
+        @click="nextPage"
+        :disable="currentPage * itemsPerPage >= funcionarios.length"
+        color="primary"
+        flat
+        round
+        style="margin-left: 8px"
+      />
     </div>
-  </q-page>
+  </div>
 </template>
 
 <script setup>
@@ -42,7 +41,7 @@ import { ref, onMounted, computed } from 'vue';
 import { getFuncionario } from '../services/funcionarioApi';
 
 const funcionarios = ref([]); // Armazena a lista de funcionários
-const itemsPerPage = 10; // Número de funcionários por página
+const itemsPerPage = 100; // Número de funcionários por página
 const currentPage = ref(1); // Página atual
 
 const columns = [
@@ -50,7 +49,7 @@ const columns = [
     name: 'dataHora',
     label: 'Data de Cadastro',
     align: 'center',
-    field: 'dataHora',
+    field: (row) => formatarData(row.dataHora),
     sortable: true,
   },
   {
@@ -107,7 +106,7 @@ const prevPage = () => {
   }
 };
 
-/* function formatarData(dataString) {
+function formatarData(dataString) {
   const data = new Date(dataString);
   const dia = data.getDate().toString().padStart(2, '0');
   const mes = (data.getMonth() + 1).toString().padStart(2, '0');
@@ -117,7 +116,7 @@ const prevPage = () => {
   const segundos = data.getSeconds().toString().padStart(2, '0');
 
   return `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
-} */
+}
 </script>
 
 <style scoped>

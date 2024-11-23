@@ -36,7 +36,7 @@
         <div v-else>{{ noEncomendasMessage }}</div>
 
         <!-- Controles de Paginação -->
-        <div class="pagination-controls">
+        <!--         <div class="pagination-controls">
           <q-btn
             icon="chevron_left"
             @click="prevPage"
@@ -56,7 +56,7 @@
             round
             style="margin-left: 8px"
           />
-        </div>
+        </div> -->
       </div>
     </div>
   </q-page>
@@ -116,7 +116,8 @@ const filteredEncomendas = computed(() => {
   return encomendas.value.filter(
     (encomenda) =>
       String(encomenda.conjunto).toLowerCase().includes(searchValue) ||
-      String(encomenda.nome).toLowerCase().includes(searchValue)
+      String(encomenda.nome).toLowerCase().includes(searchValue) ||
+      String(encomenda.tipo).toLowerCase().includes(searchValue)
   );
 });
 

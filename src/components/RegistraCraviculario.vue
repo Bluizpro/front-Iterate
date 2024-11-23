@@ -75,7 +75,7 @@ const keys = Array.from({ length: 128 }, (_, i) => i + 11).filter(
   (key) => ![0, 9].includes(key % 10)
 );
 const currentPage = ref(1);
-const keysPerPage = 16;
+const keysPerPage = 8;
 const search = ref('');
 let selectedKeys = ref({});
 let message = ref('');
