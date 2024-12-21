@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'https://gestor-encomenda-back.onrender.com/api/CorrespondenciaExterna', // Verifique se este URL está correto
+  baseURL: 'http://localhost:5001/api/CorrespondenciaExterna', // Verifique se este URL está correto
   headers: {
     'Content-Type': 'application/json',
   },

@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL:
-    'https://gestor-encomenda-back.onrender.com/api/CorrespondenciaSedex',
+  baseURL: 'http://localhost:5001/api/CorrespondenciaSedex',
   headers: {
     'Content-Type': 'application/json',
   },

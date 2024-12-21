@@ -40,7 +40,7 @@
           </template>
         </q-input>
 
-      <!--   <q-input
+        <!--   <q-input
           required
           name="recebedor"
           outlined
@@ -135,7 +135,7 @@ const encomenda = ref({
   hora: '',
   conjunto: '',
   nome: '',
- // recebedor: '',
+  // recebedor: '',
   conteudo: '',
   local: '',
 });
@@ -236,52 +236,21 @@ const cadastrar = async () => {
     local: encomenda.value.local,
   };
   try {
-    // Primeiro, buscar o telefone para verificar se a encomenda pode ser cadastrada
-    const telefone = await buscarTelefonePorNome(
-      novaEncomenda.conjunto,
-      novaEncomenda.nome
-    );
-    if (telefone) {
-      const response = await createCorrespondenciaExterno(novaEncomenda);
+    // Cadastro direto da encomenda sem verificar o telefone
+    const response = await createCorrespondenciaExterno(novaEncomenda);
 
-      if (response) {
-        // A função de envio de WhatsApp foi comentada
-        /*
-        const mensagem = `Olá ${novaEncomenda.nome}, sua encomenda foi entregue à portaria.`;
-        try {
-          await enviarMensagemWhatsApp(telefone, mensagem);
-          console.log(
-            `Mensagem enviada com sucesso para: ${novaEncomenda.nome}`
-          );
-        } catch (err) {
-          console.error('Erro ao enviar mensagem via WhatsApp:', err);
-          $q.notify({
-            type: 'warning',
-            message:
-              'Encomenda cadastrada, mas ocorreu um erro ao enviar a mensagem.',
-          });
-        }
-        */
-
-        store.resetFormularioAtual();
-        $q.notify({
-          type: 'positive',
-          message: 'Encomenda cadastrada com sucesso',
-        });
-        $router.push('/usuario/Cards-Encomendas');
-      } else {
-        $q.notify({
-          type: 'negative',
-          message: 'Falha ao cadastrar encomenda',
-        });
-      }
-    } else {
-      // Se o telefone não for encontrado, não cria a encomenda
-      console.warn('Telefone não encontrado para:', novaEncomenda.nome);
+    if (response) {
+      // Envio de WhatsApp e verificação de telefone foram removidos
+      store.resetFormularioAtual();
       $q.notify({
-        type: 'warning',
-        message:
-          'Encomenda não cadastrada. O telefone do destinatário não foi encontrado.',
+        type: 'positive',
+        message: 'Encomenda cadastrada com sucesso',
+      });
+      $router.push('/usuario/Cards-Encomendas');
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: 'Falha ao cadastrar encomenda',
       });
     }
   } catch (error) {
@@ -294,5 +263,4 @@ const cadastrar = async () => {
     hideLoading();
   }
 };
-
 </script>

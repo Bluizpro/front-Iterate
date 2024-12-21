@@ -79,7 +79,7 @@
     </div>
   </q-page>
 </template>
-
+*
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router'; // Importe o useRoute

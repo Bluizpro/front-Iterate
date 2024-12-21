@@ -1,8 +1,6 @@
 <template>
   <q-page>
-    <h1 style="font-size: 1.5em; text-align: center">
-      Cadastro de Locatarios
-    </h1>
+    <h1 style="font-size: 1.5em; text-align: center">Cadastro de Locatarios</h1>
     <div class="border">
       <div class="row items-center justify-evenly">
         <q-form
@@ -43,7 +41,7 @@
           </q-input>
 
           <div class="row justify-between">
-         <!--    <q-input
+            <!--    <q-input
               class="col-md-6 col-sm-6 col-xs-12"
               required
               name="CPF/RG"
@@ -80,7 +78,7 @@
             </q-input>
           </div>
 
-    <!--       <q-input
+          <!--       <q-input
             class="col-md-6 col-sm-6 col-xs-12"
             required
             name="proprietario"
@@ -119,10 +117,9 @@
             clearable
             clear-icon="close"
             v-model="form.interfone"
-            color="indigo-13"
             label="Interfone"
-            :options="['sim', 'não', '2/T','A/S']"
-            :rules="[(val:string) => (val && val.length > 0) || 'Selecione uma opção']"
+            :options="inforOption"
+            :class="colorClass(form.interfone)"
           >
             <template v-slot:prepend>
               <q-icon name="phone_in_talk" />
@@ -183,11 +180,11 @@ const hideLoading = () => {
 const form = ref({
   conjunto: '',
   nome: '',
-//  cpfrg: '',
+  //  cpfrg: '',
   telefone: '',
   interfone: '',
   especialidade: '',
- // proprietario: '',
+  // proprietario: '',
 });
 
 // Referência para o formulário
@@ -199,11 +196,11 @@ const resetForm = () => {
     form.value = {
       conjunto: '',
       nome: '',
-     // cpfrg: '',
+      // cpfrg: '',
       telefone: '',
       interfone: '',
       especialidade: '',
-     // proprietario: '',
+      // proprietario: '',
     };
     // Se o formRef for um formulário Quasar, tentar limpar a validação
     formRef.value.$refs.form.resetValidation();
@@ -220,11 +217,11 @@ const cadastrar = async () => {
   const dados = {
     conjunto: form.value.conjunto,
     nome: form.value.nome,
-   // cpfrg: form.value.cpfrg,
+    // cpfrg: form.value.cpfrg,
     telefone: form.value.telefone,
     interfone: form.value.interfone,
     especialidade: form.value.especialidade,
-   // proprietario: form.value.proprietario,
+    // proprietario: form.value.proprietario,
   };
 
   try {
@@ -273,6 +270,19 @@ const cadastrar = async () => {
     hideLoading();
   }
 };
+const inforOption = ['NÃO', '2/T', 'A/S','SIM'];
+const colorClass = (interfone: unknown) => {
+  switch (interfone) {
+    case 'NAO':
+      return 'background';
+    case '2/T':
+      return 'yellow-background';
+    case 'A/S':
+      return 'red-background';
+      case 'SIM':
+      return 'green-background';
+  }
+};
 </script>
 
 <style scoped lang="scss">
@@ -291,5 +301,18 @@ const cadastrar = async () => {
   margin-right: 5rem;
   padding: 5rem;
   background-color: rgb(235 208 208 / 20%);
+}
+.yellow-background {
+  background-color: rgb(250, 250, 144);
+}
+.red-background {
+  background-color: #f07171;
+}
+.green-background {
+  background-color: #0faa0a;
+}
+
+.background {
+  background-color: rgb(255, 255, 255);
 }
 </style>

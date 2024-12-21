@@ -1,5 +1,7 @@
 <template>
-  <h1 style="font-size: 1.5em; text-align: center">Lista Correspondencia</h1>
+  <h1 style="font-size: 1.5em; text-align: center">
+    Lista Correspondencia Externos
+  </h1>
   <q-page>
     <lista-correspondencia />
   </q-page>

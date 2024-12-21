@@ -26,6 +26,7 @@
         row-key="conjunto"
         binary-state-sort
         :rows-per-page-options="[0]"
+        class="custom-table"
       >
         <template v-slot:body="props">
           <q-tr :props="props">
@@ -42,53 +43,20 @@
               />
             </q-td>
             <q-td key="conjunto" :props="props">{{ props.row.conjunto }}</q-td>
-            <q-td key="especialidade" :props="props">
-              {{ props.row.especialidade }}
-              <q-popup-edit
-                v-model="props.row.especialidade"
-                title="Alterar?"
-                buttons
-                v-slot="scope"
-                @save="updateCondomino(props.row)"
-              >
-                <q-input type="text" v-model="scope.value" dense autofocus />
-              </q-popup-edit>
-            </q-td>
-            <q-td key="interfone" :props="props">
+
+            <q-td
+              key="interfone"
+              :props="props"
+              :class="['interfone', getInterfoneStyle(props.row.interfone)]"
+            >
               {{ props.row.interfone }}
-              <q-popup-edit
-                v-model="props.row.interfone"
-                title="Alterar?"
-                buttons
-                v-slot="scope"
-                @save="updateCondomino(props.row)"
-              >
-                <q-input type="text" v-model="scope.value" dense autofocus />
-              </q-popup-edit>
             </q-td>
+
             <q-td key="proprietario" :props="props">
               {{ props.row.proprietario }}
-              <q-popup-edit
-                v-model="props.row.proprietario"
-                title="Alterar?"
-                buttons
-                v-slot="scope"
-                @save="updateCondomino(props.row)"
-              >
-                <q-input type="text" v-model="scope.value" dense autofocus />
-              </q-popup-edit>
             </q-td>
             <q-td key="telefone" :props="props">
               {{ props.row.telefone }}
-              <q-popup-edit
-                v-model="props.row.telefone"
-                title="Alterar?"
-                buttons
-                v-slot="scope"
-                @save="updateCondomino(props.row)"
-              >
-                <q-input type="phone" v-model="scope.value" dense autofocus />
-              </q-popup-edit>
             </q-td>
           </q-tr>
         </template>
@@ -105,10 +73,11 @@
           <q-table
             flat
             bordered
-            :rows="locatarios[conjunto]"
+            :rows="locatarios[conjunto] || []"
             :columns="locatarioColumns"
             row-key="id"
             binary-state-sort
+            class="custom-table"
           >
             <template v-slot:body="props">
               <q-tr :props="props">
@@ -116,17 +85,24 @@
                 <q-td key="especialidade" :props="props">{{
                   props.row.especialidade
                 }}</q-td>
-                <q-td key="interfone" :props="props">{{
-                  props.row.interfone
-                }}</q-td>
-                <q-td key="telefone" :props="props">{{
-                  props.row.telefone
-                }}</q-td>
+                <q-td
+                  key="interfone"
+                  :props="props"
+                  :class="['interfone', getInterfoneStyle(props.row.interfone)]"
+                >
+                  {{ props.row.interfone }}
+                </q-td>
+
+                <q-td key="telefone" :props="props" class="telefone-table">
+                  {{ props.row.telefone }}
+                </q-td>
               </q-tr>
             </template>
           </q-table>
         </div>
       </div>
+
+      <!-- Paginação -->
       <q-pagination
         v-model="page"
         :max="totalPages"
@@ -149,7 +125,7 @@ const locatarios = ref({});
 const search = ref(''); // Campo de pesquisa
 
 const page = ref(1); // Página atual
-const rowsPerPage = 8; // Limitar a 8 itens por página
+const rowsPerPage = 130; // Limitar a 8 itens por página
 
 const columns = [
   {
@@ -166,12 +142,12 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'proprietario',
-    label: 'Proprietário',
+    name: 'interfone',
+    label: 'Interfone',
     align: 'left',
-    field: 'proprietario',
-    sortable: true,
+    field: 'interfone',
   },
+
   {
     name: 'telefone',
     label: 'Telefone',
@@ -204,12 +180,15 @@ const locatarioColumns = [
     label: 'Telefone',
     align: 'left',
     field: 'telefone',
+    align: 'right',
   },
 ];
 
 // Computed property para filtrar as linhas da tabela com base na pesquisa
 const filteredRows = computed(() => {
   const lowerSearch = search.value.toLowerCase();
+
+  // Filtrar os dados
   const filtered = store.condominos.filter((row) => {
     const matchesCondomino =
       row.conjunto.toString().includes(lowerSearch) ||
@@ -222,10 +201,13 @@ const filteredRows = computed(() => {
     return matchesCondomino || matchesLocatario;
   });
 
-  // Paginação: pegar as linhas da página atual
+  // Ordenar por 'conjunto'
+  const sorted = filtered.sort((a, b) => a.conjunto - b.conjunto);
+
+  // Paginação
   const start = (page.value - 1) * rowsPerPage;
   const end = start + rowsPerPage;
-  return filtered.slice(start, end);
+  return sorted.slice(start, end);
 });
 
 // Computed para o total de páginas
@@ -241,30 +223,25 @@ const totalPages = computed(() => {
 });
 
 function toggleExpand(conjunto) {
+  if (!conjunto) return; // Evitar tentar expandir algo sem conjunto válido
+
   if (expandedConjuntos.value.includes(conjunto)) {
     expandedConjuntos.value = expandedConjuntos.value.filter(
       (c) => c !== conjunto
     );
   } else {
     expandedConjuntos.value.push(conjunto);
-    getLocatariosByConjunto(conjunto)
-      .then((data) => {
-        locatarios.value[conjunto] = data;
-      })
-      .catch((error) => {
-        console.error('Erro ao carregar locatários:', error);
-      });
-  }
-}
-
-function updateCondomino(condomino) {
-  store.atualizarCondomino(condomino).then((success) => {
-    if (success) {
-      console.log('Condomínio atualizado com sucesso.');
-    } else {
-      console.error('Falha ao atualizar condomínio.');
+    // Verificar se os locatários já foram carregados para esse conjunto
+    if (!locatarios.value[conjunto]) {
+      getLocatariosByConjunto(conjunto)
+        .then((data) => {
+          locatarios.value[conjunto] = data;
+        })
+        .catch((error) => {
+          console.error('Erro ao carregar locatários:', error);
+        });
     }
-  });
+  }
 }
 
 // Inicializa a lista de condomínios após o componente ser montado
@@ -276,6 +253,21 @@ function getExpandIcon(conjunto) {
   return expandedConjuntos.value.includes(conjunto)
     ? 'expand_less'
     : 'expand_more';
+}
+
+function getInterfoneStyle(interfone) {
+  // Verifique se o valor de interfone é uma string válida, caso contrário, defina como uma string vazia
+  const interfoneNormalized =
+    interfone && interfone.trim ? interfone.trim().toLowerCase() : '';
+
+  if (interfoneNormalized === '2/t') {
+    return 'yellow-interfone'; // Cor amarela
+  } else if (interfoneNormalized === 'a/s') {
+    return 'red-interfone'; // Cor vermelha
+  } else if (interfoneNormalized === 'sim') {
+    return 'green-interfone'; // Cor verde
+  }
+  return 'default-interfone'; // Cor padrão (branca)
 }
 </script>
 
@@ -308,11 +300,26 @@ function getExpandIcon(conjunto) {
   }
 }
 
-.q-table {
+.custom-table {
+  margin-top: 1rem;
   border-radius: 8px;
   overflow: hidden;
-  margin-top: 1rem;
+  max-width: 100%; // Garante que a tabela não ultrapasse a largura da tela
+
+  .q-tr {
+    height: 40px; /* Diminuir a altura das linhas */
+  }
+
+  .q-td {
+    font-size: 0.85rem; /* Ajustar o tamanho da fonte */
+    padding: 0.5rem; /* Reduzir o preenchimento das células */
+  }
+
+  .q-td.interfone {
+    width: 5rem !important; /* Ajuste a largura da coluna "Interfone" */
+  }
 }
+
 .q-btn {
   background-color: #316ae4; // Cor de fundo dos botões
   color: white; // Cor do texto dos botões
@@ -339,17 +346,54 @@ function getExpandIcon(conjunto) {
 }
 
 .locatario-table {
-  margin-top: 2rem;
+  margin-top: 1rem;
   padding: 1rem;
   border: 1px solid #ddd;
   border-radius: 8px;
+  max-width: 100%; // Evita que o card ultrapasse a largura da tela
+}
+.q-th.telefone-td {
+  text-align: right; /* Alinha o cabeçalho da coluna telefone à direita */
 }
 
 .locatario-table h3 {
   margin-bottom: 1rem;
+  font-size: 1rem; /* Ajusta o tamanho do título */
 }
+
 .q-pagination {
   display: flex;
   justify-content: center;
+  margin-top: 1rem;
+}
+
+.yellow-interfone {
+  background-color: #ffeb3b; /* Cor amarela */
+  color: black; /* Cor do texto para contraste */
+  font-size: 0.75rem;
+  padding: 1rem !important;
+}
+
+.red-interfone {
+  background-color: #f44336; /* Cor vermelha */
+  color: white; /* Cor do texto para contraste */
+  font-size: 0.75rem; /* Ajuste do tamanho da fonte */
+  padding: 1rem !important;
+}
+.green-interfone {
+  background-color: #08aa08; /* Cor vermelha */
+  color: white; /* Cor do texto para contraste */
+  font-size: 0.75rem; /* Ajuste do tamanho da fonte */
+  padding: 1rem !important;
+}
+
+.default-interfone {
+  background-color: white; /* Cor branca */
+  color: black; /* Cor do texto para contraste */
+  font-size: 0.75rem; /* Ajuste do tamanho da fonte */
+  padding: 1rem !important;
+}
+.telefone-table {
+  text-align: right;
 }
 </style>

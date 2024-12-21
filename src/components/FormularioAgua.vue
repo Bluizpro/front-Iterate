@@ -549,204 +549,205 @@ async function calcular() {
 }
 </style>
  -->
-<script setup>
-import { ref, onMounted, watch } from 'vue';
-import { useQuasar } from 'quasar';
-import { enviarMensagemWhatsAppAgua } from '../services/whatsappAPI';
-import { createLeituraAgua } from '../services/leituraAguaApi';
-import dayjs from 'dayjs';
+ <script setup>
+ import { ref, onMounted, watch } from 'vue';
+ import { useQuasar } from 'quasar';
+ import { enviarMensagemWhatsAppAgua } from '../services/whatsappAPI';
+ import { createLeituraAgua } from '../services/leituraAguaApi';
+ import dayjs from 'dayjs';
 
-const $q = useQuasar();
+ const $q = useQuasar();
 
-const usuarioLogado = localStorage.getItem('usuarioLogado') || '';
+ const usuarioLogado = localStorage.getItem('usuarioLogado') || '';
 
-// Função para definir a data de amanhã
-let tomorrow = new Date();
-tomorrow.setDate(tomorrow.getDate() + 1);
+ // Função para definir a data de amanhã
+ let tomorrow = new Date();
+ tomorrow.setDate(tomorrow.getDate() + 1);
 
-let leituraAgua = ref({
-  dataInicial: new Date().toISOString().split('T')[0],
-  hora: new Date().toLocaleTimeString('pt-BR', {
-    hour12: false,
-    timeStyle: 'short',
-  }),
-  leituraInicial: '',
-  vistoInicial: usuarioLogado,
-  dataParcial: new Date().toISOString().split('T')[0],
-  Parcial: '11:00',
-  leituraParcial: '',
-  dataMeio: new Date().toISOString().split('T')[0],
-  horaParcial2: '23:00',
-  leituraParcial2: '',
-  dataFinal: tomorrow.toISOString().split('T')[0],
-  horaFinal: '06:00',
-  leituraFinal: '',
-  vistoFinal: usuarioLogado,
-  consumo: '',
-});
+ let leituraAgua = ref({
+   dataInicial: new Date().toISOString().split('T')[0],
+   hora: new Date().toLocaleTimeString('pt-BR', {
+     hour12: false,
+     timeStyle: 'short',
+   }),
+   leituraInicial: '',
+   vistoInicial: usuarioLogado,
+   dataParcial: new Date().toISOString().split('T')[0],
+   Parcial: '11:00',
+   leituraParcial: '',
+   dataMeio: new Date().toISOString().split('T')[0],
+   horaParcial2: '23:00',
+   leituraParcial2: '',
+   dataFinal: tomorrow.toISOString().split('T')[0],
+   horaFinal: '06:00',
+   leituraFinal: '',
+   vistoFinal: usuarioLogado,
+   consumo: '',
+ });
 
-// Carregar leituras salvas do localStorage ao montar o componente
-onMounted(() => {
-  const savedLeituras = JSON.parse(localStorage.getItem('leituras'));
-  if (savedLeituras) {
-    leituraAgua.value = { ...leituraAgua.value, ...savedLeituras };
-  }
+ // Carregar leituras salvas do localStorage ao montar o componente
+ onMounted(() => {
+   const savedLeituras = JSON.parse(localStorage.getItem('leituras'));
+   if (savedLeituras) {
+     leituraAgua.value = { ...leituraAgua.value, ...savedLeituras };
+   }
 
-  // Se a primeira leitura já foi salva, manter o `vistoInicial` original
-  // e atualizar apenas o `vistoFinal` com o usuário logado, se o usuário tiver mudado
-  if (leituraAgua.value.leituraInicial) {
-    leituraAgua.value.vistoFinal = usuarioLogado;
-  } else {
-    leituraAgua.value.vistoInicial = usuarioLogado;
-  }
-});
+   if (leituraAgua.value.leituraInicial) {
+     leituraAgua.value.vistoFinal = usuarioLogado;
+   } else {
+     leituraAgua.value.vistoInicial = usuarioLogado;
+   }
+ });
 
-// Observar mudanças em cada leitura e salvar no localStorage
-watch(
-  () => leituraAgua.value,
-  (newLeituraAgua) => {
-    // Salva apenas se houver leituras preenchidas
-    if (
-      newLeituraAgua.leituraInicial ||
-      newLeituraAgua.leituraParcial ||
-      newLeituraAgua.leituraFinal
-    ) {
-      localStorage.setItem('leituras', JSON.stringify(newLeituraAgua));
-    }
-  },
-  { deep: true }
-);
+ // Observar mudanças em cada leitura e salvar no localStorage
+ watch(
+   () => leituraAgua.value,
+   (newLeituraAgua) => {
+     if (
+       newLeituraAgua.leituraInicial ||
+       newLeituraAgua.leituraParcial ||
+       newLeituraAgua.leituraFinal
+     ) {
+       localStorage.setItem('leituras', JSON.stringify(newLeituraAgua));
+     }
+   },
+   { deep: true }
+ );
 
-async function calcular() {
-  console.log('Função calcular chamada');
+ // Observar mudanças específicas nas leituras para verificar consumo
+ watch(
+   () => leituraAgua.value.leituraParcial,
+   (novaLeituraParcial) => {
+     const leituraInicial = parseInt(leituraAgua.value.leituraInicial);
+     const leituraParcial = parseInt(novaLeituraParcial);
 
-  if (
-    !leituraAgua.value.leituraInicial ||
-    !leituraAgua.value.leituraParcial ||
-    !leituraAgua.value.leituraFinal
-  ) {
-    $q.notify({
-      color: 'red-5',
-      textColor: 'white',
-      icon: 'warning',
-      message: 'Por favor, preencha todas as leituras antes de calcular!',
-    });
-    return;
-  }
+     if (leituraInicial && leituraParcial && leituraParcial - leituraInicial > 6000) {
+       $q.notify({
+         color: 'red-5',
+         textColor: 'white',
+         icon: 'warning',
+         message: `O consumo ultrapassou 6000m³ na leitura Parcial! Consumo: *${leituraParcial - leituraInicial}* m³.`
+       });
 
-  let leituraInicial = parseInt(leituraAgua.value.leituraInicial.slice(3));
-  let leituraParcial = parseInt(leituraAgua.value.leituraParcial.slice(3));
-  let leituraParcial2 = parseInt(leituraAgua.value.leituraParcial2.slice(3));
-  let leituraFinal = parseInt(leituraAgua.value.leituraFinal.slice(3));
+       enviarMensagemWhatsAppAgua(
+         `O consumo ultrapassou 6000m³ na leitura Parcial! Consumo: *${leituraParcial - leituraInicial}* m³.`
+       ).catch(error => console.error('Erro ao enviar a mensagem:', error));
+     }
+   }
+ );
 
-  let consumo = leituraParcial - leituraParcial2 - leituraInicial;
-  let consumoFinal = leituraFinal - leituraInicial;
-  consumoFinal = Number(consumoFinal.toFixed(2));
+ watch(
+   () => leituraAgua.value.leituraParcial2,
+   (novaLeituraParcial2) => {
+     const leituraParcial = parseInt(leituraAgua.value.leituraParcial);
+     const leituraParcial2 = parseInt(novaLeituraParcial2);
 
-  // Notificação para consumo acima de 6000m³
-  if (consumoFinal > 6000 && !isNaN(consumo)) {
-    $q.notify({
-      color: 'red-5',
-      textColor: 'white',
-      icon: 'warning',
-      message: `O consumo ultrapassou 6000m³. Consumo atual: ${consumoFinal} m³!`,
-    });
+     if (leituraParcial && leituraParcial2 && leituraParcial2 - leituraParcial > 6000) {
+       $q.notify({
+         color: 'red-5',
+         textColor: 'white',
+         icon: 'warning',
+         message: `O consumo ultrapassou 6000m³ na leitura Parcial 2! Consumo: *${leituraParcial2 - leituraParcial}* m³.`
+       });
 
-    try {
-      await enviarMensagemWhatsAppAgua(
-        `O consumo ultrapassou 6000m³. Consumo atual: ${consumoFinal} m³!`
-      );
-      console.log('Mensagem enviada com sucesso!');
-    } catch (error) {
-      console.error('Erro ao enviar a mensagem:', error);
-    }
-  } else {
-    // Notificação de sucesso quando o cálculo for bem-sucedido
-    $q.notify({
-      color: 'green-5',
-      textColor: 'white',
-      icon: 'check',
-      message: `Cálculo realizado com sucesso! Consumo atual: ${consumoFinal} m³!`,
-    });
-  }
+       enviarMensagemWhatsAppAgua(
+         `O consumo ultrapassou 6000m³ na leitura Parcial 2! Consumo: *${leituraParcial2 - leituraParcial}* m³.`
+       ).catch(error => console.error('Erro ao enviar a mensagem:', error));
+     }
+   }
+ );
 
-  leituraAgua.value.consumo = `${consumoFinal} m³!`;
+ async function calcular() {
+   console.log('Função calcular chamada');
 
-  try {
-    leituraAgua.value.dataInicial = dayjs(leituraAgua.value.dataInicial).format(
-      'DD-MM-YYYY'
-    );
-    leituraAgua.value.dataParcial = dayjs(leituraAgua.value.dataParcial).format(
-      'DD-MM-YYYY'
-    );
-    leituraAgua.value.dataMeio = dayjs(leituraAgua.value.dataMeio).format(
-      'DD-MM-YYYY'
-    );
-    leituraAgua.value.dataFinal = dayjs(leituraAgua.value.dataFinal).format(
-      'DD-MM-YYYY'
-    );
+   if (
+     !leituraAgua.value.leituraInicial ||
+     !leituraAgua.value.leituraParcial ||
+     !leituraAgua.value.leituraFinal
+   ) {
+     $q.notify({
+       color: 'red-5',
+       textColor: 'white',
+       icon: 'warning',
+       message: 'Por favor, preencha todas as leituras antes de calcular!',
+     });
+     return;
+   }
 
-    await createLeituraAgua(leituraAgua.value);
-    console.log('Leitura de água salva com sucesso!');
+   const leituraInicial = parseInt(leituraAgua.value.leituraInicial);
+   const leituraFinal = parseInt(leituraAgua.value.leituraFinal);
+   const consumoFinal = leituraFinal - leituraInicial;
 
-    // Se a leitura inicial já está preenchida, atualizar apenas `vistoFinal`
-    if (leituraAgua.value.leituraInicial) {
-      leituraAgua.value.vistoFinal = usuarioLogado;
-    } else {
-      leituraAgua.value.vistoInicial = usuarioLogado;
-    }
+   leituraAgua.value.consumo = `${consumoFinal} m³!`;
 
-    // Notificação de sucesso após salvar a leitura
-    $q.notify({
-      color: 'green-5',
-      textColor: 'white',
-      icon: 'check',
-      message: 'Leitura de água salva com sucesso!',
-    });
-  } catch (error) {
-    console.error(
-      'Erro ao salvar leitura de água:',
-      error.response ? error.response.data : error.message
-    );
-  }
+   if (consumoFinal > 6000) {
+     $q.notify({
+       color: 'red-5',
+       textColor: 'white',
+       icon: 'warning',
+       message: `O consumo ultrapassou 6000m³ no total! Consumo: *${consumoFinal}* m³.`
+     });
 
-  // Limpar leituras do localStorage após o cálculo
-  console.log(
-    'Antes de limpar o localStorage:',
-    localStorage.getItem('leituras')
-  );
-  localStorage.removeItem('leituras');
-  console.log(
-    'Depois de limpar o localStorage:',
-    localStorage.getItem('leituras')
-  );
+     await enviarMensagemWhatsAppAgua(
+       `O consumo ultrapassou 6000m³ no total! Consumo: *${consumoFinal}* m³.`
+     ).catch(error => console.error('Erro ao enviar a mensagem:', error));
+   } else {
+     $q.notify({
+       color: 'green-5',
+       textColor: 'white',
+       icon: 'check',
+       message: `Cálculo realizado com sucesso! Consumo total: *${consumoFinal}* m³.`
+     });
+   }
 
-  // Aguardar 10 segundos antes de resetar os campos
-  setTimeout(() => {
-    // Resetar todos os valores
-    leituraAgua.value = {
-      dataInicial: new Date().toISOString().split('T')[0],
-      hora: new Date().toLocaleTimeString('pt-BR', {
-        hour12: false,
-        timeStyle: 'short',
-      }),
-      leituraInicial: '',
-      vistoInicial: usuarioLogado,
-      dataParcial: new Date().toISOString().split('T')[0],
-      Parcial: '11:00',
-      leituraParcial: '',
-      dataMeio: new Date().toISOString().split('T')[0],
-      horaParcial2: '23:00',
-      leituraParcial2: '',
-      dataFinal: tomorrow.toISOString().split('T')[0],
-      horaFinal: '06:00',
-      leituraFinal: '',
-      vistoFinal: usuarioLogado,
-      consumo: '',
-    };
-  }, 10000); // 10 segundos de atraso
-}
-</script>
+   try {
+     leituraAgua.value.dataInicial = dayjs(leituraAgua.value.dataInicial).format('DD-MM-YYYY');
+     leituraAgua.value.dataParcial = dayjs(leituraAgua.value.dataParcial).format('DD-MM-YYYY');
+     leituraAgua.value.dataMeio = dayjs(leituraAgua.value.dataMeio).format('DD-MM-YYYY');
+     leituraAgua.value.dataFinal = dayjs(leituraAgua.value.dataFinal).format('DD-MM-YYYY');
+
+     await createLeituraAgua(leituraAgua.value);
+     console.log('Leitura de água salva com sucesso!');
+
+     $q.notify({
+       color: 'green-5',
+       textColor: 'white',
+       icon: 'check',
+       message: 'Leitura de água salva com sucesso!',
+     });
+   } catch (error) {
+     console.error(
+       'Erro ao salvar leitura de água:',
+       error.response ? error.response.data : error.message
+     );
+   }
+
+   localStorage.removeItem('leituras');
+
+   setTimeout(() => {
+     leituraAgua.value = {
+       dataInicial: new Date().toISOString().split('T')[0],
+       hora: new Date().toLocaleTimeString('pt-BR', {
+         hour12: false,
+         timeStyle: 'short',
+       }),
+       leituraInicial: '',
+       vistoInicial: usuarioLogado,
+       dataParcial: new Date().toISOString().split('T')[0],
+       Parcial: '11:00',
+       leituraParcial: '',
+       dataMeio: new Date().toISOString().split('T')[0],
+       horaParcial2: '23:00',
+       leituraParcial2: '',
+       dataFinal: tomorrow.toISOString().split('T')[0],
+       horaFinal: '06:00',
+       leituraFinal: '',
+       vistoFinal: usuarioLogado,
+       consumo: '',
+     };
+   }, 10000);
+ }
+ </script>
 
 <style scoped lang="scss">
 .my-card {

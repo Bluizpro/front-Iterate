@@ -117,10 +117,10 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useStore } from '../../stores/example-store';
-import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
-
+import { useQuasar } from 'quasar';
 import { createCorrespondenciaInterno } from '../../services/encomenInterAPI';
+import { enviarMensagemWhatsApp } from '../../services/whatsappAPI';
 import { getLocatariosByConjunto } from '../../services/locatarioApi';
 import { getCondominos } from '../../services/condonimoApi';
 import { getFuncionario } from '../../services/funcionarioApi';
@@ -129,7 +129,7 @@ import SpinnerComponente from 'src/components/SpinnerComponente.vue'; // Importe
 const store = useStore();
 const $q = useQuasar();
 const $router = useRouter();
-const isLoading = ref(false); // Controle de estado para o spinner
+const isLoading = ref(false);
 
 const encomenda = ref({
   data: '',
@@ -138,10 +138,10 @@ const encomenda = ref({
   nome: '',
   remetente: '',
   conteudo: '',
+  tipo: 'interno',
   empresa: '',
 });
-
-const nomes = ref([]); // Lista de nomes a ser preenchida dinamicamente
+const nomes = ref([]);
 
 onMounted(() => {
   const agora = new Date();
@@ -149,14 +149,10 @@ onMounted(() => {
   encomenda.value.hora = agora.toLocaleTimeString('pt-BR');
 });
 
-// Função para buscar todos os nomes associados ao conjunto
 const buscarNomesPorConjunto = async (conjunto) => {
-  console.log('Buscando nomes para o conjunto:', conjunto);
-
   const conjuntoStr = String(conjunto).trim().toLowerCase();
   let resultados = [];
 
-  // Busca nos condomínios
   try {
     const condominos = await getCondominos();
     resultados = resultados.concat(
@@ -168,7 +164,6 @@ const buscarNomesPorConjunto = async (conjunto) => {
     console.error('Erro ao buscar condomínios:', error);
   }
 
-  // Busca nos funcionários
   try {
     const funcionarios = await getFuncionario();
     resultados = resultados.concat(
@@ -180,7 +175,6 @@ const buscarNomesPorConjunto = async (conjunto) => {
     console.error('Erro ao buscar funcionários:', error);
   }
 
-  // Busca nos locatários
   try {
     const locatarios = await getLocatariosByConjunto(conjuntoStr);
     resultados = resultados.concat(locatarios.map((l) => l.nome));
@@ -188,14 +182,10 @@ const buscarNomesPorConjunto = async (conjunto) => {
     console.error('Erro ao buscar locatários:', error);
   }
 
-  // Remover duplicatas
   const nomesUnicos = Array.from(new Set(resultados));
-
-  console.log('Nomes encontrados:', nomesUnicos);
   return nomesUnicos;
 };
 
-// Observa mudanças no campo conjunto e atualiza a lista de nomes
 watch(
   () => encomenda.value.conjunto,
   async (newConjunto) => {
@@ -214,26 +204,65 @@ onBeforeUnmount(() => {
 });
 
 const showLoading = () => {
-  isLoading.value = true; // Mostra o spinner
+  isLoading.value = true;
 };
 
 const hideLoading = () => {
-  isLoading.value = false; // Esconde o spinner
+  isLoading.value = false;
   $q.loading.hide();
 };
 
 const voltar = () => {
-  $router.push('/usuario/Cards-Encomendas'); // Ajuste conforme sua rota
+  $router.push('/usuario/Cards-Encomendas');
 };
 
-// Função para buscar telefone, caso necessário no futuro
 const buscarTelefonePorNome = async (conjunto, nome) => {
-  let telefone = null;
-  // Aqui pode ser implementada a lógica para buscar o telefone no futuro
-  return telefone; // Retorna o telefone encontrado, se existir
+  const conjuntoStr = String(conjunto).trim().toLowerCase();
+  const nomeStr = nome.trim().toLowerCase();
+
+  try {
+    const condominos = await getCondominos();
+    const condomino = condominos.find(
+      (c) =>
+        String(c.conjunto).trim().toLowerCase() === conjuntoStr &&
+        c.nome.trim().toLowerCase() === nomeStr
+    );
+    if (condomino) {
+      return condomino.telefone;
+    }
+  } catch (error) {
+    console.error('Erro ao buscar condomínios:', error);
+  }
+
+  try {
+    const funcionarios = await getFuncionario();
+    const funcionario = funcionarios.find(
+      (f) =>
+        String(f.conjunto).trim().toLowerCase() === conjuntoStr &&
+        f.nome.trim().toLowerCase() === nomeStr
+    );
+    if (funcionario) {
+      return funcionario.telefone;
+    }
+  } catch (error) {
+    console.error('Erro ao buscar funcionários:', error);
+  }
+
+  try {
+    const locatarios = await getLocatariosByConjunto(conjuntoStr);
+    const locatario = locatarios.find(
+      (l) => l.nome.trim().toLowerCase() === nomeStr
+    );
+    if (locatario) {
+      return locatario.telefone;
+    }
+  } catch (error) {
+    console.error('Erro ao buscar locatários:', error);
+  }
+
+  return null;
 };
 
-// Função para cadastrar a encomenda
 const cadastrar = async () => {
   showLoading();
 
@@ -241,7 +270,7 @@ const cadastrar = async () => {
     data: encomenda.value.data,
     hora: encomenda.value.hora,
     conjunto: encomenda.value.conjunto,
-    nome: encomenda.value.nome, // Nome selecionado no <q-select>
+    nome: encomenda.value.nome,
     remetente: encomenda.value.remetente,
     conteudo: encomenda.value.conteudo,
     tipo: 'interno',
@@ -249,54 +278,57 @@ const cadastrar = async () => {
   };
 
   try {
-    // Buscar o telefone para verificar, mas não impedir o cadastro
     const telefone = await buscarTelefonePorNome(
       novaEncomenda.conjunto,
       novaEncomenda.nome
     );
+    const dataBrasilia = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }).format(new Date());
 
     if (telefone) {
-      // Se o telefone for encontrado, você pode adicionar a lógica para enviar a mensagem
-      // Exemplo de código comentado para envio de mensagem de WhatsApp (no futuro)
-      /*
-      const mensagem = `Olá ${novaEncomenda.nome}, sua encomenda foi entregue à portaria. `;
+      const response = await createCorrespondenciaInterno(novaEncomenda);
 
-      try {
-        await enviarMensagemWhatsApp(telefone, mensagem);
-        console.log(`Mensagem enviada com sucesso para: ${novaEncomenda.nome}`);
-      } catch (err) {
-        console.error('Erro ao enviar mensagem via WhatsApp:', err);
+      if (response) {
+        const mensagem = `Olá ${novaEncomenda.nome}, sua encomenda foi entregue à portaria do West Tower. Data de Recebimento: *${dataBrasilia}*`;
+
+        try {
+          await enviarMensagemWhatsApp(telefone, mensagem);
+          console.log(
+            `Mensagem enviada com sucesso para: ${novaEncomenda.nome}`
+          );
+        } catch (err) {
+          console.error('Erro ao enviar mensagem via WhatsApp:', err);
+          $q.notify({
+            type: 'warning',
+            message:
+              'Encomenda cadastrada, mas ocorreu um erro ao enviar a mensagem.',
+          });
+        }
+
+        store.resetFormularioAtual();
         $q.notify({
-          type: 'warning',
-          message:
-            'Encomenda cadastrada, mas ocorreu um erro ao enviar a mensagem.',
+          type: 'positive',
+          message: 'Encomenda cadastrada com sucesso',
+        });
+        $router.push('/usuario/Cards-Encomendas');
+      } else {
+        $q.notify({
+          type: 'negative',
+          message: 'Falha ao cadastrar encomenda',
         });
       }
-      */
     } else {
-      // Notificar se o telefone não foi encontrado
-      console.warn('Telefone não encontrado para:', novaEncomenda.nome);
       $q.notify({
         type: 'warning',
         message:
-          'Encomenda cadastrada, mas o telefone do destinatário não foi encontrado.',
-      });
-    }
-
-    // Criação da encomenda sem bloquear o fluxo por falta de telefone
-    const response = await createCorrespondenciaInterno(novaEncomenda);
-
-    if (response) {
-      store.resetFormularioAtual();
-      $q.notify({
-        type: 'positive',
-        message: 'Encomenda cadastrada com sucesso',
-      });
-      $router.push('/usuario/Cards-Encomendas');
-    } else {
-      $q.notify({
-        type: 'negative',
-        message: 'Falha ao cadastrar encomenda',
+          'Encomenda não cadastrada. O telefone do destinatário não foi encontrado.',
       });
     }
   } catch (error) {

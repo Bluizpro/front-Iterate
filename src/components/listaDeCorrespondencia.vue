@@ -64,51 +64,13 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { QBtn, QPage, QTable } from 'quasar';
-import { getCorrespondenciasInternas } from '../services/encomenInterAPI';
-import { getCorrespondenciasSedex } from '../services/encomenSedexAPI';
+import { QPage, QTable } from 'quasar';
 import { getCorrespondenciasExterno } from '../services/encomenExternoAPI';
 
 const search = ref('');
 const encomendas = ref([]);
 const itemsPerPage = 150;
 const currentPage = ref(1);
-
-const getEncomendasInternasESedex = async () => {
-  try {
-    const [internas, sedex, externas] = await Promise.all([
-      getCorrespondenciasInternas(),
-      getCorrespondenciasSedex(),
-      getCorrespondenciasExterno(),
-    ]);
-
-    encomendas.value = [
-      ...internas.map((encomenda) => ({
-        id: encomenda.id,
-        conjunto: encomenda.conjunto,
-        nome: encomenda.nome,
-        conteudo: encomenda.conteudo,
-        tipo: 'interno',
-      })),
-      ...sedex.map((encomenda) => ({
-        id: encomenda.id,
-        conjunto: encomenda.conjunto,
-        nome: encomenda.nome,
-        conteudo: encomenda.conteudo,
-        tipo: 'correio',
-      })),
-      ...externas.map((encomenda) => ({
-        id: encomenda.id,
-        conjunto: encomenda.conjunto,
-        nome: encomenda.nome,
-        conteudo: encomenda.conteudo,
-        tipo: 'externo',
-      })),
-    ];
-  } catch (error) {
-    console.error('Erro ao carregar as encomendas:', error);
-  }
-};
 
 // Computed property para encomendas filtradas
 const filteredEncomendas = computed(() => {
@@ -120,6 +82,24 @@ const filteredEncomendas = computed(() => {
       String(encomenda.tipo).toLowerCase().includes(searchValue)
   );
 });
+
+// Função para carregar encomendas externas e ordenar pelo campo conjunto numericamente
+const getEncomendasExternaOrdenadas = async () => {
+  try {
+    const externas = await getCorrespondenciasExterno();
+    encomendas.value = externas
+      .map((encomenda) => ({
+        id: encomenda.id,
+        conjunto: encomenda.conjunto,
+        nome: encomenda.nome,
+        conteudo: encomenda.conteudo,
+        tipo: 'externo',
+      }))
+      .sort((a, b) => a.conjunto - b.conjunto); // Ordenação numérica
+  } catch (error) {
+    console.error('Erro ao carregar as encomendas externas:', error);
+  }
+};
 
 // Atualizar encomendas exibidas com base na página atual e filtro
 const updateDisplayedEncomendas = () => {
@@ -171,20 +151,8 @@ const computedColumns = computed(() => [
   },
 ]);
 
-const nextPage = () => {
-  if (currentPage.value * itemsPerPage < filteredEncomendas.value.length) {
-    currentPage.value++;
-  }
-};
-
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
-};
-
 onMounted(async () => {
-  await getEncomendasInternasESedex();
+  await getEncomendasExternaOrdenadas();
   updateDisplayedEncomendas();
 });
 </script>

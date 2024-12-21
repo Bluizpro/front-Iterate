@@ -71,9 +71,13 @@
               label="Telefone"
               mask="+55(##)#####-####"
               :rules="[
-    (val:string) => (val && val.length > 0) || 'Telefone Obrigatório',
-    (val: string) => (val && val.replace(/\D/g, '').length === 13) || 'Telefone inválido'
-
+    (val: string) => (val && val.length > 0) || 'Telefone Obrigatório',
+    (val: string) => {
+      // Remove os caracteres não numéricos (como parênteses, hífens, espaços)
+      const phoneNumber = val.replace(/\D/g, '');
+      // Verifica se o número tem 10 ou 11 dígitos, que é o número esperado para telefone fixo ou celular
+      return (phoneNumber.length === 12 || phoneNumber.length === 13) || 'Telefone inválido';
+    }
   ]"
             >
               <template v-slot:prepend>
@@ -114,22 +118,21 @@
             </template>
           </q-input>
 
-          <!--   <q-select
+          <q-select
             required
             name="interfone"
             outlined
             clearable
             clear-icon="close"
             v-model="form.interfone"
-            color="indigo-13"
             label="Interfone"
-            :options="['sim', 'não', '2/T', 'A/S']"
-            :rules="[(val:string) => (val && val.length > 0) || 'Selecione uma opção']"
+            :options="inforOption"
+            :class="colorClass(form.interfone)"
           >
             <template v-slot:prepend>
               <q-icon name="phone_in_talk" />
             </template>
-          </q-select> -->
+          </q-select>
 
           <div class="row q-gutter-md btn-container">
             <q-btn
@@ -150,7 +153,7 @@
             <div class="spacer"></div>
             <q-btn
               class="col-md-2 col-sm-2 col-xs-12"
-              label="Colaboradores"
+              label="Locatarios"
               type="button"
               rounded
               color="indigo-14"
@@ -198,7 +201,7 @@ const form = ref({
   nome: '',
   // cpfrg: '',
   telefone: '',
-  //interfone: '',
+  interfone: '',
   especialidade: '',
   //proprietario: '',
 });
@@ -220,7 +223,7 @@ const cadastrar = async () => {
     nome: form.value.nome,
     // cpfrg: form.value.cpfrg,
     telefone: form.value.telefone,
-    //interfone: form.value.interfone,
+    interfone: form.value.interfone,
     especialidade: form.value.especialidade,
     //proprietario: form.value.proprietario,
   };
@@ -277,6 +280,19 @@ const cadastrar = async () => {
     hideLoading();
   }
 };
+const inforOption = ['NÃO', '2/T', 'A/S', 'SIM'];
+const colorClass = (interfone: unknown) => {
+  switch (interfone) {
+    case 'NÃO':
+      return 'background';
+    case '2/T':
+      return 'yellow-background';
+    case 'A/S':
+      return 'red-background';
+    case 'SIM':
+      return 'green-background';
+  }
+};
 </script>
 
 <style scoped lang="scss">
@@ -303,5 +319,18 @@ const cadastrar = async () => {
   margin-right: 5rem;
   padding: 5rem;
   background-color: rgb(235 208 208 / 20%);
+}
+.yellow-background {
+  background-color: rgb(250, 250, 144);
+}
+.red-background {
+  background-color: #f07171;
+}
+.green-background {
+  background-color: #0faa0a;
+}
+
+.background {
+  background-color: rgb(255, 255, 255);
 }
 </style>

@@ -197,7 +197,9 @@ onBeforeUnmount(() => {
 const showLoading = () => {
   isLoading.value = true; // Mostra o spinner
 };
-
+const voltar = () => {
+  $router.push('/usuario/Cards-Encomendas'); // Ajuste conforme sua rota
+};
 const hideLoading = () => {
   isLoading.value = false; // Esconde o spinner
   $q.loading.hide();

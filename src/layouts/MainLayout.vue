@@ -45,13 +45,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import EssentialLink from 'components/EssentialLink.vue';
 import PainelInterSedex from 'src/components/PainelInterSedex.vue';
 import AvatarUser from 'src/components/AvatarUser.vue';
 import MenuTree from 'src/components/MenuTree.vue';
-import { onBeforeUnmount } from 'vue';
 import { useQuasar } from 'quasar';
 import SpinnerComponente from 'src/components/SpinnerComponente.vue'; // Importe o componente
 
@@ -64,9 +63,8 @@ const linksList = ref([
     icon: 'dashboard',
     link: 'painelEncomenda',
   },
-
   {
-    title: 'Anotacões',
+    title: 'Anotações',
     icon: 'note_add',
     link: 'anotacao',
   },
@@ -81,12 +79,12 @@ const linksList = ref([
     link: 'listaDeVisitante',
   },
   {
-    title: 'Lista de Correspondencia',
+    title: 'Correspondência Externa',
     icon: 'format_list_bulleted',
     link: 'listaCorrespondencia',
   },
   {
-    title: 'Lista de Funcionario',
+    title: 'Lista de Funcionário',
     icon: 'format_list_bulleted',
     link: 'listaFuncionario',
   },
@@ -96,7 +94,7 @@ const linksList = ref([
     link: 'qtc',
   },
   {
-    title: 'Ocorrencia',
+    title: 'Ocorrência',
     icon: 'warning',
     link: 'ocorrencia',
   },
@@ -106,17 +104,17 @@ const linksList = ref([
     link: 'agua',
   },
   {
-    title: 'Craviculario',
+    title: 'Craviculário',
     icon: '_keys',
     link: 'craviculario',
   },
   {
-    title: 'Relatorio',
+    title: 'Relatório',
     icon: 'assignment',
     link: 'relatorio',
   },
   {
-    title: 'Saida',
+    title: 'Saída',
     icon: 'logout',
     link: 'logout',
   },
@@ -129,14 +127,6 @@ const isLoading = ref(false); // Controle de estado para o spinner
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 };
-
-let timer: NodeJS.Timeout | null = null;
-
-onBeforeUnmount(() => {
-  if (timer !== null) {
-    clearTimeout(timer);
-  }
-});
 
 const showLoading = () => {
   isLoading.value = true; // Mostra o spinner
@@ -154,14 +144,53 @@ const logout = () => {
 const handleLinkClick = async (link: { link: string }) => {
   if (link.link === 'logout') {
     showLoading();
-    await new Promise((resolve) => setTimeout(resolve, 2000)); // Simula o tempo de logout
+    await new Promise((resolve) => setTimeout(resolve, 3000)); // Simula o tempo de logout
     hideLoading();
     logout();
   } else {
-    console.log('erro');
+    console.log('Erro ao processar link');
   }
 };
+
+// Timeout de inatividade
+let inactivityTimer: NodeJS.Timeout | null = null;
+const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutos em milissegundos
+
+const resetInactivityTimer = () => {
+  if (inactivityTimer) {
+    clearTimeout(inactivityTimer);
+  }
+  inactivityTimer = setTimeout(() => {
+    showLoading();
+    logout();
+  }, INACTIVITY_LIMIT);
+};
+
+const startInactivityTimer = () => {
+  window.addEventListener('mousemove', resetInactivityTimer);
+  window.addEventListener('keydown', resetInactivityTimer);
+  window.addEventListener('click', resetInactivityTimer);
+  resetInactivityTimer(); // Inicializa o timer
+};
+
+const stopInactivityTimer = () => {
+  if (inactivityTimer) {
+    clearTimeout(inactivityTimer);
+  }
+  window.removeEventListener('mousemove', resetInactivityTimer);
+  window.removeEventListener('keydown', resetInactivityTimer);
+  window.removeEventListener('click', resetInactivityTimer);
+};
+
+onMounted(() => {
+  startInactivityTimer();
+});
+
+onBeforeUnmount(() => {
+  stopInactivityTimer();
+});
 </script>
+
 <style scoped>
 .title-text {
   font-size: 14px;

@@ -133,25 +133,13 @@ const paginatedForms = computed(() => {
 
 let intervalId;
 
-onMounted(async () => {
-  intervalId = setInterval(() => {
-    forms.value.forEach((form) => {
-      if (
-        !form.salvo &&
-        form.conjunto === '' &&
-        form.prestador === '' &&
-        form.informacao === ''
-      ) {
-        form.hora = dayjs().format('HH:mm:ss');
-      }
-    });
-  }, 1000);
-
+// Função para buscar QTCs do backend e atualizar a lista
+const fetchQtcs = async () => {
   try {
     const loadedQtcs = await QtcInforService.getQtcInfos();
     forms.value = loadedQtcs;
 
-    // Adiciona um formulário vazio se não houver QTCs
+    // Adiciona um formulário vazio se necessário
     if (
       forms.value.length === 0 ||
       (forms.value.length > 0 && !forms.value[forms.value.length - 1].salvo)
@@ -167,6 +155,25 @@ onMounted(async () => {
       message: 'Erro ao carregar QTC:',
     });
   }
+};
+
+onMounted(async () => {
+  // Atualiza a hora dos formulários não salvos
+  intervalId = setInterval(() => {
+    forms.value.forEach((form) => {
+      if (
+        !form.salvo &&
+        form.conjunto === '' &&
+        form.prestador === '' &&
+        form.informacao === ''
+      ) {
+        form.hora = dayjs().format('HH:mm:ss');
+      }
+    });
+  }, 1000);
+
+  // Carrega os dados iniciais
+  await fetchQtcs();
 });
 
 onUnmounted(() => {
@@ -205,10 +212,8 @@ const onSubmit = async (index) => {
       salvo: true,
     });
 
-    // Verifica se já existe um formulário vazio
-    if (!forms.value.some((f) => !f.salvo)) {
-      forms.value.push({ ...emptyForm }); // Adiciona um novo formulário vazio
-    }
+    // Adiciona um novo formulário vazio
+    forms.value.push({ ...emptyForm });
 
     // Notificação de sucesso
     $q.notify({
@@ -217,6 +222,9 @@ const onSubmit = async (index) => {
       icon: 'cloud_done',
       message: 'Salvo com sucesso',
     });
+
+    // Atualiza os QTCs após salvar
+    await fetchQtcs();
   } catch (error) {
     $q.notify({
       color: 'red-5',
@@ -234,14 +242,15 @@ const onReset = async (index) => {
       console.log('Tentando arquivar QTC com ID:', form.id);
       await QtcInforService.archiveQtcInfo(form.id);
       forms.value.splice(index, 1); // Remove o formulário arquivado
-
-      // Adiciona um novo formulário vazio apenas se não houver nenhum salvo
-      if (forms.value.length === 0 || !forms.value.some((f) => !f.salvo)) {
-        forms.value.push({ ...emptyForm });
-      }
-    } else {
-      console.log('Formulário não salvo, não será arquivado.');
     }
+
+    // Adiciona um novo formulário vazio
+    if (!forms.value.some((f) => !f.salvo)) {
+      forms.value.push({ ...emptyForm });
+    }
+
+    // Atualiza os QTCs após arquivar
+    await fetchQtcs();
 
     $q.notify({
       color: 'green-4',

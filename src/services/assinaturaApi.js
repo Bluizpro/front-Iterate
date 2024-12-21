@@ -18,7 +18,7 @@ export const uploadSignature = async (imageData) => {
 // src/services/assinaturaService.js
 
 const API_URL_back =
-  'https://gestor-encomenda-back.onrender.com/api/Assinatura'; // URL do seu servidor backend
+  'http://localhost:5001/api/Assinatura'; // URL do seu servidor backend
 
 // Função para fazer o upload da assinatura
 export const saveAssinatura = async (assinatura) => {

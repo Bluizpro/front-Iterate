@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL:
-    'https://gestor-encomenda-back.onrender.com/api/CorrespondenciaInterno',
+  baseURL: 'http://localhost:5001/api/CorrespondenciaInterno',
   headers: {
     'Content-Type': 'application/json',
   },

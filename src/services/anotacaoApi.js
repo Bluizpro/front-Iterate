@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'https://gestor-encomenda-back.onrender.com/api/Anotacao',
+  baseURL: 'http://localhost:5001/api/Anotacao',
 });
 
 export async function createAnnotation(anotacao) {
@@ -29,3 +29,4 @@ export const getArchivedAnnotations = async () => {
     throw error; // Lança o erro para que possa ser tratado
   }
 };
+

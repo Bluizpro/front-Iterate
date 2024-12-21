@@ -1,6 +1,12 @@
 <template>
   <div class="panel-container">
     <div class="cards-container">
+      <!-- Verifica se há conjuntos de encomendas -->
+      <div v-if="conjuntos.length === 0" class="no-encomendas">
+        <p>Não há encomendas cadastradas.</p>
+      </div>
+
+      <!-- Exibe os cards somente se houver conjuntos -->
       <div
         v-for="(conjunto, index) in conjuntos"
         :key="index"
@@ -38,7 +44,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { getCorrespondenciasInternas } from '../services/encomenInterAPI';
-import { getCorrespondenciasExterno } from '../services/encomenExternoAPI';
+//import { getCorrespondenciasExterno } from '../services/encomenExternoAPI';
 import { getCorrespondenciasSedex } from '../services/encomenSedexAPI';
 import { useRouter } from 'vue-router';
 
@@ -238,5 +244,12 @@ const handleCardClick = (conjunto) => {
   overflow: hidden;
   text-overflow: ellipsis; /* Trunca texto longo com "..." */
   white-space: nowrap; /* Evita que o texto quebre em várias linhas */
+}
+.no-encomendas p {
+  font-size: 1.5em; /* Tamanho da fonte aumentado */
+  font-weight: bold; /* Deixa a fonte em negrito */
+  color: #333; /* Cor do texto, você pode mudar conforme necessário */
+  text-align: center; /* Centraliza o texto */
+  margin-top: 20px; /* Adiciona um espaço acima */
 }
 </style>

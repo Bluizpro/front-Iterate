@@ -17,7 +17,7 @@
           v-model="anotacao.data"
           color="indigo-13"
           label="Data"
-          class="col-2"
+          class="col-2 data"
         >
           <template v-slot:prepend>
             <q-icon name="date_range" />
@@ -51,8 +51,9 @@
           outlined
           v-model="anotacao.conjunto"
           label="Conjunto"
-          class="col-1"
+          class="col-1 conjunto"
         />
+
         <q-input
           outlined
           v-model="anotacao.paciente"
@@ -127,25 +128,13 @@ const paginatedForms = computed(() => {
 
 let intervalId;
 
-onMounted(async () => {
-  intervalId = setInterval(() => {
-    forms.value.forEach((form) => {
-      if (
-        !form.salvo &&
-        form.conjunto === '' &&
-        form.paciente === '' &&
-        form.info === ''
-      ) {
-        form.hora = dayjs().format('HH:mm:ss');
-      }
-    });
-  }, 1000);
-
+// Função para buscar os dados do backend e atualizar a lista de formulários
+const fetchForms = async () => {
   try {
     const loadedAnnotations = await AnnotationService.getAnnotations();
     forms.value = loadedAnnotations;
 
-    // Adiciona um formulário vazio se não houver anotações
+    // Adiciona um formulário vazio se necessário
     if (
       forms.value.length === 0 ||
       (forms.value.length > 0 && !forms.value[forms.value.length - 1].salvo)
@@ -161,6 +150,25 @@ onMounted(async () => {
       message: 'Erro ao carregar Anotações:',
     });
   }
+};
+
+onMounted(async () => {
+  // Atualiza a hora dos formulários não salvos
+  intervalId = setInterval(() => {
+    forms.value.forEach((form) => {
+      if (
+        !form.salvo &&
+        form.conjunto === '' &&
+        form.paciente === '' &&
+        form.info === ''
+      ) {
+        form.hora = dayjs().format('HH:mm:ss');
+      }
+    });
+  }, 1000);
+
+  // Carrega os dados iniciais
+  await fetchForms();
 });
 
 onUnmounted(() => {
@@ -198,10 +206,8 @@ const onSubmit = async (index) => {
       salvo: true,
     });
 
-    // Verifica se já existe um formulário vazio, se não houver, adiciona um
-    if (!forms.value.some((f) => !f.salvo)) {
-      forms.value.push({ ...ensureEmptyForm });
-    }
+    // Adiciona um novo formulário vazio ao final da lista
+    forms.value.push({ ...ensureEmptyForm });
 
     $q.notify({
       color: 'green-4',
@@ -209,6 +215,8 @@ const onSubmit = async (index) => {
       icon: 'cloud_done',
       message: 'Salvo com sucesso',
     });
+
+    await fetchForms(); // Atualiza os dados após salvar
   } catch (error) {
     $q.notify({
       color: 'red-5',
@@ -223,14 +231,10 @@ const onReset = async (index) => {
   try {
     const form = forms.value[index];
     if (form.id) {
-      console.log('Tentando arquivar Anotação com ID:', form.id);
       await AnnotationService.archiveAnnotation(form.id);
       forms.value.splice(index, 1); // Remove o formulário arquivado
-    } else {
-      console.log('Formulário não salvo, não será arquivado.');
     }
 
-    // Adiciona um formulário vazio apenas se não houver nenhum salvo
     if (!forms.value.some((f) => !f.salvo)) {
       forms.value.push({ ...ensureEmptyForm });
     }
@@ -241,6 +245,8 @@ const onReset = async (index) => {
       icon: 'cloud_done',
       message: 'Anotação arquivada com sucesso',
     });
+
+    await fetchForms(); // Atualiza os dados após arquivar
   } catch (error) {
     console.error('Erro ao arquivar anotação:', error);
     $q.notify({
@@ -279,44 +285,94 @@ const colorClass = (info) => {
   align-items: flex-start;
   justify-content: flex-start;
 }
+
 .q-form .q-field {
-  margin-right: 1px !important;
+  margin-right: 8px; /* Espaçamento entre campos */
 }
+
+/* Ajustes para o container das notas */
 .note-container {
   border: 3px solid #ccc;
-  padding: 2rem;
+  padding: 1rem;
   width: 95%;
-  height: 100px;
-  align-items: flex-start;
-  margin: auto;
-  margin-top: 1rem;
+  height: auto;
+  margin: 1rem auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
+
+/* Estilos específicos para cada input */
+.q-input.data {
+  width: 150px; /* Largura do campo Data */
+}
+
+.q-input.hora {
+  width: 120px; /* Largura do campo Hora */
+}
+
+.q-input.usuario {
+  width: 150px; /* Largura do campo Usuário */
+}
+
+.q-input.conjunto {
+  width: 150px; /* Largura do campo Conjunto */
+}
+
+.q-input.paciente {
+  width: 200px; /* Largura do campo Paciente */
+}
+
+.q-select {
+  width: 280px; /* Largura do campo Informações */
+}
+
+/* Estilos para os botões */
 .button-save,
 .button-done {
-  margin-left: 3px !important;
+  margin-left: 8px;
   border: 1px solid #ccc;
-  padding: 5px;
+  padding: 6px 12px; /* Ajuste do padding para melhor aparência */
   border-radius: 4px;
+  font-size: 14px !important; /* Tamanho do texto */
+  cursor: pointer;
 }
+
+/* Adiciona hover aos botões para melhor UX */
+.button-save:hover,
+.button-done:hover {
+  background-color: rgba(
+    0,
+    0,
+    0,
+    0.1
+  ); /* Sutil mudança de cor ao passar o mouse */
+}
+
+/* Cores de fundo para os elementos */
 .yellow-background {
   background-color: rgb(250, 250, 144);
 }
+
 .red-background {
   background-color: #f07171;
 }
+
 .green-background {
   background-color: rgb(152, 228, 152);
 }
-.background {
-  background-color: rgb(255, 255, 255);
-}
+
 .orange-background {
   background-color: rgb(253, 202, 107);
 }
+
 .blue-background {
   background-color: rgb(147, 147, 247);
 }
+
+/* Estilo da paginação */
 .paginação {
   margin-top: 2rem;
+  font-size: 16px;
 }
 </style>
