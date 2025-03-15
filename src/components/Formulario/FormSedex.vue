@@ -297,7 +297,7 @@ const cadastrar = async () => {
 
       if (response) {
         // Cria a mensagem com a data incluída no corpo
-        const mensagem = `Olá ${novaEncomenda.nome}, sua encomenda do Correio foi entregue à portaria do West Tower. Data de Recebimento: *${dataBrasilia}*`;
+        const mensagem = `Olá ${novaEncomenda.nome}, sua encomenda do Correio foi entregue à portaria do West Tower. Data de Recebimento testando os disparo atraves da api de instancias criada pelo bruno: *${dataBrasilia}*`;
 
         // Dentro do seu código onde você chama a função de enviar a mensagem
         try {

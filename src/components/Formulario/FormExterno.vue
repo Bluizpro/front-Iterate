@@ -23,38 +23,38 @@
             <q-icon name="pin" />
           </template>
         </q-input>
-
+        <!-- Campo Recebedor Ajustado para ser um q-select -->
+        <q-select
+          required
+          outlined
+          clearable
+          v-model="encomenda.nome"
+          color="indigo-13"
+          label="Nome do Destinatário"
+          :options="nomes"
+          :filter="true"
+          @filter="filtrarNomes"
+          :rules="[(val) => (val && val.length > 0) || 'Digite o nome']"
+        >
+          <template v-slot:prepend>
+            <q-icon name="person" />
+          </template>
+        </q-select>
         <q-input
           required
           name="nome"
           outlined
           clearable
           clear-icon="close"
-          v-model="encomenda.nome"
+          v-model="encomenda.recebedor"
           color="indigo-13"
-          label="Nome do Destinatario"
+          label="Remetente"
           :rules="[(val) => (val && val.length > 0) || 'Digite nome']"
         >
           <template v-slot:prepend>
             <q-icon name="person" />
           </template>
         </q-input>
-
-        <!--   <q-input
-          required
-          name="recebedor"
-          outlined
-          clearable
-          clear-icon="close"
-          v-model="encomenda.recebedor"
-          color="indigo-13"
-          label="Nome do Recebedor"
-          :rules="[(val) => (val && val.length > 0) || 'Digite Seu nome']"
-        >
-          <template v-slot:prepend>
-            <q-icon name="person" />
-          </template>
-        </q-input> -->
 
         <q-input
           required
@@ -112,14 +112,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useStore } from '../../stores/example-store';
 import { useRouter } from 'vue-router';
 /* import { useCondominosStore } from '../../stores/condominosStore';
 import { useFuncionariosStore } from '../../stores/funcionarioStore'; */
 import { createCorrespondenciaExterno } from '../../services/encomenExternoAPI';
 import { useQuasar } from 'quasar';
-import { enviarMensagemWhatsApp } from '../../services/whatsappAPI';
+//import { enviarMensagemWhatsApp } from '../../services/whatsappAPI';
 import { getLocatariosByConjunto } from '../../services/locatarioApi';
 import { getCondominos } from '../../services/condonimoApi';
 import { getFuncionario } from '../../services/funcionarioApi'; // Importando o serviço de WhatsApp
@@ -135,7 +135,7 @@ const encomenda = ref({
   hora: '',
   conjunto: '',
   nome: '',
-  // recebedor: '',
+  recebedor: '',
   conteudo: '',
   local: '',
 });
@@ -144,6 +144,62 @@ onMounted(() => {
   encomenda.value.data = agora.toLocaleDateString('pt-BR');
   encomenda.value.hora = agora.toLocaleTimeString('pt-BR');
 });
+const nomes = ref([]);
+/// Função para buscar todos os nomes associados ao conjunto
+const buscarNomesPorConjunto = async (conjunto) => {
+  console.log('Buscando nomes para o conjunto:', conjunto);
+
+  const conjuntoStr = String(conjunto).trim().toLowerCase();
+  let resultados = [];
+
+  // Busca nos condomínios
+  try {
+    const condominos = await getCondominos();
+    resultados = resultados.concat(
+      condominos
+        .filter((c) => String(c.conjunto).trim().toLowerCase() === conjuntoStr)
+        .map((c) => c.nome)
+    );
+  } catch (error) {
+    console.error('Erro ao buscar condomínios:', error);
+  }
+
+  // Busca nos funcionários
+  try {
+    const funcionarios = await getFuncionario();
+    resultados = resultados.concat(
+      funcionarios
+        .filter((f) => String(f.conjunto).trim().toLowerCase() === conjuntoStr)
+        .map((f) => f.nome)
+    );
+  } catch (error) {
+    console.error('Erro ao buscar funcionários:', error);
+  }
+
+  // Busca nos locatários
+  try {
+    const locatarios = await getLocatariosByConjunto(conjuntoStr);
+    resultados = resultados.concat(locatarios.map((l) => l.nome));
+  } catch (error) {
+    console.error('Erro ao buscar locatários:', error);
+  }
+
+  // Remover duplicatas
+  const nomesUnicos = Array.from(new Set(resultados));
+
+  console.log('Nomes encontrados:', nomesUnicos);
+  return nomesUnicos;
+};
+
+// Observa mudanças no campo conjunto e atualiza a lista de nomes
+watch(
+  () => encomenda.value.conjunto,
+  async (newConjunto) => {
+    if (newConjunto) {
+      nomes.value = await buscarNomesPorConjunto(newConjunto);
+    }
+  }
+);
 
 let timer = null;
 onBeforeUnmount(() => {
@@ -231,6 +287,7 @@ const cadastrar = async () => {
     hora: encomenda.value.hora,
     conjunto: encomenda.value.conjunto,
     nome: encomenda.value.nome,
+    recebedor: encomenda.value.recebedor,
     conteudo: encomenda.value.conteudo,
     tipo: 'externo',
     local: encomenda.value.local,

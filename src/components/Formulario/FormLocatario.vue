@@ -66,11 +66,18 @@
               clear-icon="close"
               v-model="form.telefone"
               label="Telefone"
-              mask="+55(##)#####-####"
+              mask="55(##)#########"
+              fill-mask
               :rules="[
-              (val:string) => (val && val.length > 0) || 'Telefone Obrigatório',
-              (val: string) => (val && val.replace(/\D/g, '').length === 13) || 'Telefone inválido'
-            ]"
+                (val) => !!val || 'Telefone obrigatório.',
+                (val) => {
+                  const phoneNumber = val.replace(/\D/g, '');
+                  return (
+                    (phoneNumber.length >= 12 && phoneNumber.length <= 13) ||
+                    'Telefone inválido'
+                  );
+                },
+              ]"
             >
               <template v-slot:prepend>
                 <q-icon name="phone" />
@@ -214,11 +221,12 @@ const voltar = () => {
 };
 
 const cadastrar = async () => {
+  const telefoneSanitizado = form.value.telefone.replace(/\D/g, '');
   const dados = {
     conjunto: form.value.conjunto,
     nome: form.value.nome,
     // cpfrg: form.value.cpfrg,
-    telefone: form.value.telefone,
+    telefone: telefoneSanitizado,
     interfone: form.value.interfone,
     especialidade: form.value.especialidade,
     // proprietario: form.value.proprietario,
@@ -270,7 +278,7 @@ const cadastrar = async () => {
     hideLoading();
   }
 };
-const inforOption = ['NÃO', '2/T', 'A/S','SIM'];
+const inforOption = ['NÃO', '2/T', 'A/S', 'SIM'];
 const colorClass = (interfone: unknown) => {
   switch (interfone) {
     case 'NAO':
@@ -279,7 +287,7 @@ const colorClass = (interfone: unknown) => {
       return 'yellow-background';
     case 'A/S':
       return 'red-background';
-      case 'SIM':
+    case 'SIM':
       return 'green-background';
   }
 };

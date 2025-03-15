@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:5001/api/QtcInfor',
+  baseURL: 'http://localhost:5000/api/QtcInfor',
 });
 export async function createQtcInfos(qtcInfo) {
   const response = await apiClient.post('/', qtcInfo);

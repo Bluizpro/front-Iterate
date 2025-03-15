@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Configura a instância do Axios com a URL base do backend
 const api = axios.create({
-  baseURL: 'http://localhost:5001/api/Chave', // Altere para a URL do seu back-end
+  baseURL: 'http://localhost:5000/api/Chave', // Altere para a URL do seu back-end
   timeout: 10000, // Define um tempo limite (10 segundos)
 });
 

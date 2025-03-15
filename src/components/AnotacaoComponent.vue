@@ -72,15 +72,17 @@
         />
         <q-btn
           icon="save"
-          color="primary"
+          color="green"
+          label="Salvar"
           flat
           class="button-save"
           size="10px"
           @click="onSubmit(index)"
         />
         <q-btn
-          icon="done"
-          color="green"
+          icon="archive"
+          color="red"
+          label="Arquivar"
           flat
           class="button-done"
           size="10px"
@@ -324,7 +326,7 @@ const colorClass = (info) => {
 }
 
 .q-select {
-  width: 280px; /* Largura do campo Informações */
+  width: 250px; /* Largura do campo Informações */
 }
 
 /* Estilos para os botões */

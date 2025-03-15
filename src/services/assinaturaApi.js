@@ -17,8 +17,7 @@ export const uploadSignature = async (imageData) => {
 };
 // src/services/assinaturaService.js
 
-const API_URL_back =
-  'http://localhost:5001/api/Assinatura'; // URL do seu servidor backend
+const API_URL_back = 'http://localhost:5000/api/Assinatura'; // URL do seu servidor backend
 
 // Função para fazer o upload da assinatura
 export const saveAssinatura = async (assinatura) => {

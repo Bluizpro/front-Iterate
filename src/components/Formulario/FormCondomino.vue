@@ -69,16 +69,18 @@
               clear-icon="close"
               v-model="form.telefone"
               label="Telefone"
-              mask="+55(##)#####-####"
+              mask="55(##)#########"
+              fill-mask
               :rules="[
-    (val: string) => (val && val.length > 0) || 'Telefone Obrigatório',
-    (val: string) => {
-      // Remove os caracteres não numéricos (como parênteses, hífens, espaços)
-      const phoneNumber = val.replace(/\D/g, '');
-      // Verifica se o número tem 10 ou 11 dígitos, que é o número esperado para telefone fixo ou celular
-      return (phoneNumber.length === 12 || phoneNumber.length === 13) || 'Telefone inválido';
-    }
-  ]"
+                (val) => !!val || 'Telefone obrigatório.',
+                (val) => {
+                  const phoneNumber = val.replace(/\D/g, '');
+                  return (
+                    (phoneNumber.length >= 12 && phoneNumber.length <= 13) ||
+                    'Telefone inválido'
+                  );
+                },
+              ]"
             >
               <template v-slot:prepend>
                 <q-icon name="phone" />
@@ -218,14 +220,15 @@ const titulo = computed(() => {
 });
 
 const cadastrar = async () => {
+  // Remover caracteres não numéricos
+  const telefoneSanitizado = form.value.telefone.replace(/\D/g, '');
+
   const dados = {
     conjunto: form.value.conjunto,
     nome: form.value.nome,
-    // cpfrg: form.value.cpfrg,
-    telefone: form.value.telefone,
+    telefone: telefoneSanitizado, // Aqui já está limpo
     interfone: form.value.interfone,
     especialidade: form.value.especialidade,
-    //proprietario: form.value.proprietario,
   };
 
   try {
@@ -280,6 +283,7 @@ const cadastrar = async () => {
     hideLoading();
   }
 };
+
 const inforOption = ['NÃO', '2/T', 'A/S', 'SIM'];
 const colorClass = (interfone: unknown) => {
   switch (interfone) {

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5001/api/LeituraAgua'; // Substitua pelo URL correto da sua API
+const API_URL = 'http://localhost:5000/api/LeituraAgua'; // Substitua pelo URL correto da sua API
 
 // Configuração do Axios com URL base
 const apiClient = axios.create({

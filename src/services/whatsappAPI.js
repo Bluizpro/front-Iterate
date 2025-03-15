@@ -1,4 +1,4 @@
-import axios from 'axios';
+/* import axios from 'axios';
 
 export const enviarMensagemWhatsApp = async (telefone, mensagem) => {
   try {
@@ -32,6 +32,43 @@ export const enviarMensagemWhatsAppAgua = async (mensagem) => {
       }
     );
     return response.data; // Retorna a resposta da API
+  } catch (error) {
+    console.error('Erro ao enviar mensagem WhatsApp:', error);
+    throw error;
+  }
+};
+ */
+
+import axios from 'axios';
+
+export const enviarMensagemWhatsApp = async (telefone, mensagem) => {
+  try {
+    const dataEnvio = new Date().toISOString();
+
+    const response = await axios.post(
+      'http://localhost:3002/send-whatsapp/encomenda',
+      {
+        telefone,
+        message: mensagem,
+        dataEnvio,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao enviar mensagem WhatsApp:', error);
+    throw error;
+  }
+};
+
+export const enviarMensagemWhatsAppAgua = async (mensagem) => {
+  try {
+    const dataEnvio = new Date().toISOString();
+
+    const response = await axios.post('http://localhost:3002/send-whatsapp', {
+      message: mensagem,
+      dataEnvio,
+    });
+    return response.data;
   } catch (error) {
     console.error('Erro ao enviar mensagem WhatsApp:', error);
     throw error;

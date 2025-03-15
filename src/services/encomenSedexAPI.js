@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:5001/api/CorrespondenciaSedex',
+  baseURL: 'http://localhost:5000/api/CorrespondenciaSedex',
   headers: {
     'Content-Type': 'application/json',
   },

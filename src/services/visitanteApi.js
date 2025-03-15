@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:5001/api/Visitante', // URL base para a API de visitantes
+  baseURL: 'http://localhost:5000/api/Visitante', // URL base para a API de visitantes
 });
 
 export async function createVisitante(visitante) {

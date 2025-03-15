@@ -65,14 +65,18 @@
             clear-icon="close"
             v-model="form.telefone"
             label="Telefone"
-            mask="+55(##)#####-####"
+            mask="55(##)#########"
+            fill-mask
             :rules="[
-              (val) => (val && val.length > 0) || 'Telefone Obrigatório',
-              (val) =>
-                (val && val.replace(/\D/g, '').length === 13) ||
-                'Telefone inválido',
+              (val) => !!val || 'Telefone obrigatório.',
+              (val) => {
+                const phoneNumber = val.replace(/\D/g, '');
+                return (
+                  (phoneNumber.length >= 12 && phoneNumber.length <= 13) ||
+                  'Telefone inválido'
+                );
+              },
             ]"
-            class="input-field"
           >
             <template v-slot:prepend>
               <q-icon name="phone" />
@@ -150,12 +154,13 @@ function formatarDataHora(data) {
 }
 
 const cadastrar = async () => {
+  const telefoneSanitizado = form.value.telefone.replace(/\D/g, '');
   const agora = new Date();
 
   const funcionario = {
     conjunto: form.value.conjunto,
     nome: form.value.nome,
-    telefone: form.value.telefone,
+    telefone: telefoneSanitizado, // Use o telefone sanitizado
     setor: form.value.setor,
     dataCadastro: formatarDataHora(agora),
     encomendas: [], // Adicione esta linha se for necessário

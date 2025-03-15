@@ -59,7 +59,7 @@ const agruparEncomendasPorConjunto = (encomendas) => {
     const conjunto = encomenda.conjunto; // Identificador do andar
     const tipo = encomenda.tipo; // Tipo da encomenda
 
-    console.log(`Agrupando encomenda - Conjunto: ${conjunto}, Tipo: ${tipo}`);
+    /* console.log(`Agrupando encomenda - Conjunto: ${conjunto}, Tipo: ${tipo}`); */
 
     // Inicializar o conjunto se ainda não existir
     if (!agrupadosPorConjunto[conjunto]) {
@@ -80,7 +80,7 @@ const agruparEncomendasPorConjunto = (encomendas) => {
     agrupadosPorConjunto[conjunto].tipos[tipo]++;
   });
 
-  console.log('Agrupados por conjunto:', agrupadosPorConjunto);
+  /* console.log('Agrupados por conjunto:', agrupadosPorConjunto); */
 
   return Object.values(agrupadosPorConjunto);
 };
@@ -93,9 +93,9 @@ const atualizarQuantidades = async () => {
     /*   const encomendasExternas = await getCorrespondenciasExterno(); */
     const encomendasSedex = await getCorrespondenciasSedex();
 
-    console.log('Encomendas Internas:', encomendasInternas);
-    /*  console.log('Encomendas Externos:', encomendasExternas); */
-    console.log('Encomendas Sedex:', encomendasSedex);
+ /*    console.log('Encomendas Internas:', encomendasInternas);
+      console.log('Encomendas Externos:', encomendasExternas);
+    console.log('Encomendas Sedex:', encomendasSedex); */
 
     // Adicionar um identificador de tipo em cada conjunto de encomendas
     encomendasInternas.forEach((e) => (e.tipo = 'Interna'));
@@ -109,7 +109,7 @@ const atualizarQuantidades = async () => {
       ...encomendasSedex,
     ];
 
-    console.log('Todas as Encomendas:', todasEncomendas);
+    /* console.log('Todas as Encomendas:', todasEncomendas); */
 
     conjuntos.value = agruparEncomendasPorConjunto(todasEncomendas);
   } catch (error) {

@@ -78,18 +78,20 @@
 
         <q-btn
           icon="save"
-          color="primary"
+          color="green"
+          label="Salvar"
           flat
           class="button-save"
-          size="10px"
+          size="15px"
           @click="onSubmit(index)"
         />
         <q-btn
-          icon="close"
+          icon="archive"
           color="red"
+          label="Arquivar"
           flat
           class="button-done"
-          size="10px"
+          size="15px"
           @click="onReset(index)"
         />
       </q-form>

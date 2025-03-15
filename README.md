@@ -22,7 +22,7 @@
 - Relatórios de encomendas recebidas e enviadas
 
 ## Instalação
-
+A
 1. Clone o repositório.
 2. Instale as dependências usando o comando `npm install`.
 3. Inicie o servidor de desenvolvimento com `quasar dev`.

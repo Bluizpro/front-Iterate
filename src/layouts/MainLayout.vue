@@ -148,13 +148,13 @@ const handleLinkClick = async (link: { link: string }) => {
     hideLoading();
     logout();
   } else {
-    console.log('Erro ao processar link');
+    /* console.log('Erro ao processar link'); */
   }
 };
 
 // Timeout de inatividade
 let inactivityTimer: NodeJS.Timeout | null = null;
-const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutos em milissegundos
+const INACTIVITY_LIMIT = 2 * 60 * 60 * 1000; // 15 minutos em milissegundos
 
 const resetInactivityTimer = () => {
   if (inactivityTimer) {
